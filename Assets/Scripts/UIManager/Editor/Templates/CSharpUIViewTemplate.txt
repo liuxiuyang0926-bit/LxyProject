@@ -1,0 +1,48 @@
+// ------------------------------------------------------------------------------
+// Created by $USERNAME$
+// Date: $DATETIME$
+// Panel: $PANEL_ID$
+// Prefab: $PREFAB_PATH$
+// Generated Base: $BASE_SCRIPT_PATH$
+// ------------------------------------------------------------------------------
+
+using UnityEngine.Scripting;
+
+namespace $NAMESPACE$
+{
+    [Preserve]
+    public class $CLASS_NAME$ : $BASE_CLASS_NAME$
+    {
+        protected override void OnInitialize(object userData)
+        {
+            // Logic is created once. UI fields are not bound yet.
+        }
+
+        protected override void OnInit()
+        {
+            // ObjectBinder fields and generated events are ready.
+        }
+
+        protected override void OnShow(object userData)
+        {
+            // Refresh UI data whenever the panel is shown.
+        }
+
+        protected override void OnHide(bool skipAnimation)
+        {
+            // Stop animations, timers, and business listeners.
+        }
+
+        protected override void OnRelease()
+        {
+            // Release business listeners before generated fields.
+        }
+
+        protected override void OnDispose()
+        {
+            // Logic is permanently disposed.
+        }
+
+$EVENT_HANDLER_STUBS$
+    }
+}

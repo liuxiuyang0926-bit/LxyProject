@@ -1,0 +1,51 @@
+// ------------------------------------------------------------------------------
+// Created by $USERNAME$
+// Date: $DATETIME$
+// Panel: $PANEL_ID$
+// Prefab: $PREFAB_PATH$
+// Auto file: $AUTO_SCRIPT_PATH$
+// ------------------------------------------------------------------------------
+
+using LxyDemo.UIFramework;
+using UnityEngine.Scripting;
+
+namespace $NAMESPACE$
+{
+    [Preserve]
+    public sealed partial class $CLASS_NAME$ : UIPanelLogic
+    {
+        protected override void OnInitialize(object userData)
+        {
+            // Logic 首次创建。这里只执行一次。
+        }
+
+        protected override void OnBind()
+        {
+            BindGenerated();
+            // Prefab 实例和 Auto 字段已经绑定。
+        }
+
+        protected override void OnShow(object userData)
+        {
+            // 每次显示时刷新数据。
+        }
+
+        protected override void OnHide(bool skipAnimation)
+        {
+            // 隐藏前停止动画、计时器或网络监听。
+        }
+
+        protected override void OnUnbind()
+        {
+            // 先解除业务监听，再释放 Auto 字段。
+            ReleaseGenerated();
+        }
+
+        protected override void OnDispose()
+        {
+            // Logic 被彻底销毁。
+        }
+
+$EVENT_HANDLER_STUBS$
+    }
+}

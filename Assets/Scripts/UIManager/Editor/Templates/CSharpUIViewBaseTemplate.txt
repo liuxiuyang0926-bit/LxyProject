@@ -1,0 +1,53 @@
+// ==================== AUTO GENERATED - DO NOT MODIFY ====================
+// Generated at: $DATETIME$
+// Panel: $PANEL_ID$
+// Prefab: $PREFAB_PATH$
+// ========================================================================
+
+using LxyDemo.UIFramework;
+
+namespace $NAMESPACE$
+{
+    public abstract class $BASE_CLASS_NAME$ : UIPanelLogic
+    {
+        public const string PrefabPath = "$PREFAB_PATH$";
+
+$BIND_FIELDS$
+
+        protected sealed override void OnBind()
+        {
+            OnBaseInit();
+            OnInit();
+        }
+
+        protected sealed override void OnUnbind()
+        {
+            OnRelease();
+            ReleaseGenerated();
+        }
+
+        protected virtual void OnInit()
+        {
+        }
+
+        protected virtual void OnRelease()
+        {
+        }
+
+        private void OnBaseInit()
+        {
+$BIND_ASSIGNMENTS$
+$EVENT_SUBSCRIPTIONS$
+        }
+
+        private void ReleaseGenerated()
+        {
+$EVENT_UNSUBSCRIPTIONS$
+$FIELD_RELEASES$
+        }
+
+$EVENT_WRAPPERS$
+
+$EVENT_CALLBACKS$
+    }
+}

@@ -1,0 +1,338 @@
+using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
+
+namespace LxyDemo.SceneManagement
+{
+    /// <summary>
+    /// 常驻场景服务，只负责场景加载、进度与切换事件。
+    /// 游戏启动流程由 GameMain 统一编排。
+    /// </summary>
+    [DefaultExecutionOrder(-20000)]
+    [DisallowMultipleComponent]
+    public sealed class GameSceneManager : MonoBehaviour
+    {
+        private static GameSceneManager instance;
+
+        private float minimumLoadingSeconds = 0.1f;
+
+        private Coroutine activeLoadCoroutine;
+        private Action<float> activeProgressCallback;
+        private Action<bool, string> activeCompletedCallback;
+
+        public static GameSceneManager Instance
+        {
+            get
+            {
+                if (instance != null)
+                {
+                    return instance;
+                }
+
+                var runtimeObject = new GameObject(
+                    "[GameSceneManager]")
+                {
+                    hideFlags = HideFlags.HideInHierarchy |
+                                HideFlags.DontSave
+                };
+                instance =
+                    runtimeObject.AddComponent<GameSceneManager>();
+                return instance;
+            }
+        }
+
+        public float MinimumLoadingSeconds
+        {
+            get => minimumLoadingSeconds;
+            set => minimumLoadingSeconds = Mathf.Max(0f, value);
+        }
+
+        public bool IsLoading { get; private set; }
+
+        public float Progress { get; private set; }
+
+        public string TargetSceneName { get; private set; }
+
+        public string LastError { get; private set; }
+
+        public string ActiveSceneName =>
+            UnitySceneManager.GetActiveScene().name;
+
+        public event Action<string> SceneLoadStarted;
+
+        public event Action<string, float> SceneLoadProgressChanged;
+
+        public event Action<string> SceneLoadCompleted;
+
+        public event Action<string, string> SceneLoadFailed;
+
+        private void Awake()
+        {
+            if (instance != null && instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            instance = this;
+            gameObject.hideFlags = HideFlags.HideInHierarchy |
+                                   HideFlags.DontSave;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        /// <summary>
+        /// 异步切换到目标场景。同一时间只允许一个加载任务。
+        /// </summary>
+        public Coroutine LoadSceneAsync(string sceneName)
+        {
+            string normalizedName = sceneName?.Trim();
+            if (string.IsNullOrEmpty(normalizedName))
+            {
+                ReportFailure(string.Empty, "场景名称不能为空。");
+                return null;
+            }
+
+            if (IsLoading)
+            {
+                Debug.LogWarning(
+                    $"[GameSceneManager] 正在加载 {TargetSceneName}，" +
+                    $"忽略重复请求：{normalizedName}",
+                    this);
+                return activeLoadCoroutine;
+            }
+
+            if (string.Equals(
+                    ActiveSceneName,
+                    normalizedName,
+                    StringComparison.Ordinal))
+            {
+                Progress = 1f;
+                TargetSceneName = normalizedName;
+                return null;
+            }
+
+            if (!Application.CanStreamedLevelBeLoaded(normalizedName))
+            {
+                ReportFailure(
+                    normalizedName,
+                    $"场景未加入 Build Settings：{normalizedName}");
+                return null;
+            }
+
+            activeLoadCoroutine =
+                StartCoroutine(LoadSceneRoutine(normalizedName));
+            return activeLoadCoroutine;
+        }
+
+        /// <summary>
+        /// Lua 场景系统使用的回调式加载入口。
+        /// 真正的场景加载仍由 GameSceneManager 统一执行。
+        /// </summary>
+        public bool LoadSceneWithCallbacks(
+            string sceneName,
+            Action<float> progressCallback,
+            Action<bool, string> completedCallback)
+        {
+            string normalizedName = sceneName?.Trim();
+            if (string.IsNullOrEmpty(normalizedName))
+            {
+                SafeInvokeCompleted(
+                    completedCallback,
+                    false,
+                    "场景名称不能为空。");
+                return false;
+            }
+
+            if (IsLoading)
+            {
+                if (!string.Equals(
+                        TargetSceneName,
+                        normalizedName,
+                        StringComparison.Ordinal))
+                {
+                    SafeInvokeCompleted(
+                        completedCallback,
+                        false,
+                        $"正在加载 {TargetSceneName}，" +
+                        $"不能同时加载 {normalizedName}。");
+                    return false;
+                }
+
+                activeProgressCallback += progressCallback;
+                activeCompletedCallback += completedCallback;
+                SafeInvokeProgress(progressCallback, Progress);
+                return true;
+            }
+
+            if (string.Equals(
+                    ActiveSceneName,
+                    normalizedName,
+                    StringComparison.Ordinal))
+            {
+                SafeInvokeProgress(progressCallback, 1f);
+                SafeInvokeCompleted(
+                    completedCallback,
+                    true,
+                    null);
+                return true;
+            }
+
+            activeProgressCallback = progressCallback;
+            activeCompletedCallback = completedCallback;
+            Coroutine operation = LoadSceneAsync(normalizedName);
+            return operation != null;
+        }
+
+        private IEnumerator LoadSceneRoutine(string sceneName)
+        {
+            IsLoading = true;
+            Progress = 0f;
+            TargetSceneName = sceneName;
+            LastError = null;
+            SceneLoadStarted?.Invoke(sceneName);
+            NotifyProgress(sceneName, 0f);
+
+            float startTime = Time.realtimeSinceStartup;
+            AsyncOperation operation =
+                UnitySceneManager.LoadSceneAsync(
+                    sceneName,
+                    LoadSceneMode.Single);
+            if (operation == null)
+            {
+                FinishWithFailure(
+                    sceneName,
+                    $"Unity 未能创建场景加载任务：{sceneName}");
+                yield break;
+            }
+
+            operation.allowSceneActivation = false;
+            while (operation.progress < 0.9f)
+            {
+                NotifyProgress(
+                    sceneName,
+                    Mathf.Clamp01(operation.progress / 0.9f));
+                yield return null;
+            }
+
+            while (Time.realtimeSinceStartup - startTime <
+                   minimumLoadingSeconds)
+            {
+                yield return null;
+            }
+
+            NotifyProgress(sceneName, 1f);
+            operation.allowSceneActivation = true;
+            while (!operation.isDone)
+            {
+                yield return null;
+            }
+
+            IsLoading = false;
+            activeLoadCoroutine = null;
+            SceneLoadCompleted?.Invoke(sceneName);
+            FinishCallbacks(true, null);
+            Debug.Log(
+                $"[GameSceneManager] 场景加载完成：{sceneName}",
+                this);
+        }
+
+        private void NotifyProgress(
+            string sceneName,
+            float progress)
+        {
+            Progress = Mathf.Clamp01(progress);
+            SceneLoadProgressChanged?.Invoke(
+                sceneName,
+                Progress);
+            SafeInvokeProgress(
+                activeProgressCallback,
+                Progress);
+        }
+
+        private void ReportFailure(
+            string sceneName,
+            string message)
+        {
+            TargetSceneName = sceneName;
+            LastError = message;
+            Debug.LogError(
+                "[GameSceneManager] " + message,
+                this);
+            SceneLoadFailed?.Invoke(sceneName, message);
+            FinishCallbacks(false, message);
+        }
+
+        private void FinishCallbacks(
+            bool succeeded,
+            string errorMessage)
+        {
+            Action<bool, string> completed =
+                activeCompletedCallback;
+            activeProgressCallback = null;
+            activeCompletedCallback = null;
+            SafeInvokeCompleted(
+                completed,
+                succeeded,
+                errorMessage);
+        }
+
+        private void SafeInvokeProgress(
+            Action<float> callback,
+            float progress)
+        {
+            if (callback == null)
+            {
+                return;
+            }
+
+            try
+            {
+                callback(progress);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        private void SafeInvokeCompleted(
+            Action<bool, string> callback,
+            bool succeeded,
+            string errorMessage)
+        {
+            if (callback == null)
+            {
+                return;
+            }
+
+            try
+            {
+                callback(succeeded, errorMessage);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        private void FinishWithFailure(
+            string sceneName,
+            string message)
+        {
+            IsLoading = false;
+            Progress = 0f;
+            activeLoadCoroutine = null;
+            ReportFailure(sceneName, message);
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
+            }
+        }
+    }
+}

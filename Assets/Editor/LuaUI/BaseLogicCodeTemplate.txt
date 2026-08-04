@@ -1,0 +1,38 @@
+---
+--- Created by $username$.
+--- DateTime: $datetime$
+--- ResPath: $resPath$
+--- ClassName: $className$
+---
+
+---@class $luaclassName$ : $luaclassName$Auto
+local $luaclassName$ = require("$autoClassPath$")
+
+function $luaclassName$:ctor()
+end
+
+--function $luaclassName$:OnInitLogic(userData)
+--    -- 逻辑层初始化
+--end
+
+function $luaclassName$:OnBindGameObject(gameObject)
+    -- UI绑定完成
+    -- gameObject: 绑定的GameObject对象
+end
+
+function $luaclassName$:OnShow(userData)
+    -- UI显示
+    -- userData: 显示时传入的用户数据
+end
+
+--function $luaclassName$:OnHide()
+--    -- UI隐藏
+--end
+
+function $luaclassName$:OnDisposeLogic()
+    -- 销毁逻辑对象（彻底释放）
+end
+
+return $luaclassName$
+
+
