@@ -129,6 +129,36 @@ namespace LxyDemo.UIFramework
             return result;
         }
 
+        public static ObjectBinder GetBoundLogicObject(
+            ObjectBinder binder,
+            string bindingName,
+            string panelId,
+            bool required)
+        {
+            if (binder == null)
+            {
+                if (required)
+                {
+                    throw new MissingComponentException(
+                        $"面板 {panelId} 缺少 ObjectBinder。");
+                }
+
+                return null;
+            }
+
+            ObjectBinder result =
+                binder.binderElements?.Get(bindingName);
+            if (result == null && required)
+            {
+                throw new MissingReferenceException(
+                    $"面板 {panelId} 的 ObjectBinder Logic 绑定 " +
+                    $"{bindingName} 无效；期望 " +
+                    $"{typeof(ObjectBinder).FullName}。");
+            }
+
+            return result;
+        }
+
         public static T FindComponent<T>(
             GameObject root,
             string path,

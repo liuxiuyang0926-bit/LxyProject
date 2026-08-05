@@ -494,12 +494,19 @@ namespace LxyDemo.UIFramework.Editor
             IntValue
         }
 
+        private enum BindingSource
+        {
+            Object,
+            LogicObject
+        }
+
         private sealed class BindingCode
         {
             public string FieldName;
             public string FieldType;
             public string BindingName;
             public bool Required;
+            public BindingSource Source;
             public GeneratedEventKind EventKind;
             public string HandlerName;
             public string CallbackName;
@@ -1390,6 +1397,7 @@ namespace LxyDemo.UIFramework.Editor
                         FieldType = GetCSharpTypeName(fieldType),
                         BindingName = bindingName,
                         Required = metadata?.required ?? true,
+                        Source = BindingSource.Object,
                         EventKind = eventKind,
                         HandlerName =
                             "Handle" +
@@ -1402,12 +1410,113 @@ namespace LxyDemo.UIFramework.Editor
                     });
                 }
 
+                IEnumerable<BinderElement> logicBindings =
+                    objectBinder.binderElements?.Binds ??
+                    Enumerable.Empty<BinderElement>();
+                foreach (BinderElement logicBinding in logicBindings)
+                {
+                    if (logicBinding == null ||
+                        logicBinding.Value == null)
+                    {
+                        continue;
+                    }
+
+                    string bindingName =
+                        logicBinding.Name?.Trim() ??
+                        string.Empty;
+                    string fieldName =
+                        SanitizeIdentifier(
+                            bindingName,
+                            false);
+                    if (fieldName.Length == 0)
+                    {
+                        throw new InvalidOperationException(
+                            "ObjectBinder 的 Logic 对象中存在空绑定名。");
+                    }
+
+                    if (!fields.Add(fieldName))
+                    {
+                        throw new InvalidOperationException(
+                            "ObjectBinder 的普通绑定与 Logic 对象" +
+                            $"绑定名重复或占用保留名：{fieldName}");
+                    }
+
+                    GameObject targetObject =
+                        logicBinding.Value.gameObject;
+                    if (targetObject != root &&
+                        !targetObject.transform.IsChildOf(
+                            root.transform))
+                    {
+                        throw new InvalidOperationException(
+                            $"Logic 对象 {fieldName} 的目标不在 Prefab 内部。");
+                    }
+
+                    result.Add(new BindingCode
+                    {
+                        FieldName = fieldName,
+                        FieldType = GetCSharpLogicTypeName(
+                            logicBinding),
+                        BindingName = bindingName,
+                        Required = true,
+                        Source = BindingSource.LogicObject,
+                        EventKind = GeneratedEventKind.None
+                    });
+                }
+
                 return result;
             }
             finally
             {
                 PrefabUtility.UnloadPrefabContents(root);
             }
+        }
+
+        private static string GetCSharpLogicTypeName(
+            BinderElement logicBinding)
+        {
+            UIScriptGenerationSettings settings =
+                logicBinding.Value.uiScriptGeneration;
+            if (settings == null ||
+                settings.scriptType !=
+                UIObjectBinderScriptType.CSharp)
+            {
+                throw new InvalidOperationException(
+                    $"Logic 对象 {logicBinding.Name} 未配置为 C# 类型。");
+            }
+
+            string codeNamespace =
+                settings.csharpNamespace?.Trim() ??
+                string.Empty;
+            string className =
+                settings.csharpClassName?.Trim() ??
+                string.Empty;
+            if (!IsValidNamespace(codeNamespace) ||
+                !IsValidIdentifier(className))
+            {
+                throw new InvalidOperationException(
+                    $"Logic 对象 {logicBinding.Name} 的 C# " +
+                    "Namespace 或 Class Name 无效。");
+            }
+
+            string fullName = codeNamespace + "." + className;
+            Type logicType = FindType(fullName);
+            if (logicType == null)
+            {
+                throw new InvalidOperationException(
+                    $"无法解析 Logic 对象 {logicBinding.Name} 的类型 " +
+                    $"{fullName}，请先生成并编译子 Logic 脚本。");
+            }
+
+            if (!typeof(UIPanelLogic).IsAssignableFrom(logicType) ||
+                logicType.IsAbstract ||
+                logicType.GetConstructor(Type.EmptyTypes) == null)
+            {
+                throw new InvalidOperationException(
+                    $"Logic 对象 {logicBinding.Name} 的类型 {fullName} " +
+                    "必须是可实例化且具有无参构造函数的 UIPanelLogic。");
+            }
+
+            return "global::" + fullName;
         }
 
         private static string BuildViewMainContent(
@@ -1472,12 +1581,16 @@ namespace LxyDemo.UIFramework.Editor
                 fields.AppendLine(
                     $"        protected {binding.FieldType} " +
                     $"{viewFieldName};");
-                assignments.AppendLine(
-                    $"            {viewFieldName} = " +
-                    $"UIBindingUtility.GetBoundObject<" +
-                    $"{binding.FieldType}>(_ObjectBinder, " +
-                    $"\"{EscapeStringLiteral(binding.BindingName)}\", " +
-                    $"Config.Id, {ToBoolean(binding.Required)});");
+                AppendViewBindingAssignment(
+                    binding,
+                    viewFieldName,
+                    assignments);
+                if (binding.Source == BindingSource.LogicObject)
+                {
+                    releases.AppendLine(
+                        $"            ReleaseEmbeddedLogic(" +
+                        $"{viewFieldName});");
+                }
                 releases.AppendLine(
                     $"            {viewFieldName} = null;");
 
@@ -1534,6 +1647,35 @@ namespace LxyDemo.UIFramework.Editor
                     callbacks.Length == 0
                         ? "        // No generated event callbacks."
                         : callbacks.ToString().TrimEnd());
+        }
+
+        private static void AppendViewBindingAssignment(
+            BindingCode binding,
+            string viewFieldName,
+            StringBuilder assignments)
+        {
+            string escapedBindingName =
+                EscapeStringLiteral(binding.BindingName);
+            if (binding.Source == BindingSource.LogicObject)
+            {
+                assignments.AppendLine(
+                    $"            {viewFieldName} = " +
+                    $"CreateEmbeddedLogic<{binding.FieldType}>(");
+                assignments.AppendLine(
+                    "                " +
+                    "UIBindingUtility.GetBoundLogicObject(" +
+                    "_ObjectBinder, " +
+                    $"\"{escapedBindingName}\", Config.Id, " +
+                    $"{ToBoolean(binding.Required)}));");
+                return;
+            }
+
+            assignments.AppendLine(
+                $"            {viewFieldName} = " +
+                $"UIBindingUtility.GetBoundObject<" +
+                $"{binding.FieldType}>(_ObjectBinder, " +
+                $"\"{escapedBindingName}\", Config.Id, " +
+                $"{ToBoolean(binding.Required)});");
         }
 
         private static void AppendViewEventCode(
@@ -1714,13 +1856,34 @@ namespace LxyDemo.UIFramework.Editor
 
                 string escapedBindingName =
                     EscapeStringLiteral(binding.BindingName);
-                assignments.AppendLine(
-                    $"            {binding.FieldName} = " +
-                    $"UIBindingUtility.GetBoundObject<" +
-                    $"{binding.FieldType}>(uiObjectBinder, " +
-                    $"\"{escapedBindingName}\", Config.Id, " +
-                    $"{ToBoolean(binding.Required)});");
+                if (binding.Source == BindingSource.LogicObject)
+                {
+                    assignments.AppendLine(
+                        $"            {binding.FieldName} = " +
+                        $"CreateEmbeddedLogic<{binding.FieldType}>(");
+                    assignments.AppendLine(
+                        "                " +
+                        "UIBindingUtility.GetBoundLogicObject(" +
+                        "uiObjectBinder, " +
+                        $"\"{escapedBindingName}\", Config.Id, " +
+                        $"{ToBoolean(binding.Required)}));");
+                }
+                else
+                {
+                    assignments.AppendLine(
+                        $"            {binding.FieldName} = " +
+                        $"UIBindingUtility.GetBoundObject<" +
+                        $"{binding.FieldType}>(uiObjectBinder, " +
+                        $"\"{escapedBindingName}\", Config.Id, " +
+                        $"{ToBoolean(binding.Required)});");
+                }
 
+                if (binding.Source == BindingSource.LogicObject)
+                {
+                    releases.AppendLine(
+                        $"            ReleaseEmbeddedLogic(" +
+                        $"{binding.FieldName});");
+                }
                 releases.AppendLine(
                     $"            {binding.FieldName} = null;");
                 AppendEventCode(

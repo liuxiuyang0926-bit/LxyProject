@@ -82,6 +82,7 @@ public class UIShopView : UIShopViewBase
 
 - 声明 `_Root`、`_BtnClose`、`_TxtTitle` 等 protected 字段。
 - 从 `ObjectBinder.bindValues` 读取强类型组件引用。
+- 从 `ObjectBinder.binderElements` 创建并绑定 `_ItemLogic` 等强类型子 Logic。
 - 添加和移除 Button、Toggle、Slider 等默认事件。
 - 生成 `OnBtnCloseClick()` 等 protected virtual 回调。
 - 在解绑时清空生成字段。
@@ -142,6 +143,17 @@ btn_Close -> protected Button _BtnClose;
 txt_Title -> protected TMP_Text _TxtTitle;
 go_Item   -> protected GameObject _GoItem;
 ```
+
+`静态自动绑定的Logic对象` 中的 `ItemLogic` 会生成：
+
+```csharp
+protected ItemLogic _ItemLogic;
+```
+
+子 Logic 的类型来自其 `ObjectBinder > UI Script Generation` 配置。
+业务类可以直接通过 `_ItemLogic` 调用 `ItemLogic.cs` 中的公开方法；
+它的 `OnInitialize`、`OnInit`、`OnShow`、`OnHide`、`OnRelease` 和
+`OnDispose` 生命周期会跟随父 Logic。
 
 ## 推荐流程
 

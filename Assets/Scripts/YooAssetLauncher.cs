@@ -2,16 +2,30 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 using YooAsset;
 
 public sealed class YooAssetLauncher : MonoBehaviour
 {
-    // Host 地址的唯一配置来源。修改后不受场景序列化数据影响。
-    private const string DefaultHostServer =
-        "http://47.97.108.193:8080/GameResources/Android/1.0.0";
+    private const string GameConfigUrl =
+        "http://47.97.108.193:8080/LoadConfig/gameConfig.json";
 
-    private const string FallbackHostServer =
-        "http://47.97.108.193:8080/GameResources/Android/1.0.0";
+    private const int GameConfigRequestTimeoutSeconds = 15;
+
+    [Serializable]
+    private sealed class GameConfigResponse
+    {
+        public int code;
+        public string message;
+        public GameConfigData data;
+    }
+
+    [Serializable]
+    private sealed class GameConfigData
+    {
+        public string version;
+        public string downloadUrl;
+    }
 
     public enum PlayMode
     {
@@ -64,6 +78,8 @@ public sealed class YooAssetLauncher : MonoBehaviour
     public string LastError { get; private set; }
     public string PackageName => packageName;
     public PlayMode ActiveMode => _activeMode;
+    public string DefaultHostServer { get; private set; }
+    public string FallbackHostServer { get; private set; }
 
     private PlayMode _activeMode;
 
@@ -253,6 +269,26 @@ public sealed class YooAssetLauncher : MonoBehaviour
     {
         Debug.Log("[YooAsset] 使用 Host 模式");
 
+        bool hostServerReady = false;
+        yield return RequestHostServers(
+            result => hostServerReady = result);
+        if (!hostServerReady)
+        {
+            if (fallbackToOffline)
+            {
+                Debug.LogWarning(
+                    "[YooAsset] 获取远程资源地址失败，" +
+                    "切换到 APK 内置资源");
+                yield return SwitchToOffline(completed);
+            }
+            else
+            {
+                completed?.Invoke(false);
+            }
+
+            yield break;
+        }
+
         var remoteServices = new RemoteServices(
             DefaultHostServer,
             FallbackHostServer
@@ -326,6 +362,141 @@ public sealed class YooAssetLauncher : MonoBehaviour
         {
             completed?.Invoke(false);
         }
+    }
+
+    private IEnumerator RequestHostServers(
+        Action<bool> completed)
+    {
+        Debug.Log(
+            $"[YooAsset] 请求远程资源配置：{GameConfigUrl}");
+
+        using (UnityWebRequest request =
+               UnityWebRequest.Get(GameConfigUrl))
+        {
+            request.timeout =
+                GameConfigRequestTimeoutSeconds;
+            yield return request.SendWebRequest();
+
+            if (request.result !=
+                UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning(
+                    "[YooAsset] 请求远程资源配置失败：\n" +
+                    request.error);
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            if (!TryBuildHostServer(
+                    request.downloadHandler.text,
+                    Application.platform,
+                    out string hostServer,
+                    out string error))
+            {
+                Debug.LogWarning(
+                    "[YooAsset] 远程资源配置无效：\n" +
+                    error);
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            DefaultHostServer = hostServer;
+            FallbackHostServer = hostServer;
+            Debug.Log(
+                "[YooAsset] 远程资源地址：" +
+                DefaultHostServer);
+            completed?.Invoke(true);
+        }
+    }
+
+    private static bool TryBuildHostServer(
+        string json,
+        RuntimePlatform platform,
+        out string hostServer,
+        out string error)
+    {
+        hostServer = null;
+        error = null;
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            error = "gameConfig.json 返回内容为空。";
+            return false;
+        }
+
+        GameConfigResponse response;
+        try
+        {
+            response =
+                JsonUtility.FromJson<GameConfigResponse>(json);
+        }
+        catch (Exception exception)
+        {
+            error = "gameConfig.json 解析失败：" +
+                    exception.Message;
+            return false;
+        }
+
+        if (response == null)
+        {
+            error = "gameConfig.json 解析结果为空。";
+            return false;
+        }
+
+        if (response.code != 200)
+        {
+            error =
+                $"接口返回 code={response.code}，" +
+                $"message={response.message}";
+            return false;
+        }
+
+        if (response.data == null)
+        {
+            error = "gameConfig.json 缺少 data。";
+            return false;
+        }
+
+        string version =
+            response.data.version?.Trim().Trim('/') ??
+            string.Empty;
+        string downloadUrl =
+            response.data.downloadUrl?.Trim().TrimEnd('/') ??
+            string.Empty;
+        if (version.Length == 0 || downloadUrl.Length == 0)
+        {
+            error = "gameConfig.json 缺少 version 或 downloadUrl。";
+            return false;
+        }
+
+        if (!Uri.TryCreate(
+                downloadUrl,
+                UriKind.Absolute,
+                out Uri downloadUri) ||
+            (downloadUri.Scheme != Uri.UriSchemeHttp &&
+             downloadUri.Scheme != Uri.UriSchemeHttps))
+        {
+            error = "downloadUrl 必须是有效的 HTTP/HTTPS 地址。";
+            return false;
+        }
+
+        string platformFolder;
+        switch (platform)
+        {
+            case RuntimePlatform.Android:
+                platformFolder = "Android";
+                break;
+            case RuntimePlatform.IPhonePlayer:
+                platformFolder = "IPhone";
+                break;
+            default:
+                error = $"Host 模式暂不支持平台：{platform}";
+                return false;
+        }
+
+        hostServer =
+            $"{downloadUrl}/{platformFolder}/{version}";
+        return true;
     }
 
     #endregion

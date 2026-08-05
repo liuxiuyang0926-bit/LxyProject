@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using LuaObjectBind;
 using UnityEngine;
 
 namespace LxyDemo.UIFramework
@@ -13,6 +15,8 @@ namespace LxyDemo.UIFramework
         private bool initialized;
         private bool disposed;
         private bool visible;
+        private readonly List<UIPanelLogic> embeddedLogics =
+            new List<UIPanelLogic>();
 
         public UIManager Owner => owner;
         public UIPanelConfig Config { get; private set; }
@@ -65,6 +69,7 @@ namespace LxyDemo.UIFramework
             }
 
             visible = true;
+            ShowEmbeddedLogics(userData);
             OnShow(userData);
         }
 
@@ -76,6 +81,7 @@ namespace LxyDemo.UIFramework
             }
 
             OnHide(skipAnimation);
+            HideEmbeddedLogics(skipAnimation);
             visible = false;
         }
 
@@ -97,6 +103,8 @@ namespace LxyDemo.UIFramework
                     Debug.LogException(exception);
                 }
 
+                HideEmbeddedLogics(true);
+
                 visible = false;
             }
 
@@ -111,6 +119,8 @@ namespace LxyDemo.UIFramework
                     Debug.LogException(exception);
                 }
             }
+
+            DisposeEmbeddedLogics();
 
             gameObject = null;
 
@@ -149,6 +159,110 @@ namespace LxyDemo.UIFramework
         protected void CloseSelf(bool forceDestroy = false)
         {
             owner?.ClosePanel(Config.Id, forceDestroy);
+        }
+
+        protected TLogic CreateEmbeddedLogic<TLogic>(
+            ObjectBinder objectBinder)
+            where TLogic : UIPanelLogic, new()
+        {
+            if (objectBinder == null)
+            {
+                throw new MissingReferenceException(
+                    $"{GetType().Name} 的子 Logic ObjectBinder 为空。");
+            }
+
+            if (!initialized || Config == null)
+            {
+                throw new InvalidOperationException(
+                    $"{GetType().Name} 尚未初始化，无法创建子 Logic。");
+            }
+
+            var logic = new TLogic();
+            try
+            {
+                logic.Initialize(owner, Config, null);
+                logic.BindGameObject(objectBinder.gameObject);
+                embeddedLogics.Add(logic);
+                return logic;
+            }
+            catch
+            {
+                if (logic.initialized)
+                {
+                    logic.DisposeLogic();
+                }
+
+                throw;
+            }
+        }
+
+        protected void ReleaseEmbeddedLogic(
+            UIPanelLogic logic)
+        {
+            if (logic == null)
+            {
+                return;
+            }
+
+            embeddedLogics.Remove(logic);
+            logic.DisposeLogic();
+        }
+
+        private void ShowEmbeddedLogics(object userData)
+        {
+            for (int index = 0;
+                 index < embeddedLogics.Count;
+                 index++)
+            {
+                UIPanelLogic logic = embeddedLogics[index];
+                if (logic != null && !logic.IsDisposed)
+                {
+                    logic.Show(userData);
+                }
+            }
+        }
+
+        private void HideEmbeddedLogics(bool skipAnimation)
+        {
+            for (int index = embeddedLogics.Count - 1;
+                 index >= 0;
+                 index--)
+            {
+                UIPanelLogic logic = embeddedLogics[index];
+                if (logic == null || logic.IsDisposed)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    logic.Hide(skipAnimation);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
+        }
+
+        private void DisposeEmbeddedLogics()
+        {
+            for (int index = embeddedLogics.Count - 1;
+                 index >= 0;
+                 index--)
+            {
+                UIPanelLogic logic = embeddedLogics[index];
+                try
+                {
+                    logic?.DisposeLogic();
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
+
+            embeddedLogics.Clear();
         }
 
         protected virtual void OnInitialize(object userData)

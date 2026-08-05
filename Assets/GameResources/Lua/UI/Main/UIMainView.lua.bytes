@@ -23,7 +23,7 @@ end
 function UIMainView:OnShow(userData)
     -- UI显示
     -- userData: 显示时传入的用户数据
-    self.Widget.txt_test.text = "再次测试"
+    self.Widget.txt_test.text = "hahahahaha"
 end
 
 --function UIMainView:OnHide()
