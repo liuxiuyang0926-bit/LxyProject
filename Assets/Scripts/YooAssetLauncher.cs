@@ -6,6 +6,13 @@ using YooAsset;
 
 public sealed class YooAssetLauncher : MonoBehaviour
 {
+    // Host 地址的唯一配置来源。修改后不受场景序列化数据影响。
+    private const string DefaultHostServer =
+        "http://47.97.108.193:8080/GameResources/Android/1.0.0";
+
+    private const string FallbackHostServer =
+        "http://47.97.108.193:8080/GameResources/Android/1.0.0";
+
     public enum PlayMode
     {
         /// <summary>
@@ -31,16 +38,6 @@ public sealed class YooAssetLauncher : MonoBehaviour
     [Header("Bundle Collector 中的 Package 名")]
     [SerializeField]
     private string packageName = "DefaultPackage";
-
-    [Header("远程资源根地址")]
-    [SerializeField]
-    private string defaultHostServer =
-        "http://10.225.13.32:80/YooAsset/Android/1.0.0";
-
-    [Header("备用远程资源根地址")]
-    [SerializeField]
-    private string fallbackHostServer =
-        "http://10.225.13.32:80/YooAsset/Android/1.0.0";
 
     [Header("Host 模式启动时下载全部缺失资源")]
     [SerializeField]
@@ -257,8 +254,8 @@ public sealed class YooAssetLauncher : MonoBehaviour
         Debug.Log("[YooAsset] 使用 Host 模式");
 
         var remoteServices = new RemoteServices(
-            defaultHostServer,
-            fallbackHostServer
+            DefaultHostServer,
+            FallbackHostServer
         );
 
         var builtinFileSystemParameters =

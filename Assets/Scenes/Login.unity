@@ -154,8 +154,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playMode: 2
   packageName: DefaultPackage
-  defaultHostServer: http://10.225.13.32:80/YooAsset/Android/1.0.0
-  fallbackHostServer: http://10.225.13.32:80/YooAsset/Android/1.0.0
   downloadAllOnStart: 1
   fallbackToOffline: 1
   maxDownloadCount: 10

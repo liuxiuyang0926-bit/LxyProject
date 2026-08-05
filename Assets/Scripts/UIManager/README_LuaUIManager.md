@@ -112,6 +112,10 @@ Player 构建前会自动同步，也可以在构建 YooAsset Package 前手动�
 工具 > UI工具 > 清理Lua构建资源
 ```
 
+使用 YooAsset 的 Bundle Builder 时，只有点击 Build 按钮才会先执行
+“同步Lua构建资源”。同步成功后继续按钮原有的 Bundle 构建逻辑；
+同步失败则阻止本次构建，不会修改或切换 YooAsset 构建管线。
+
 `UIStartup` 在资源准备完成后初始化唯一 LuaEnv，先加载
 `Framework.UI.Bootstrap`，再执行 `Main.lua`。Main 返回的 table 中存在
 `Start` 方法时会自动调用。

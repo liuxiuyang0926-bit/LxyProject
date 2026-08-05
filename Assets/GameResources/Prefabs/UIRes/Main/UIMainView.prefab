@@ -140,7 +140,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u4E3B\u754C\u9762"
+  m_text: "\u6211\u662F\u6D4B\u8BD5\u4E3B\u754C\u9762"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8a876e1acb1077c438fe8fc5b86a5247, type: 2}
   m_sharedMaterial: {fileID: 8891967958448545013, guid: 8a876e1acb1077c438fe8fc5b86a5247, type: 2}
@@ -329,6 +329,9 @@ MonoBehaviour:
     binds:
     - name: root
       objectValue: {fileID: 8421539987038116766}
+      bindValueType: 0
+    - name: txt_test
+      objectValue: {fileID: 7590807741772994385}
       bindValueType: 0
   fieldBindValues:
     binds: []

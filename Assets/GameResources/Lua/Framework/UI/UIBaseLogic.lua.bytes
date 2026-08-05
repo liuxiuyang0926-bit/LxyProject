@@ -4,6 +4,12 @@ local UIObjectBinderProxy =
 
 local UIBaseLogic = DefineClass("UIBaseLogic")
 
+-- XLua userdata is still non-nil after its Unity native object is destroyed.
+-- UnityEngine.Object:Equals(nil) preserves Unity's destroyed-object semantics.
+local function isUnityObjectAlive(unityObject)
+    return unityObject ~= nil and not unityObject:Equals(nil)
+end
+
 function UIBaseLogic:ctor(panelConfig)
     self.PanelConfig = panelConfig
     self.Config = panelConfig
@@ -38,7 +44,8 @@ end
 
 function UIBaseLogic:BindGameObject(gameObject)
     assert(not self.destroyed, "cannot bind a destroyed UI logic")
-    assert(gameObject ~= nil, "gameObject cannot be nil")
+    assert(isUnityObjectAlive(gameObject),
+        "gameObject cannot be nil or destroyed")
 
     self.uiGameObject = gameObject
     self.isLoaded = true
@@ -65,16 +72,23 @@ function UIBaseLogic:UnBindGameObject()
         return
     end
 
-    self:ReleaseGeneratedEvents()
-    if self.ReleaseBind then
-        self:ReleaseBind()
-    end
-    if self.OnUnBindGameObject then
-        self:OnUnBindGameObject()
-    end
+    -- Unity may destroy the UI hierarchy before LuaUIRuntime.OnDestroy runs.
+    -- In that case all binding callbacks can reference invalid components, so
+    -- only clear the Lua-side bookkeeping and continue disposing the logic.
+    if isUnityObjectAlive(self.uiGameObject) then
+        self:ReleaseGeneratedEvents()
+        if self.ReleaseBind then
+            self:ReleaseBind()
+        end
+        if self.OnUnBindGameObject then
+            self:OnUnBindGameObject()
+        end
 
-    if self.objectBinder ~= nil then
-        self.objectBinder:Release()
+        if isUnityObjectAlive(self.objectBinder) then
+            self.objectBinder:Release()
+        end
+    else
+        self.__generatedEvents = {}
     end
     self.Widget = {}
     self.Logic = {}
@@ -84,7 +98,7 @@ function UIBaseLogic:UnBindGameObject()
 end
 
 function UIBaseLogic:Show(userData)
-    assert(self.isLoaded and self.uiGameObject ~= nil,
+    assert(self.isLoaded and isUnityObjectAlive(self.uiGameObject),
         "UI logic is not bound: " .. tostring(self.PanelConfig.Id))
 
     self.logicUserData = userData
@@ -100,11 +114,12 @@ function UIBaseLogic:Hide(stopCloseAnim)
         return
     end
 
-    if self.OnHide then
+    local gameObjectAlive = isUnityObjectAlive(self.uiGameObject)
+    if gameObjectAlive and self.OnHide then
         self:OnHide(stopCloseAnim == true)
     end
     self.isLogicVisible = false
-    if self.uiGameObject ~= nil then
+    if gameObjectAlive and isUnityObjectAlive(self.uiGameObject) then
         self.uiGameObject:SetActive(false)
     end
 end
@@ -128,14 +143,15 @@ end
 function UIBaseLogic:IsUIVisible()
     return self.isLoaded
         and self.isLogicVisible
-        and self.uiGameObject ~= nil
+        and isUnityObjectAlive(self.uiGameObject)
         and self.uiGameObject.activeSelf
 end
 
 function UIBaseLogic:FindTransform(path, required, fieldName)
-    if self.uiGameObject == nil then
+    if not isUnityObjectAlive(self.uiGameObject) then
         if required then
-            error("UI root is nil: " .. tostring(self.PanelConfig.Id))
+            error("UI root is nil or destroyed: "
+                .. tostring(self.PanelConfig.Id))
         end
         return nil
     end

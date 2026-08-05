@@ -1,10 +1,12 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
+using UnityEngine.UIElements;
+using YooAsset.Editor;
 
 namespace LxyDemo.UIFramework.Editor
 {
@@ -20,7 +22,8 @@ namespace LxyDemo.UIFramework.Editor
 
         public int callbackOrder => -1000;
 
-        public void OnPreprocessBuild(BuildReport report)
+        public void OnPreprocessBuild(
+            UnityEditor.Build.Reporting.BuildReport report)
         {
             StageLuaFiles();
         }
@@ -96,6 +99,109 @@ namespace LxyDemo.UIFramework.Editor
             if (Directory.Exists(absolutePath))
             {
                 Directory.Delete(absolutePath, true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 监听 YooAsset Bundle Builder 的 Build 按钮。
+    /// 只有用户实际点击按钮时才同步 Lua，成功后继续 YooAsset 原构建逻辑。
+    /// </summary>
+    [InitializeOnLoad]
+    internal static class YooAssetBundleBuilderClickHook
+    {
+        private const string RemovedPipelineName =
+            "ScriptableBuildPipelineWithLua";
+
+        private static readonly HashSet<Button> HookedButtons =
+            new HashSet<Button>();
+
+        static YooAssetBundleBuilderClickHook()
+        {
+            RestoreRemovedPipeline();
+            EditorApplication.update += BindBuildButtons;
+        }
+
+        private static void RestoreRemovedPipeline()
+        {
+            if (!BundleCollectorSettingData.HasSettingAsset())
+            {
+                return;
+            }
+
+            string standardPipeline =
+                EBuildPipeline.ScriptableBuildPipeline.ToString();
+            foreach (BundleCollectorPackage package in
+                     BundleCollectorSettingData.Setting.Packages)
+            {
+                string currentPipeline =
+                    BundleBuilderSetting.GetPackageBuildPipeline(
+                        package.PackageName);
+                if (currentPipeline == RemovedPipelineName)
+                {
+                    BundleBuilderSetting.SetPackageBuildPipeline(
+                        package.PackageName,
+                        standardPipeline);
+                }
+            }
+        }
+
+        private static void BindBuildButtons()
+        {
+            BundleBuilderWindow[] windows =
+                Resources.FindObjectsOfTypeAll<BundleBuilderWindow>();
+            foreach (BundleBuilderWindow window in windows)
+            {
+                Button buildButton =
+                    window.rootVisualElement.Q<Button>("Build");
+                if (buildButton == null ||
+                    !HookedButtons.Add(buildButton))
+                {
+                    continue;
+                }
+
+                buildButton.RegisterCallback<PointerUpEvent>(
+                    OnBuildButtonPointerUp,
+                    TrickleDown.TrickleDown);
+                buildButton.RegisterCallback<NavigationSubmitEvent>(
+                    OnBuildButtonSubmit,
+                    TrickleDown.TrickleDown);
+            }
+        }
+
+        private static void OnBuildButtonPointerUp(
+            PointerUpEvent evt)
+        {
+            if (evt.button == 0)
+            {
+                SynchronizeLuaBeforeBuild(evt);
+            }
+        }
+
+        private static void OnBuildButtonSubmit(
+            NavigationSubmitEvent evt)
+        {
+            SynchronizeLuaBeforeBuild(evt);
+        }
+
+        private static void SynchronizeLuaBeforeBuild(EventBase evt)
+        {
+            try
+            {
+                Debug.Log(
+                    "[Lua UI Build] 点击 YooAsset Build，" +
+                    "开始同步 Lua 资源。"
+                );
+                LuaUIBuildProcessor.StageLuaFiles();
+            }
+            catch (Exception exception)
+            {
+                evt.StopImmediatePropagation();
+                Debug.LogError(
+                    "[Lua UI Build] Lua 资源同步失败，" +
+                    "已阻止本次 YooAsset 构建。\n" +
+                    exception
+                );
             }
         }
     }
