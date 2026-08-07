@@ -1,0 +1,13 @@
+{
+  "name": "com.lxy.resource",
+  "version": "1.0.0",
+  "displayName": "Lxy Resource Runtime",
+  "description": "YooAsset package initialization, manifest validation, downloading, and cache lifecycle.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.tuyoogame.yooasset": "3.0.5"
+  },
+  "author": {
+    "name": "Lxy"
+  }
+}

@@ -30,11 +30,51 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/GameResources
-        CollectorGUID: 2329b75094c93d146a07cf59a997702f
+      - CollectPath: Assets/GameResources/Fonts
+        CollectorGUID: 9d0e3a849e609c14d9bb3b293b8352d1
         CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackSeparately
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/Lua
+        CollectorGUID: 5da298a46bf1b22429c04f335a70682a
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/Prefabs
+        CollectorGUID: 7fcda9f8b7dda3b478c9952baa845fec
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/UIAtlas
+        CollectorGUID: 787dad044280631408431d757624be51
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/UITexture
+        CollectorGUID: 1fbeb4f9886c2da4e8f4ce5b44ed3a68
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/HybridCLR
+        CollectorGUID: d58eb5aa1b9e2af46b797bf7c12875e9
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 

@@ -1,0 +1,20 @@
+{
+  "name": "Game.Common.Editor",
+  "rootNamespace": "Game.Common.Editor",
+  "references": [
+    "Game.Common",
+    "Unity.TextMeshPro",
+    "Unity.UGUI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

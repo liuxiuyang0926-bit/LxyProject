@@ -1,0 +1,130 @@
+﻿#include "pch-c.h"
+#ifndef _MSC_VER
+# include <alloca.h>
+#else
+# include <malloc.h>
+#endif
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m9A7B395773A5B9A5FF077B50358B2C1A659DB179 (void);
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m70FB4E468EC2D9B8A06ED8205B931FDE645D70F6 (void);
+extern void HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9 (void);
+extern void HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10 (void);
+extern void HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986 (void);
+extern void HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840 (void);
+extern void HotUpdateStartupContext__ctor_mC645F7ABCA519D8716C3231F9C087B822EE68FFB (void);
+extern void HotUpdateStartupContext_get_PackageName_m97BE08E66B6864C3A3FAE905A2AE4E717C817F02 (void);
+extern void HotUpdateStartupContext_get_PackageVersion_mE05F46153841DF9D79CA8319050CCEA5DF0BCD92 (void);
+extern void HotUpdateStartupContext_get_ApplicationVersion_m72C7134F99210F325E92108324140BBDD982CEA2 (void);
+extern void HotUpdateStartupContext_get_FirstSceneName_m664F5AB4D64FF4208AA8E79DF237BF91F54320F5 (void);
+extern void HotUpdateStartupContext_get_IsEditor_mACD4C7EEC115E93F09A2EF8D5538EF61C7F3F892 (void);
+extern void HotUpdateStartupContext_get_Stage_m27CB0877B16F4C16F38E7F384599554E77255C26 (void);
+extern void HotUpdateStartupContext_set_Stage_mEBD416A750D8029318C6D157A6DD1B89E8DF4AB2 (void);
+extern void HotUpdateStartupContext_get_Progress_m3C969BCC60A5C34093C7D0A6E619E994656DB205 (void);
+extern void HotUpdateStartupContext_set_Progress_mEC5BDD994FB82D11645DC6AADCA66A39F37FA166 (void);
+extern void HotUpdateStartupContext_get_Message_m5E36FA6FC65BE9A8CC568D651D5D3DD9F7D92770 (void);
+extern void HotUpdateStartupContext_set_Message_m47C50A832F311F61D53EA64B4F7A62B70FAC897E (void);
+extern void HotUpdateStartupContext_get_Error_m3F0685C9D8A442EBDCBFEF5C9A622FEEEC5715DA (void);
+extern void HotUpdateStartupContext_set_Error_m95F272BBF44019562C6174543D1E4A988C932177 (void);
+extern void HotUpdateStartupContext_get_IsCompleted_m64BDCD8A8614A70B3BF467A36BED338245440474 (void);
+extern void HotUpdateStartupContext_set_IsCompleted_mBE55BA3D05C43D24430A1D70232D7FC1B384446F (void);
+extern void HotUpdateStartupContext_get_Succeeded_mABD56C3A3AD9A7E6D63DFBEB1ABFAA0479FC3E11 (void);
+extern void HotUpdateStartupContext_Report_mAF96D3154788A56A8F0538F7DC568043BB36B492 (void);
+extern void HotUpdateStartupContext_Complete_mB2C23AD9AD2F4A91919AF20FBC3F4818E2585145 (void);
+extern void HotUpdateStartupContext_Fail_m041507398D2D48E94C918AC314B229F8A626C217 (void);
+static Il2CppMethodPointer s_methodPointers[26] = 
+{
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m9A7B395773A5B9A5FF077B50358B2C1A659DB179,
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m70FB4E468EC2D9B8A06ED8205B931FDE645D70F6,
+	HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9,
+	HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10,
+	HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986,
+	HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840,
+	HotUpdateStartupContext__ctor_mC645F7ABCA519D8716C3231F9C087B822EE68FFB,
+	HotUpdateStartupContext_get_PackageName_m97BE08E66B6864C3A3FAE905A2AE4E717C817F02,
+	HotUpdateStartupContext_get_PackageVersion_mE05F46153841DF9D79CA8319050CCEA5DF0BCD92,
+	HotUpdateStartupContext_get_ApplicationVersion_m72C7134F99210F325E92108324140BBDD982CEA2,
+	HotUpdateStartupContext_get_FirstSceneName_m664F5AB4D64FF4208AA8E79DF237BF91F54320F5,
+	HotUpdateStartupContext_get_IsEditor_mACD4C7EEC115E93F09A2EF8D5538EF61C7F3F892,
+	HotUpdateStartupContext_get_Stage_m27CB0877B16F4C16F38E7F384599554E77255C26,
+	HotUpdateStartupContext_set_Stage_mEBD416A750D8029318C6D157A6DD1B89E8DF4AB2,
+	HotUpdateStartupContext_get_Progress_m3C969BCC60A5C34093C7D0A6E619E994656DB205,
+	HotUpdateStartupContext_set_Progress_mEC5BDD994FB82D11645DC6AADCA66A39F37FA166,
+	HotUpdateStartupContext_get_Message_m5E36FA6FC65BE9A8CC568D651D5D3DD9F7D92770,
+	HotUpdateStartupContext_set_Message_m47C50A832F311F61D53EA64B4F7A62B70FAC897E,
+	HotUpdateStartupContext_get_Error_m3F0685C9D8A442EBDCBFEF5C9A622FEEEC5715DA,
+	HotUpdateStartupContext_set_Error_m95F272BBF44019562C6174543D1E4A988C932177,
+	HotUpdateStartupContext_get_IsCompleted_m64BDCD8A8614A70B3BF467A36BED338245440474,
+	HotUpdateStartupContext_set_IsCompleted_mBE55BA3D05C43D24430A1D70232D7FC1B384446F,
+	HotUpdateStartupContext_get_Succeeded_mABD56C3A3AD9A7E6D63DFBEB1ABFAA0479FC3E11,
+	HotUpdateStartupContext_Report_mAF96D3154788A56A8F0538F7DC568043BB36B492,
+	HotUpdateStartupContext_Complete_mB2C23AD9AD2F4A91919AF20FBC3F4818E2585145,
+	HotUpdateStartupContext_Fail_m041507398D2D48E94C918AC314B229F8A626C217,
+};
+extern void HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9_AdjustorThunk (void);
+extern void HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10_AdjustorThunk (void);
+extern void HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986_AdjustorThunk (void);
+extern void HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840_AdjustorThunk (void);
+static Il2CppTokenAdjustorThunkPair s_adjustorThunks[4] = 
+{
+	{ 0x06000003, HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9_AdjustorThunk },
+	{ 0x06000004, HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10_AdjustorThunk },
+	{ 0x06000005, HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986_AdjustorThunk },
+	{ 0x06000006, HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840_AdjustorThunk },
+};
+static const int32_t s_InvokerIndices[26] = 
+{
+	8711,
+	5921,
+	1467,
+	5778,
+	5856,
+	5808,
+	244,
+	5808,
+	5808,
+	5808,
+	5808,
+	5717,
+	5778,
+	4823,
+	5856,
+	4905,
+	5808,
+	4861,
+	5808,
+	4861,
+	5717,
+	4759,
+	5717,
+	1467,
+	4861,
+	4861,
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Game_Contracts_CodeGenModule;
+const Il2CppCodeGenModule g_Game_Contracts_CodeGenModule = 
+{
+	"Game.Contracts.dll",
+	26,
+	s_methodPointers,
+	4,
+	s_adjustorThunks,
+	s_InvokerIndices,
+	0,
+	NULL,
+	0,
+	NULL,
+	0,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};

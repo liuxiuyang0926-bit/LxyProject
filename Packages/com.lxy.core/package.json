@@ -1,0 +1,14 @@
+{
+  "name": "com.lxy.core",
+  "version": "1.0.0",
+  "displayName": "Lxy Game Core",
+  "description": "Reusable common utilities and state-control runtime/editor tooling.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.textmeshpro": "3.0.7",
+    "com.unity.ugui": "1.0.0"
+  },
+  "author": {
+    "name": "Lxy"
+  }
+}

@@ -1,0 +1,5 @@
+<linker>
+  <!-- HotUpdateEntry 通过热更新程序集调用本契约。
+       IL2CPP 静态分析不一定能看到这些调用，必须显式保留。 -->
+  <assembly fullname="Game.Contracts" preserve="all" />
+</linker>

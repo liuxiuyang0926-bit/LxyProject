@@ -1,0 +1,23 @@
+{
+  "name": "Game.UI.Editor",
+  "rootNamespace": "LxyDemo.UIFramework.Editor",
+  "references": [
+    "Game.Common",
+    "Game.Lua",
+    "Game.Lua.Editor",
+    "Game.UI",
+    "YooAsset.Editor",
+    "Unity.UGUI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

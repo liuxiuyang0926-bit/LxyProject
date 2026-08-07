@@ -1,0 +1,20 @@
+{
+  "name": "Game.UI",
+  "rootNamespace": "LxyDemo.UIFramework",
+  "references": [
+    "Game.Lua",
+    "Game.Resource",
+    "XLua.Runtime",
+    "YooAsset",
+    "Unity.UGUI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

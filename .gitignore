@@ -7,6 +7,9 @@
 [Bb]uilds/
 [Mm]emoryCaptures/
 
+/Bundles
+/Assets/StreamingAssets/yoo
+
 .vs/
 .idea/
 

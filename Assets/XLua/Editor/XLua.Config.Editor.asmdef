@@ -1,0 +1,19 @@
+{
+  "name": "XLua.Config.Editor",
+  "rootNamespace": "XLua.Editor",
+  "references": [
+    "Game.Scene",
+    "XLua.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
