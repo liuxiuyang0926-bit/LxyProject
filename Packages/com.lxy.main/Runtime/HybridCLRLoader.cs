@@ -14,16 +14,16 @@ namespace Game.Main
     public sealed class HybridCLRLoader : MonoBehaviour
     {
         private const string DefaultPackageName = "DefaultPackage";
+        private const string ManifestAssetPath =
+            "Assets/GameResources/HybridCLR/" +
+            "HybridCLRAssemblyManifest.bytes";
 
-        public const string HotUpdateDllLocation = "Game.HotUpdate.dll";
-
-        // 每次执行 HybridCLR/Generate/All 后，都应按生成的
-        // AOTGenericReferences.PatchedAOTAssemblyList 更新此列表，
-        // 并重新复制对应平台的裁剪后 AOT DLL。
-        private static readonly IReadOnlyList<string>
-            AotMetadataDlls = Array.Empty<string>();
+        public const string HotUpdateDllLocation =
+            HybridCLRAssemblyManifest.DefaultEntryAssemblyName +
+            ".dll";
 
         private string packageName = DefaultPackageName;
+        private HybridCLRAssemblyManifest assemblyManifest;
         private Assembly hotUpdateAssembly;
 
         public bool IsLoading { get; private set; }
@@ -119,26 +119,47 @@ namespace Game.Main
                 yield break;
             }
 
+            yield return LoadAssemblyManifest(package);
+            if (!string.IsNullOrEmpty(LastError))
+            {
+                yield break;
+            }
+
             yield return LoadAotMetadata(package);
             if (!string.IsNullOrEmpty(LastError))
             {
                 yield break;
             }
 
-            yield return LoadHotUpdateAssembly(package);
+            yield return LoadHotUpdateAssemblies(package);
             if (!string.IsNullOrEmpty(LastError))
             {
                 yield break;
             }
 #else
-            // Editor 中热更新程序集已经由 Unity 加载，重复
-            // Assembly.Load 会得到两个同名程序集。
-            hotUpdateAssembly = FindLoadedHotUpdateAssembly();
-            if (hotUpdateAssembly == null)
+            // Editor 中 asmdef 已由 Unity 加载，重复 Assembly.Load
+            // 会得到两个同名程序集。这里同时校验生成清单是否完整。
+            if (!TryLoadEditorAssemblyManifest(out string manifestError))
             {
-                Fail("Editor 中没有找到 Game.HotUpdate 程序集。");
+                Fail(manifestError);
                 yield break;
             }
+
+            foreach (string location in assemblyManifest.hotUpdateDlls)
+            {
+                string assemblyName =
+                    GetAssemblyNameFromLocation(location);
+                if (FindLoadedHotUpdateAssembly(assemblyName) == null)
+                {
+                    Fail(
+                        $"Editor 中没有找到热更新程序集：" +
+                        $"{assemblyName}。请重新执行生成同步命令。");
+                    yield break;
+                }
+            }
+
+            hotUpdateAssembly = FindLoadedHotUpdateAssembly(
+                assemblyManifest.entryAssemblyName);
 #endif
 
             yield return StartHotUpdateEntry(context);
@@ -175,10 +196,107 @@ namespace Game.Main
                 : value.Trim();
         }
 
+        /// <summary>
+        /// 首场景加载后再次进入热更新程序集，由热更新层启动 UI、Lua
+        /// 和其他场景级业务。AOT 壳不直接引用这些程序集。
+        /// </summary>
+        public IEnumerator StartFirstScene(
+            HotUpdateStartupContext context)
+        {
+            if (context == null)
+            {
+                Fail("首场景热更新启动上下文为空。");
+                yield break;
+            }
+
+            if (!IsReady || hotUpdateAssembly == null)
+            {
+                Fail("HybridCLR 热更新运行时尚未就绪。");
+                yield break;
+            }
+
+            LastError = null;
+            yield return InvokeHotUpdateEntryRoutine(
+                "StartFirstScene",
+                context);
+            if (!string.IsNullOrEmpty(LastError))
+            {
+                yield break;
+            }
+
+            if (!context.FirstSceneRuntimeSucceeded)
+            {
+                Fail(
+                    context.FirstSceneRuntimeError ??
+                    "首场景热更新运行时未报告启动成功。");
+            }
+        }
+
 #if !UNITY_EDITOR
+        private IEnumerator LoadAssemblyManifest(
+            ResourcePackage package)
+        {
+            string location =
+                HybridCLRAssemblyManifest.ManifestLocation;
+            if (!package.IsLocationValid(location))
+            {
+                Fail(
+                    $"当前 Package Manifest " +
+                    $"{package.GetPackageVersion()} 不包含 HybridCLR " +
+                    $"程序集清单：{location}。请重新同步并构建 " +
+                    "YooAsset Bundle。");
+                yield break;
+            }
+
+            AssetHandle handle =
+                package.LoadAssetAsync<TextAsset>(location);
+            yield return handle;
+
+            if (handle.Status != EOperationStatus.Succeeded)
+            {
+                string error =
+                    $"加载 HybridCLR 程序集清单失败：{location}\n" +
+                    handle.Error;
+                handle.Release();
+                Fail(error);
+                yield break;
+            }
+
+            TextAsset manifestAsset =
+                handle.AssetObject as TextAsset;
+            if (manifestAsset == null)
+            {
+                handle.Release();
+                Fail(
+                    $"HybridCLR 程序集清单不是 TextAsset：" +
+                    location);
+                yield break;
+            }
+
+            bool parsed = TryParseAssemblyManifest(
+                manifestAsset.text,
+                out HybridCLRAssemblyManifest parsedManifest,
+                out string errorMessage);
+            handle.Release();
+
+            if (!parsed)
+            {
+                Fail(errorMessage);
+                yield break;
+            }
+
+            assemblyManifest = parsedManifest;
+            Debug.Log(
+                $"[HybridCLR] 程序集清单加载成功：" +
+                $"AOT={assemblyManifest.aotMetadataDlls.Length}，" +
+                $"HotUpdate={assemblyManifest.hotUpdateDlls.Length}",
+                this);
+        }
+
         private IEnumerator LoadAotMetadata(ResourcePackage package)
         {
-            foreach (string dllName in AotMetadataDlls)
+            foreach (string dllName in
+                     assemblyManifest.aotMetadataDlls)
             {
                 // AddressByFileName：
                 // mscorlib.dll.bytes -> mscorlib.dll
@@ -254,74 +372,290 @@ namespace Game.Main
             }
         }
 
-        private IEnumerator LoadHotUpdateAssembly(
+        private IEnumerator LoadHotUpdateAssemblies(
             ResourcePackage package)
         {
-            hotUpdateAssembly = FindLoadedHotUpdateAssembly();
-            if (hotUpdateAssembly != null)
+            foreach (string location in assemblyManifest.hotUpdateDlls)
             {
-                yield break;
+                string assemblyName =
+                    GetAssemblyNameFromLocation(location);
+                Assembly loadedAssembly =
+                    FindLoadedHotUpdateAssembly(assemblyName);
+
+                if (loadedAssembly == null)
+                {
+                    if (!package.IsLocationValid(location))
+                    {
+                        Fail(
+                            $"当前 Package Manifest " +
+                            $"{package.GetPackageVersion()} 不包含" +
+                            $"热更新 DLL Location：{location}。" +
+                            "请确认已发布最新 Manifest 及其对应的 " +
+                            "HybridCLR Bundle。");
+                        yield break;
+                    }
+
+                    AssetHandle handle =
+                        package.LoadAssetAsync<TextAsset>(location);
+                    yield return handle;
+
+                    if (handle.Status != EOperationStatus.Succeeded)
+                    {
+                        string error =
+                            $"加载热更新 DLL 失败：{location}\n" +
+                            handle.Error;
+                        handle.Release();
+                        Fail(error);
+                        yield break;
+                    }
+
+                    TextAsset textAsset =
+                        handle.AssetObject as TextAsset;
+                    if (textAsset == null)
+                    {
+                        handle.Release();
+                        Fail(
+                            $"热更新 DLL 资源不是 TextAsset：" +
+                            location);
+                        yield break;
+                    }
+
+                    try
+                    {
+                        // Assembly.Load 会复制数据，完成后即可释放 Handle。
+                        loadedAssembly = Assembly.Load(textAsset.bytes);
+                    }
+                    catch (Exception exception)
+                    {
+                        handle.Release();
+                        Fail(
+                            $"Assembly.Load 失败：{location}\n" +
+                            exception.Message,
+                            exception);
+                        yield break;
+                    }
+
+                    handle.Release();
+                }
+
+                string actualName = loadedAssembly.GetName().Name;
+                if (!string.Equals(
+                        actualName,
+                        assemblyName,
+                        StringComparison.Ordinal))
+                {
+                    Fail(
+                        $"热更新程序集名称不匹配：配置={assemblyName}，" +
+                        $"实际={actualName}。");
+                    yield break;
+                }
+
+                if (string.Equals(
+                        actualName,
+                        assemblyManifest.entryAssemblyName,
+                        StringComparison.Ordinal))
+                {
+                    hotUpdateAssembly = loadedAssembly;
+                }
+
+                Debug.Log(
+                    $"[HybridCLR] 热更新程序集加载成功：" +
+                    loadedAssembly.FullName,
+                    this);
             }
 
-            if (!package.IsLocationValid(HotUpdateDllLocation))
+            if (hotUpdateAssembly == null)
             {
                 Fail(
-                    $"当前 Package Manifest {package.GetPackageVersion()} " +
-                    $"不包含热更新 DLL Location：" +
-                    $"{HotUpdateDllLocation}。请确认已发布最新 Manifest " +
-                    "及其对应的 HybridCLR Bundle。");
-                yield break;
+                    "热更新入口程序集没有加载：" +
+                    assemblyManifest.entryAssemblyName);
+            }
+        }
+#endif
+
+#if UNITY_EDITOR
+        private bool TryLoadEditorAssemblyManifest(
+            out string error)
+        {
+            TextAsset manifestAsset =
+                UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(
+                    ManifestAssetPath);
+            if (manifestAsset == null)
+            {
+                error =
+                    "Editor 中没有找到 HybridCLR 程序集清单：" +
+                    ManifestAssetPath +
+                    "。请执行生成同步命令。";
+                return false;
             }
 
-            AssetHandle handle =
-                package.LoadAssetAsync<TextAsset>(
-                    HotUpdateDllLocation);
-            yield return handle;
-
-            if (handle.Status != EOperationStatus.Succeeded)
+            bool parsed = TryParseAssemblyManifest(
+                manifestAsset.text,
+                out HybridCLRAssemblyManifest parsedManifest,
+                out error);
+            if (parsed)
             {
-                string error =
-                    $"加载热更新 DLL 失败：{HotUpdateDllLocation}\n" +
-                    handle.Error;
-                handle.Release();
-                Fail(error);
-                yield break;
+                assemblyManifest = parsedManifest;
             }
 
-            TextAsset textAsset = handle.AssetObject as TextAsset;
-            if (textAsset == null)
+            return parsed;
+        }
+#endif
+
+        private static bool TryParseAssemblyManifest(
+            string json,
+            out HybridCLRAssemblyManifest manifest,
+            out string error)
+        {
+            manifest = null;
+            error = null;
+
+            if (string.IsNullOrWhiteSpace(json))
             {
-                handle.Release();
-                Fail(
-                    $"热更新 DLL 资源不是 TextAsset：" +
-                    HotUpdateDllLocation);
-                yield break;
+                error = "HybridCLR 程序集清单内容为空。";
+                return false;
             }
 
             try
             {
-                // Assembly.Load 会复制 DLL 数据，加载完成即可释放 Handle。
-                hotUpdateAssembly = Assembly.Load(textAsset.bytes);
+                manifest =
+                    JsonUtility.FromJson<HybridCLRAssemblyManifest>(
+                        json);
             }
             catch (Exception exception)
             {
-                handle.Release();
-                Fail(
-                    $"Assembly.Load 失败：{HotUpdateDllLocation}\n" +
-                    exception.Message,
-                    exception);
+                error =
+                    "HybridCLR 程序集清单解析失败：" +
+                    exception.Message;
+                return false;
+            }
+
+            if (manifest == null)
+            {
+                error = "HybridCLR 程序集清单解析结果为空。";
+                return false;
+            }
+
+            manifest.entryAssemblyName =
+                manifest.entryAssemblyName?.Trim();
+            if (!string.Equals(
+                    manifest.entryAssemblyName,
+                    HybridCLRAssemblyManifest
+                        .DefaultEntryAssemblyName,
+                    StringComparison.Ordinal))
+            {
+                error =
+                    "HybridCLR 入口程序集必须保持为：" +
+                    HybridCLRAssemblyManifest
+                        .DefaultEntryAssemblyName;
+                return false;
+            }
+
+            if (!TryNormalizeDllList(
+                    manifest.aotMetadataDlls,
+                    false,
+                    "AOT 元数据",
+                    out manifest.aotMetadataDlls,
+                    out error) ||
+                !TryNormalizeDllList(
+                    manifest.hotUpdateDlls,
+                    true,
+                    "热更新",
+                    out manifest.hotUpdateDlls,
+                    out error))
+            {
+                return false;
+            }
+
+            string entryLocation =
+                manifest.entryAssemblyName + ".dll";
+            if (!manifest.hotUpdateDlls.Contains(entryLocation))
+            {
+                error =
+                    $"HybridCLR 程序集清单缺少入口 DLL：" +
+                    entryLocation;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryNormalizeDllList(
+            IEnumerable<string> source,
+            bool requireAtLeastOne,
+            string category,
+            out string[] normalized,
+            out string error)
+        {
+            normalized = Array.Empty<string>();
+            error = null;
+            if (source == null)
+            {
+                if (!requireAtLeastOne)
+                {
+                    return true;
+                }
+
+                error = $"HybridCLR {category} DLL 清单为空。";
+                return false;
+            }
+
+            var names = new List<string>();
+            var uniqueNames = new HashSet<string>(
+                StringComparer.Ordinal);
+            foreach (string item in source)
+            {
+                string name = item?.Trim();
+                if (string.IsNullOrEmpty(name) ||
+                    !name.EndsWith(
+                        ".dll",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    error =
+                        $"HybridCLR {category} DLL 名称无效：" +
+                        (item ?? "<null>");
+                    return false;
+                }
+
+                if (!uniqueNames.Add(name))
+                {
+                    error =
+                        $"HybridCLR {category} DLL 重复：{name}";
+                    return false;
+                }
+
+                names.Add(name);
+            }
+
+            if (requireAtLeastOne && names.Count == 0)
+            {
+                error = $"HybridCLR {category} DLL 清单为空。";
+                return false;
+            }
+
+            normalized = names.ToArray();
+            return true;
+        }
+
+        private IEnumerator StartHotUpdateEntry(
+            HotUpdateStartupContext context)
+        {
+            yield return InvokeHotUpdateEntryRoutine(
+                "Start",
+                context);
+            if (!string.IsNullOrEmpty(LastError))
+            {
                 yield break;
             }
 
-            handle.Release();
-            Debug.Log(
-                $"[HybridCLR] 热更新程序集加载成功：" +
-                hotUpdateAssembly.FullName,
-                this);
+            if (!context.IsCompleted)
+            {
+                context.Fail("热更新入口结束但未提交启动结果。");
+            }
         }
-#endif
 
-        private IEnumerator StartHotUpdateEntry(
+        private IEnumerator InvokeHotUpdateEntryRoutine(
+            string methodName,
             HotUpdateStartupContext context)
         {
             const string typeName =
@@ -334,17 +668,17 @@ namespace Game.Main
                 yield break;
             }
 
-            MethodInfo startMethod = entryType.GetMethod(
-                "Start",
+            MethodInfo entryMethod = entryType.GetMethod(
+                methodName,
                 BindingFlags.Public | BindingFlags.Static,
                 null,
                 new[] { typeof(HotUpdateStartupContext) },
                 null);
-            if (startMethod == null)
+            if (entryMethod == null)
             {
                 Fail(
                     $"热更新入口方法不存在：" +
-                    $"{typeName}.Start(" +
+                    $"{typeName}.{methodName}(" +
                     "HotUpdateStartupContext)");
                 yield break;
             }
@@ -352,7 +686,7 @@ namespace Game.Main
             object result;
             try
             {
-                result = startMethod.Invoke(
+                result = entryMethod.Invoke(
                     null,
                     new object[] { context });
             }
@@ -361,40 +695,54 @@ namespace Game.Main
                 Exception innerException =
                     exception.InnerException ?? exception;
                 Fail(
-                    $"热更新入口执行失败：{innerException.Message}",
+                    $"热更新入口 {methodName} 执行失败：" +
+                    innerException.Message,
                     innerException);
                 yield break;
             }
             catch (Exception exception)
             {
                 Fail(
-                    $"热更新入口执行失败：{exception.Message}",
+                    $"热更新入口 {methodName} 执行失败：" +
+                    exception.Message,
                     exception);
                 yield break;
             }
 
-            if (!(result is IEnumerator startRoutine))
+            if (!(result is IEnumerator entryRoutine))
             {
                 Fail(
                     $"热更新入口必须返回 IEnumerator：" +
-                    $"{typeName}.Start");
+                    $"{typeName}.{methodName}");
                 yield break;
             }
 
-            yield return startRoutine;
-
-            if (!context.IsCompleted)
-            {
-                context.Fail("热更新入口结束但未提交启动结果。");
-            }
+            yield return entryRoutine;
         }
 
-        private static Assembly FindLoadedHotUpdateAssembly()
+        private static Assembly FindLoadedHotUpdateAssembly(
+            string assemblyName)
         {
             return AppDomain.CurrentDomain
                 .GetAssemblies()
                 .FirstOrDefault(assembly =>
-                    assembly.GetName().Name == "Game.HotUpdate");
+                    string.Equals(
+                        assembly.GetName().Name,
+                        assemblyName,
+                        StringComparison.Ordinal));
+        }
+
+        private static string GetAssemblyNameFromLocation(
+            string location)
+        {
+            const string DllExtension = ".dll";
+            return location.EndsWith(
+                DllExtension,
+                StringComparison.OrdinalIgnoreCase)
+                ? location.Substring(
+                    0,
+                    location.Length - DllExtension.Length)
+                : location;
         }
 
         private void Fail(

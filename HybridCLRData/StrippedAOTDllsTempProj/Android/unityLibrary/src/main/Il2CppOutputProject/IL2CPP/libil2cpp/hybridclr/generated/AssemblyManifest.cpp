@@ -6,6 +6,10 @@ namespace hybridclr
 	{
 		//!!!{{PLACE_HOLDER
 		"Game.HotUpdate",
+		"Game.Common",
+		"Game.Lua",
+		"Game.UI",
+		"Assembly-CSharp",
 
 		//!!!}}PLACE_HOLDER
 		nullptr,

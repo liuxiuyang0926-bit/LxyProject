@@ -2,6 +2,7 @@
   "name": "Game.Resource",
   "rootNamespace": "Game.Resource",
   "references": [
+    "Game.Contracts",
     "YooAsset"
   ],
   "includePlatforms": [],

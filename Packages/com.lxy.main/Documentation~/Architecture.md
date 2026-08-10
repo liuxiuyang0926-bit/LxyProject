@@ -7,18 +7,33 @@ The project keeps game content in `Assets` and reusable first-party code in embe
 Arrows point from a consumer to its compile-time dependency.
 
 ```text
-Game.HotUpdate ───────────────> Game.Contracts <────────────── Game.Main
-                                                               ├──> Game.Resource
-                                                               ├──> Game.Scene
-                                                               └──> Game.UI
-                                                                      ├──> Game.Resource
-                                                                      └──> Game.Lua
-                                                                             ├──> Game.Common
-                                                                             └──> XLua.Runtime
-                                                                                    └──> Game.Scene
+                         AOT shell
+
+Game.Main ──────────────> Game.Contracts <──────────── Game.Resource
+    ├──> Game.Resource
+    └──> Game.Scene
+
+                      hot-update runtime
+
+Game.HotUpdate ────────> Game.Contracts
+    └──> Game.UI ──────> Game.Resource (AOT)
+              └────────> Game.Lua ─────> Game.Common
+                              └────────> XLua.Runtime (AOT)
+
+Assembly-CSharp ───────> hot-update framework assemblies as needed
 ```
 
-`Game.Main` and framework assemblies are AOT code. `Game.HotUpdate` is the HybridCLR update assembly. `Game.Contracts` is deliberately small and stable so the two sides do not depend on one another directly.
+`Game.Contracts`, `Game.Resource`, `Game.Scene`, and `Game.Main` form the
+first-party AOT bootstrap. `Game.Common`, `Game.Lua`, `Game.UI`,
+`Assembly-CSharp`, and `Game.HotUpdate` are loaded as HybridCLR assemblies in
+that dependency order. `Game.Main` invokes the two public entry phases by
+reflection, so the AOT shell never references `Game.UI` directly.
+
+`GameRuntimeConfig` is the stable bootstrap configuration bridge. The player
+contains one seed configuration URL because the first remote request happens
+before any hot-update DLL can be downloaded. After `Game.HotUpdate` starts,
+`HotUpdateRuntimeConfig` can replace and persist the URL for the current
+session and the next launch.
 
 ## Ownership
 

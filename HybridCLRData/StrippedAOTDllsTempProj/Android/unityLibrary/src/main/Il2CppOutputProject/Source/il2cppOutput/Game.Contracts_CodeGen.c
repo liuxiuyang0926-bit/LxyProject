@@ -14,6 +14,12 @@
 
 extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m9A7B395773A5B9A5FF077B50358B2C1A659DB179 (void);
 extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m70FB4E468EC2D9B8A06ED8205B931FDE645D70F6 (void);
+extern void GameRuntimeConfig_get_GameConfigUrl_m9BC05B63295B7A697FDAEE974BE03694A63ECD33 (void);
+extern void GameRuntimeConfig_get_GameConfigRequestTimeoutSeconds_mD5C4A5C054843AE084AE1D3E4A059B3D229CE2D0 (void);
+extern void GameRuntimeConfig_TryApplyBootstrapOverride_mD9B8DC08D47F47CE484343104BEF98740F01419F (void);
+extern void GameRuntimeConfig_ResetBootstrapOverride_mACBFFAC632705BA6DB3F8F3CEB6C326519562C30 (void);
+extern void GameRuntimeConfig_EnsureInitialized_m0F7DC77F3E47B4678616B21A348538FA01D8D9D4 (void);
+extern void GameRuntimeConfig_TryValidateHttpUrl_m707342E4579AB5044C97CE648E64C69DE84A1CBA (void);
 extern void HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9 (void);
 extern void HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10 (void);
 extern void HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986 (void);
@@ -35,13 +41,27 @@ extern void HotUpdateStartupContext_set_Error_m95F272BBF44019562C6174543D1E4A988
 extern void HotUpdateStartupContext_get_IsCompleted_m64BDCD8A8614A70B3BF467A36BED338245440474 (void);
 extern void HotUpdateStartupContext_set_IsCompleted_mBE55BA3D05C43D24430A1D70232D7FC1B384446F (void);
 extern void HotUpdateStartupContext_get_Succeeded_mABD56C3A3AD9A7E6D63DFBEB1ABFAA0479FC3E11 (void);
+extern void HotUpdateStartupContext_get_IsFirstSceneRuntimeCompleted_m743F00A074CD0022F5E383E44440DCC26E326BD5 (void);
+extern void HotUpdateStartupContext_set_IsFirstSceneRuntimeCompleted_m0E1F81E82EE4BE6B6345FA9652A60AE7DDB14B03 (void);
+extern void HotUpdateStartupContext_get_FirstSceneRuntimeError_mB6EEFA120E0FDD4E4D1A1F410E2C6C0EE36B5136 (void);
+extern void HotUpdateStartupContext_set_FirstSceneRuntimeError_m5AA91ED996EBFB989EDA4BA9CF98EFEB5613F8D1 (void);
+extern void HotUpdateStartupContext_get_FirstSceneRuntimeSucceeded_m2D999B56F695DB3E559292D09E79BA5072761EA2 (void);
 extern void HotUpdateStartupContext_Report_mAF96D3154788A56A8F0538F7DC568043BB36B492 (void);
 extern void HotUpdateStartupContext_Complete_mB2C23AD9AD2F4A91919AF20FBC3F4818E2585145 (void);
 extern void HotUpdateStartupContext_Fail_m041507398D2D48E94C918AC314B229F8A626C217 (void);
-static Il2CppMethodPointer s_methodPointers[26] = 
+extern void HotUpdateStartupContext_CompleteFirstSceneRuntime_m3C4682CDBAC9B5F0D0FA8DB6116AFBD650A55D0C (void);
+extern void HotUpdateStartupContext_FailFirstSceneRuntime_mC0872C1D3B3F2021064AA22B8DB9DEF0560A7411 (void);
+extern void HybridCLRAssemblyManifest__ctor_m39BA5134BFED27C913C31B7C5FFAEE0A5B5B47A8 (void);
+static Il2CppMethodPointer s_methodPointers[40] = 
 {
 	UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m9A7B395773A5B9A5FF077B50358B2C1A659DB179,
 	UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m70FB4E468EC2D9B8A06ED8205B931FDE645D70F6,
+	GameRuntimeConfig_get_GameConfigUrl_m9BC05B63295B7A697FDAEE974BE03694A63ECD33,
+	GameRuntimeConfig_get_GameConfigRequestTimeoutSeconds_mD5C4A5C054843AE084AE1D3E4A059B3D229CE2D0,
+	GameRuntimeConfig_TryApplyBootstrapOverride_mD9B8DC08D47F47CE484343104BEF98740F01419F,
+	GameRuntimeConfig_ResetBootstrapOverride_mACBFFAC632705BA6DB3F8F3CEB6C326519562C30,
+	GameRuntimeConfig_EnsureInitialized_m0F7DC77F3E47B4678616B21A348538FA01D8D9D4,
+	GameRuntimeConfig_TryValidateHttpUrl_m707342E4579AB5044C97CE648E64C69DE84A1CBA,
 	HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9,
 	HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10,
 	HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986,
@@ -63,9 +83,17 @@ static Il2CppMethodPointer s_methodPointers[26] =
 	HotUpdateStartupContext_get_IsCompleted_m64BDCD8A8614A70B3BF467A36BED338245440474,
 	HotUpdateStartupContext_set_IsCompleted_mBE55BA3D05C43D24430A1D70232D7FC1B384446F,
 	HotUpdateStartupContext_get_Succeeded_mABD56C3A3AD9A7E6D63DFBEB1ABFAA0479FC3E11,
+	HotUpdateStartupContext_get_IsFirstSceneRuntimeCompleted_m743F00A074CD0022F5E383E44440DCC26E326BD5,
+	HotUpdateStartupContext_set_IsFirstSceneRuntimeCompleted_m0E1F81E82EE4BE6B6345FA9652A60AE7DDB14B03,
+	HotUpdateStartupContext_get_FirstSceneRuntimeError_mB6EEFA120E0FDD4E4D1A1F410E2C6C0EE36B5136,
+	HotUpdateStartupContext_set_FirstSceneRuntimeError_m5AA91ED996EBFB989EDA4BA9CF98EFEB5613F8D1,
+	HotUpdateStartupContext_get_FirstSceneRuntimeSucceeded_m2D999B56F695DB3E559292D09E79BA5072761EA2,
 	HotUpdateStartupContext_Report_mAF96D3154788A56A8F0538F7DC568043BB36B492,
 	HotUpdateStartupContext_Complete_mB2C23AD9AD2F4A91919AF20FBC3F4818E2585145,
 	HotUpdateStartupContext_Fail_m041507398D2D48E94C918AC314B229F8A626C217,
+	HotUpdateStartupContext_CompleteFirstSceneRuntime_m3C4682CDBAC9B5F0D0FA8DB6116AFBD650A55D0C,
+	HotUpdateStartupContext_FailFirstSceneRuntime_mC0872C1D3B3F2021064AA22B8DB9DEF0560A7411,
+	HybridCLRAssemblyManifest__ctor_m39BA5134BFED27C913C31B7C5FFAEE0A5B5B47A8,
 };
 extern void HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9_AdjustorThunk (void);
 extern void HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10_AdjustorThunk (void);
@@ -73,45 +101,59 @@ extern void HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE8
 extern void HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840_AdjustorThunk (void);
 static Il2CppTokenAdjustorThunkPair s_adjustorThunks[4] = 
 {
-	{ 0x06000003, HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9_AdjustorThunk },
-	{ 0x06000004, HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10_AdjustorThunk },
-	{ 0x06000005, HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986_AdjustorThunk },
-	{ 0x06000006, HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840_AdjustorThunk },
+	{ 0x06000009, HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9_AdjustorThunk },
+	{ 0x0600000A, HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10_AdjustorThunk },
+	{ 0x0600000B, HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986_AdjustorThunk },
+	{ 0x0600000C, HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840_AdjustorThunk },
 };
-static const int32_t s_InvokerIndices[26] = 
+static const int32_t s_InvokerIndices[40] = 
 {
-	8711,
-	5921,
-	1467,
-	5778,
-	5856,
-	5808,
-	244,
-	5808,
-	5808,
-	5808,
-	5808,
-	5717,
-	5778,
-	4823,
-	5856,
-	4905,
-	5808,
-	4861,
-	5808,
-	4861,
-	5717,
-	4759,
-	5717,
-	1467,
-	4861,
-	4861,
+	9086,
+	6180,
+	9045,
+	9038,
+	6865,
+	9078,
+	9078,
+	7949,
+	1666,
+	6036,
+	6117,
+	6068,
+	252,
+	6068,
+	6068,
+	6068,
+	6068,
+	5975,
+	6036,
+	5074,
+	6117,
+	5158,
+	6068,
+	5113,
+	6068,
+	5113,
+	5975,
+	5010,
+	5975,
+	5975,
+	5010,
+	6068,
+	5113,
+	5975,
+	1666,
+	5113,
+	5113,
+	6180,
+	5113,
+	6180,
 };
 IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Game_Contracts_CodeGenModule;
 const Il2CppCodeGenModule g_Game_Contracts_CodeGenModule = 
 {
 	"Game.Contracts.dll",
-	26,
+	40,
 	s_methodPointers,
 	4,
 	s_adjustorThunks,

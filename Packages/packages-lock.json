@@ -64,6 +64,7 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
+        "com.lxy.contracts": "1.0.0",
         "com.tuyoogame.yooasset": "3.0.5"
       }
     },
@@ -95,6 +96,12 @@
         "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
       },
       "hash": "94422fc41491228eed0999ce4845d7b23ee2b8ae"
+    },
+    "com.unity.2d.sprite": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.collab-proxy": {
       "version": "2.5.1",

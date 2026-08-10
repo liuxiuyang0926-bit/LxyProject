@@ -68,6 +68,12 @@ namespace Game.Contracts
         public bool Succeeded => IsCompleted &&
                                  string.IsNullOrEmpty(Error);
 
+        public bool IsFirstSceneRuntimeCompleted { get; private set; }
+        public string FirstSceneRuntimeError { get; private set; }
+        public bool FirstSceneRuntimeSucceeded =>
+            IsFirstSceneRuntimeCompleted &&
+            string.IsNullOrEmpty(FirstSceneRuntimeError);
+
         public void Report(
             HotUpdateStartupStage stage,
             float progress,
@@ -125,6 +131,30 @@ namespace Game.Contracts
                     Stage,
                     Progress,
                     Message));
+        }
+
+        public void CompleteFirstSceneRuntime()
+        {
+            if (IsFirstSceneRuntimeCompleted)
+            {
+                return;
+            }
+
+            FirstSceneRuntimeError = null;
+            IsFirstSceneRuntimeCompleted = true;
+        }
+
+        public void FailFirstSceneRuntime(string error)
+        {
+            if (IsFirstSceneRuntimeCompleted)
+            {
+                return;
+            }
+
+            FirstSceneRuntimeError = string.IsNullOrWhiteSpace(error)
+                ? "首场景热更新运行时启动失败"
+                : error.Trim();
+            IsFirstSceneRuntimeCompleted = true;
         }
     }
 }

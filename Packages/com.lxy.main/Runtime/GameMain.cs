@@ -3,7 +3,6 @@ using System.Collections;
 using Game.Contracts;
 using Game.Main;
 using LxyDemo.SceneManagement;
-using LxyDemo.UIFramework;
 using UnityEngine;
 
 namespace LxyDemo
@@ -18,6 +17,9 @@ namespace LxyDemo
     [RequireComponent(typeof(HybridCLRLoader))]
     public class GameMain : MonoBehaviour
     {
+        private const string StartupDownloadViewResourcePath =
+            "UI/UISlider";
+
         public enum BootstrapStage
         {
             None,
@@ -63,13 +65,9 @@ namespace LxyDemo
         private string firstSceneName = "Login";
 
         [Header("业务运行时")]
-        [Tooltip("进入首场景后等待 UIStartup 完成 UIManager 与 XLua 初始化。")]
+        [Tooltip("进入首场景后调用热更新入口启动场景级 UI 与 Lua。")]
         [SerializeField]
         private bool waitForUIAndLua = true;
-
-        [Min(1f)]
-        [SerializeField]
-        private float uiStartupTimeoutSeconds = 30f;
 
         public static GameMain Instance => instance;
         public bool IsInitializing { get; private set; }
@@ -80,6 +78,9 @@ namespace LxyDemo
         public string StatusMessage { get; private set; }
 
         public event Action<BootstrapSnapshot> StatusChanged;
+
+        private HotUpdateStartupContext hotUpdateContext;
+        private StartupDownloadView startupDownloadView;
 
         protected virtual void Awake()
         {
@@ -102,6 +103,11 @@ namespace LxyDemo
             IsInitializing = true;
             IsInitialized = false;
             LastError = null;
+            if (!TryCreateStartupDownloadView(out string viewError))
+            {
+                Fail(viewError);
+                yield break;
+            }
 
             string targetScene = firstSceneName?.Trim();
             if (loadFirstSceneOnStart &&
@@ -119,6 +125,8 @@ namespace LxyDemo
 
             if (loadFirstSceneOnStart)
             {
+                startupDownloadView?.ShowStartingGame(
+                    $"正在进入 {targetScene}");
                 yield return LoadFirstSceneAsync(targetScene);
                 if (!string.IsNullOrEmpty(LastError))
                 {
@@ -183,6 +191,12 @@ namespace LxyDemo
                 yield break;
             }
 
+            if (startupDownloadView != null)
+            {
+                yield return startupDownloadView
+                    .PlayReadyAnimationAsync();
+            }
+
             string packageVersion =
                 resourceLauncher.PackageVersion;
             if (string.IsNullOrWhiteSpace(packageVersion))
@@ -192,7 +206,7 @@ namespace LxyDemo
                     : "Unknown";
             }
 
-            var context = new HotUpdateStartupContext(
+            hotUpdateContext = new HotUpdateStartupContext(
                 resourceLauncher.PackageName,
                 packageVersion,
                 string.IsNullOrWhiteSpace(Application.version)
@@ -212,13 +226,14 @@ namespace LxyDemo
                 hybridCLRLoader.ConfigurePackage(
                     resourceLauncher.PackageName);
             }
-            yield return hybridCLRLoader.LoadAndStart(context);
+            yield return hybridCLRLoader.LoadAndStart(
+                hotUpdateContext);
 
             if (!hybridCLRLoader.IsReady)
             {
                 Fail(
                     hybridCLRLoader.LastError ??
-                    context.Error ??
+                    hotUpdateContext.Error ??
                     "HybridCLR 热更新启动失败。");
             }
         }
@@ -277,27 +292,20 @@ namespace LxyDemo
                 0.92f,
                 "初始化 UIManager 与 XLua");
 
-            float deadline = Time.realtimeSinceStartup +
-                             Mathf.Max(1f, uiStartupTimeoutSeconds);
-            while (UIStartup.Instance == null)
+            if (hotUpdateContext == null)
             {
-                if (Time.realtimeSinceStartup >= deadline)
-                {
-                    Fail(
-                        "等待 UIStartup 超时，请确认首场景中已挂载 " +
-                        "UIStartup 组件。");
-                    yield break;
-                }
-
-                yield return null;
+                Fail("缺少热更新启动上下文。");
+                yield break;
             }
 
-            UIStartup startup = UIStartup.Instance;
-            yield return startup.InitializeAsync();
-            if (!startup.IsInitialized)
+            yield return hybridCLRLoader.StartFirstScene(
+                hotUpdateContext);
+            if (!string.IsNullOrEmpty(hybridCLRLoader.LastError) ||
+                !hotUpdateContext.FirstSceneRuntimeSucceeded)
             {
                 Fail(
-                    startup.LastError ??
+                    hybridCLRLoader.LastError ??
+                    hotUpdateContext.FirstSceneRuntimeError ??
                     "UIManager 或 XLua 初始化失败。");
                 yield break;
             }
@@ -345,6 +353,13 @@ namespace LxyDemo
             Progress = Mathf.Clamp01(progress);
             StatusMessage = message ?? string.Empty;
 
+            if (stage != BootstrapStage.UpdatingResources &&
+                stage != BootstrapStage.Failed)
+            {
+                startupDownloadView?.ShowStartingGame(
+                    StatusMessage);
+            }
+
             try
             {
                 StatusChanged?.Invoke(
@@ -368,7 +383,60 @@ namespace LxyDemo
                 BootstrapStage.Failed,
                 Progress,
                 message);
+            startupDownloadView?.ShowFailure(message);
             Debug.LogError("[GameMain] " + message, this);
+        }
+
+        private bool TryCreateStartupDownloadView(out string error)
+        {
+            if (startupDownloadView != null)
+            {
+                error = null;
+                return true;
+            }
+
+            GameObject template =
+                Resources.Load<GameObject>(
+                    StartupDownloadViewResourcePath);
+            if (template == null)
+            {
+                error =
+                    "无法加载启动下载界面：Resources/" +
+                    StartupDownloadViewResourcePath;
+                return false;
+            }
+
+            GameObject viewObject = Instantiate(template);
+            viewObject.name = "UISlider";
+            viewObject.transform.localScale = Vector3.one;
+
+            if (viewObject.TryGetComponent(
+                    out StartupDownloadView mountedView))
+            {
+                Destroy(viewObject);
+                error =
+                    "UISlider 预制体不应预挂 StartupDownloadView，" +
+                    "该组件必须由启动代码动态添加。";
+                return false;
+            }
+
+            startupDownloadView =
+                viewObject.AddComponent<StartupDownloadView>();
+            if (!startupDownloadView.Initialize(
+                    resourceLauncher,
+                    out error))
+            {
+                startupDownloadView = null;
+                Destroy(viewObject);
+                return false;
+            }
+
+            Debug.Log(
+                "[GameMain] 已动态加载启动下载界面并添加控制器：" +
+                "Resources/" +
+                StartupDownloadViewResourcePath,
+                startupDownloadView);
+            return true;
         }
 
         protected virtual void OnDestroy()

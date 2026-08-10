@@ -5993,7 +5993,7 @@ IL_00b0:
 		bool L_29 = L_28->___AnimateVisibility;
 		__this->___AnimateVisibility = (bool)((int32_t)((int32_t)L_27&(int32_t)L_29));
 		PropertyGroupAttribute_t431BBFDAA802926EC2B946D37A7896D8CBE2279E* L_30 = ___0_other;
-		VirtualActionInvoker1< PropertyGroupAttribute_t431BBFDAA802926EC2B946D37A7896D8CBE2279E* >::Invoke(4, __this, L_30);
+		VirtualActionInvoker1< PropertyGroupAttribute_t431BBFDAA802926EC2B946D37A7896D8CBE2279E* >::Invoke(11, __this, L_30);
 		return __this;
 	}
 }

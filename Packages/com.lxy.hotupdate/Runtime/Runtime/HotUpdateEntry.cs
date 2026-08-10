@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Game.Contracts;
+using LxyDemo.UIFramework;
 using UnityEngine;
 
 namespace Game.HotUpdate
@@ -20,7 +21,7 @@ namespace Game.HotUpdate
                     "[HotUpdate] 启动上下文为空，终止热更运行时启动。");
                 yield break;
             }
-            
+
             HotUpdateRuntime runtime =
                 HotUpdateRuntime.Instance;
             if (runtime == null)
@@ -33,6 +34,25 @@ namespace Game.HotUpdate
             }
 
             yield return runtime.InitializeAsync(context);
+        }
+
+        /// <summary>
+        /// 首个业务场景加载完成后由 AOT 壳反射调用。UI 与 Lua 的具体
+        /// 启动逻辑保留在热更新程序集，Game.Main 不再引用 Game.UI。
+        /// </summary>
+        public static IEnumerator StartFirstScene(
+            HotUpdateStartupContext context)
+        {
+            HotUpdateRuntime runtime =
+                HotUpdateRuntime.Instance;
+            if (runtime == null)
+            {
+                context?.FailFirstSceneRuntime(
+                    "热更新运行时尚未创建");
+                yield break;
+            }
+
+            yield return runtime.StartFirstSceneAsync(context);
         }
     }
 
@@ -122,6 +142,12 @@ namespace Game.HotUpdate
                 yield break;
             }
 
+            if (!HotUpdateRuntimeConfig.Apply(out error))
+            {
+                Fail(context, error);
+                yield break;
+            }
+
             // 将初始化开销分散到不同帧，避免以后模块增多后在首帧形成尖峰。
             yield return null;
 
@@ -182,6 +208,57 @@ namespace Game.HotUpdate
                 $"{IsFirstLaunchAfterApplicationUpdate}，" +
                 $"ResourceUpdated={IsFirstLaunchAfterResourceUpdate}",
                 this);
+        }
+
+        public IEnumerator StartFirstSceneAsync(
+            HotUpdateStartupContext context)
+        {
+            if (context == null)
+            {
+                yield break;
+            }
+
+            if (context.IsFirstSceneRuntimeCompleted)
+            {
+                yield break;
+            }
+
+            if (!IsReady)
+            {
+                context.FailFirstSceneRuntime(
+                    LastError ?? "热更新运行时尚未就绪");
+                yield break;
+            }
+
+            float deadline = Time.realtimeSinceStartup +
+                             Mathf.Max(
+                                 1f,
+                                 HotUpdateRuntimeConfig
+                                     .UIStartupTimeoutSeconds);
+            while (UIStartup.Instance == null)
+            {
+                if (Time.realtimeSinceStartup >= deadline)
+                {
+                    context.FailFirstSceneRuntime(
+                        "等待 UIStartup 超时，请确认首场景中已挂载 " +
+                        "UIStartup 组件。");
+                    yield break;
+                }
+
+                yield return null;
+            }
+
+            UIStartup startup = UIStartup.Instance;
+            yield return startup.InitializeAsync();
+            if (!startup.IsInitialized)
+            {
+                context.FailFirstSceneRuntime(
+                    startup.LastError ??
+                    "UIManager 或 XLua 初始化失败。");
+                yield break;
+            }
+
+            context.CompleteFirstSceneRuntime();
         }
 
         private static bool ValidateContext(

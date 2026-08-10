@@ -4186,7 +4186,7 @@ IL_002b:
 		L_4 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_4);
 		String_t* L_5;
-		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_4);
+		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_4);
 		String_t* L_6;
 		L_6 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteral7D2C499FF49C3933B7DADBDB7B41EBDB0C60730A, L_5, _stringLiteral5D242010B0DBE4E24408D868BD82276D154EB091, NULL);
 		__this->____error = L_6;
@@ -4250,7 +4250,7 @@ CATCH_0017:
 		L_4 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_4);
 		String_t* L_5;
-		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_4);
+		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_4);
 		Exception_t* L_6 = V_0;
 		String_t* L_7;
 		L_7 = String_Format_mFB7DA489BD99F4670881FF50EC017BFB0A5C0987(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteralCEF25526EE4C5D707740E7BEE1A5059540632644)), L_5, L_6, NULL);
@@ -4319,7 +4319,7 @@ CATCH_0010:
 		L_4 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_4);
 		String_t* L_5;
-		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_4);
+		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_4);
 		Exception_t* L_6 = V_0;
 		String_t* L_7;
 		L_7 = String_Format_mFB7DA489BD99F4670881FF50EC017BFB0A5C0987(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral1D0A98604EC312991DE8D65DBD738D8543D02475)), L_5, L_6, NULL);
@@ -4423,7 +4423,7 @@ IL_0031:
 		L_9 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_9);
 		String_t* L_10;
-		L_10 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_9);
+		L_10 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_9);
 		String_t* L_11;
 		L_11 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteral6BB8993F676DCF97A4A6F3FFE7BD03F254EFAFCB, L_10, _stringLiteral2A769C05F50407CDD39C120852D54625B78E5041, NULL);
 		YooLogger_LogWarning_m0F3B06F2CF9C072B6A6944D46F0FDB1D45A589D1(L_11, NULL);
@@ -4467,7 +4467,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AsyncOperationBase_InternalWaitForComple
 		L_0 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_0);
 		String_t* L_1;
-		L_1 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_0);
+		L_1 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_0);
 		String_t* L_2;
 		L_2 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(L_1, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral648027641E9F8E7408841200C4FA5D14CCE4439B)), NULL);
 		YooInternalException_tC20B3CBDB82872DC4B19437B36709CF9A6B50A9C* L_3 = (YooInternalException_tC20B3CBDB82872DC4B19437B36709CF9A6B50A9C*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&YooInternalException_tC20B3CBDB82872DC4B19437B36709CF9A6B50A9C_il2cpp_TypeInfo_var)));
@@ -4490,7 +4490,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AsyncOperationBase_SetResult_mB960058876
 		L_1 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_1);
 		String_t* L_2;
-		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_1);
+		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_1);
 		String_t* L_3;
 		L_3 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral7D2C499FF49C3933B7DADBDB7B41EBDB0C60730A)), L_2, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral0574F8C156EB21AF5FCBCD371FB9E748D96ABFD9)), NULL);
 		InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB* L_4 = (InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB_il2cpp_TypeInfo_var)));
@@ -4519,7 +4519,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AsyncOperationBase_SetError_m8BAA9649012
 		L_1 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_1);
 		String_t* L_2;
-		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_1);
+		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_1);
 		String_t* L_3;
 		L_3 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral7D2C499FF49C3933B7DADBDB7B41EBDB0C60730A)), L_2, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral0574F8C156EB21AF5FCBCD371FB9E748D96ABFD9)), NULL);
 		InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB* L_4 = (InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB_il2cpp_TypeInfo_var)));
@@ -4799,7 +4799,7 @@ CATCH_0022:
 		L_2 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_2);
 		String_t* L_3;
-		L_3 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_2);
+		L_3 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_2);
 		Exception_t* L_4 = V_0;
 		String_t* L_5;
 		L_5 = String_Format_mFB7DA489BD99F4670881FF50EC017BFB0A5C0987(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral9BB8ABEB47CC1FA1F35A375AD884E3146E704D75)), L_3, L_4, NULL);
@@ -5299,7 +5299,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR DiagnosticOperationInfo_tE2CC6A07F79CF1D8EA08
 		L_2 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_2);
 		String_t* L_3;
-		L_3 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_2);
+		L_3 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_2);
 		NullCheck(L_1);
 		L_1->___OperationName = L_3;
 		Il2CppCodeGenWriteBarrier((void**)(&L_1->___OperationName), (void*)L_3);
@@ -8790,7 +8790,7 @@ IL_00d7:
 		L_29 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_28, NULL);
 		NullCheck(L_29);
 		String_t* L_30;
-		L_30 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_29);
+		L_30 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_29);
 		String_t* L_31;
 		L_31 = String_Concat_m093934F71A9B351911EE46311674ED463B180006(L_27, _stringLiteral8CDC90FE1223731D5B5F01EE00C0E7615C263B39, L_30, _stringLiteral220D2A1ACE19A21B7A364FCD63F951C6E463532C, NULL);
 		AsyncOperationBase_SetError_m8BAA96490125F45D48227E1BAED6BB8025B5C544(__this, L_31, NULL);
@@ -9378,7 +9378,7 @@ IL_00ac:
 		L_27 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_26, NULL);
 		NullCheck(L_27);
 		String_t* L_28;
-		L_28 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_27);
+		L_28 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_27);
 		String_t* L_29;
 		L_29 = String_Concat_m093934F71A9B351911EE46311674ED463B180006(L_25, _stringLiteral8CDC90FE1223731D5B5F01EE00C0E7615C263B39, L_28, _stringLiteralE28E1B4249291633543F36EF695B7435C2849211, NULL);
 		AsyncOperationBase_SetError_m8BAA96490125F45D48227E1BAED6BB8025B5C544(__this, L_29, NULL);
@@ -10171,7 +10171,7 @@ IL_00d7:
 		L_29 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_28, NULL);
 		NullCheck(L_29);
 		String_t* L_30;
-		L_30 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_29);
+		L_30 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_29);
 		String_t* L_31;
 		L_31 = String_Concat_m093934F71A9B351911EE46311674ED463B180006(L_27, _stringLiteral8CDC90FE1223731D5B5F01EE00C0E7615C263B39, L_30, _stringLiteralBEAA18047909BB828FCB738C4913586BBE5C9582, NULL);
 		AsyncOperationBase_SetError_m8BAA96490125F45D48227E1BAED6BB8025B5C544(__this, L_31, NULL);
@@ -10694,7 +10694,7 @@ IL_008b:
 		L_17 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_16, NULL);
 		NullCheck(L_17);
 		String_t* L_18;
-		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_17);
+		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_17);
 		String_t* L_19;
 		L_19 = String_Concat_m093934F71A9B351911EE46311674ED463B180006(L_15, _stringLiteral8CDC90FE1223731D5B5F01EE00C0E7615C263B39, L_18, _stringLiteral220D2A1ACE19A21B7A364FCD63F951C6E463532C, NULL);
 		AsyncOperationBase_SetError_m8BAA96490125F45D48227E1BAED6BB8025B5C544(__this, L_19, NULL);
@@ -11662,7 +11662,7 @@ IL_006d:
 		L_14 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_13, NULL);
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_14);
+		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_14);
 		String_t* L_16;
 		L_16 = String_Concat_m093934F71A9B351911EE46311674ED463B180006(L_12, _stringLiteral8CDC90FE1223731D5B5F01EE00C0E7615C263B39, L_15, _stringLiteral220D2A1ACE19A21B7A364FCD63F951C6E463532C, NULL);
 		AsyncOperationBase_SetError_m8BAA96490125F45D48227E1BAED6BB8025B5C544(__this, L_16, NULL);
@@ -13242,7 +13242,7 @@ IL_008b:
 		L_17 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_16, NULL);
 		NullCheck(L_17);
 		String_t* L_18;
-		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_17);
+		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_17);
 		String_t* L_19;
 		L_19 = String_Concat_m093934F71A9B351911EE46311674ED463B180006(L_15, _stringLiteral8CDC90FE1223731D5B5F01EE00C0E7615C263B39, L_18, _stringLiteralBEAA18047909BB828FCB738C4913586BBE5C9582, NULL);
 		AsyncOperationBase_SetError_m8BAA96490125F45D48227E1BAED6BB8025B5C544(__this, L_19, NULL);
@@ -14298,7 +14298,7 @@ IL_0075:
 		L_17 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_16, NULL);
 		NullCheck(L_17);
 		String_t* L_18;
-		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(31, L_17);
+		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(40, L_17);
 		String_t* L_19;
 		L_19 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(_stringLiteral403DC7DD8B78C6E79D711F7746C2E1DD9A6D6631, L_18, NULL);
 		EvictionResult_t8475D0EF18FE188250C7432665C841287B59EEA9 L_20;
@@ -14528,7 +14528,7 @@ IL_0075:
 		L_17 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_16, NULL);
 		NullCheck(L_17);
 		String_t* L_18;
-		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(31, L_17);
+		L_18 = VirtualFuncInvoker0< String_t* >::Invoke(40, L_17);
 		String_t* L_19;
 		L_19 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(_stringLiteral403DC7DD8B78C6E79D711F7746C2E1DD9A6D6631, L_18, NULL);
 		EvictionResult_t8475D0EF18FE188250C7432665C841287B59EEA9 L_20;
@@ -16035,7 +16035,7 @@ IL_006f:
 		L_14 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_13, NULL);
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_14);
+		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_14);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_16 = __this->____bundle;
 		BuiltinBundleCacheEntry_t10E60737674266A4678693315ADFEA51FE40273F* L_17 = __this->____cacheEntry;
 		NullCheck(L_17);
@@ -16285,7 +16285,7 @@ IL_006f:
 		L_14 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_13, NULL);
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_14);
+		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_14);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_16 = __this->____bundle;
 		BuiltinBundleCacheEntry_t10E60737674266A4678693315ADFEA51FE40273F* L_17 = __this->____cacheEntry;
 		NullCheck(L_17);
@@ -16535,7 +16535,7 @@ IL_006f:
 		L_14 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_13, NULL);
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_14);
+		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_14);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_16 = __this->____bundle;
 		BuiltinBundleCacheEntry_t10E60737674266A4678693315ADFEA51FE40273F* L_17 = __this->____cacheEntry;
 		NullCheck(L_17);
@@ -21533,7 +21533,7 @@ IL_006f:
 		L_14 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_13, NULL);
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_14);
+		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_14);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_16 = __this->____bundle;
 		SandboxBundleCacheEntry_t769C82C98845C2C570154BC3822D834DDC3CB088* L_17 = __this->____cacheEntry;
 		NullCheck(L_17);
@@ -21792,7 +21792,7 @@ IL_006f:
 		L_14 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_13, NULL);
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_14);
+		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_14);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_16 = __this->____bundle;
 		SandboxBundleCacheEntry_t769C82C98845C2C570154BC3822D834DDC3CB088* L_17 = __this->____cacheEntry;
 		NullCheck(L_17);
@@ -22389,7 +22389,7 @@ IL_006f:
 		L_14 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_13, NULL);
 		NullCheck(L_14);
 		String_t* L_15;
-		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_14);
+		L_15 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_14);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_16 = __this->____bundle;
 		SandboxBundleCacheEntry_t769C82C98845C2C570154BC3822D834DDC3CB088* L_17 = __this->____cacheEntry;
 		NullCheck(L_17);
@@ -24865,7 +24865,7 @@ IL_0012:
 		L_12 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_11, NULL);
 		NullCheck(L_12);
 		String_t* L_13;
-		L_13 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_12);
+		L_13 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_12);
 		BCLoadBundleOptions_t2C7BE2901BC6D771A5E4C5CBE69B1D75411A6BA4* L_14 = (BCLoadBundleOptions_t2C7BE2901BC6D771A5E4C5CBE69B1D75411A6BA4*)(&__this->____options);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_15;
 		L_15 = BCLoadBundleOptions_get_Bundle_m27322DCB177112FE9AC9471645A5AF5480F7BC51_inline(L_14, NULL);
@@ -25132,7 +25132,7 @@ IL_0012:
 		L_15 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_14, NULL);
 		NullCheck(L_15);
 		String_t* L_16;
-		L_16 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_15);
+		L_16 = VirtualFuncInvoker0< String_t* >::Invoke(12, L_15);
 		BCLoadBundleOptions_t2C7BE2901BC6D771A5E4C5CBE69B1D75411A6BA4* L_17 = (BCLoadBundleOptions_t2C7BE2901BC6D771A5E4C5CBE69B1D75411A6BA4*)(&__this->____options);
 		PackageBundle_t9B92F4FF721DB05C09F5CF9931F0E3FB837E8497* L_18;
 		L_18 = BCLoadBundleOptions_get_Bundle_m27322DCB177112FE9AC9471645A5AF5480F7BC51_inline(L_17, NULL);

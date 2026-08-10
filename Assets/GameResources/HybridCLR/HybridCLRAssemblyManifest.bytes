@@ -1,0 +1,17 @@
+{
+  "entryAssemblyName": "Game.HotUpdate",
+  "aotMetadataDlls": [
+    "System.Core.dll",
+    "UnityEngine.CoreModule.dll",
+    "XLua.Runtime.dll",
+    "YooAsset.dll",
+    "mscorlib.dll"
+  ],
+  "hotUpdateDlls": [
+    "Game.Common.dll",
+    "Game.Lua.dll",
+    "Game.UI.dll",
+    "Assembly-CSharp.dll",
+    "Game.HotUpdate.dll"
+  ]
+}

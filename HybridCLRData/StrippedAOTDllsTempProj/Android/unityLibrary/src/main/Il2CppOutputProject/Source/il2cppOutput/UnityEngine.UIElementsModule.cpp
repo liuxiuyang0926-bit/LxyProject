@@ -4676,6 +4676,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Native_YGNodeStyleSetBorder_mAEE2CE39A65
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Native_YGNodeLayoutGetMargin_m5807C968DE6E1D4118BC79C99319B3A538D13E76 (intptr_t ___0_node, int32_t ___1_edge, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Native_YGNodeLayoutGetPadding_m5B23414150482B8E2B10BF58EF3D08563A01AC16 (intptr_t ___0_node, int32_t ___1_edge, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Native_YGNodeLayoutGetBorder_mC6617FE4EB69CFBBAD8409DD34B93945F3A3C214 (intptr_t ___0_node, int32_t ___1_edge, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Native_YGNodeGetComputedFlexBasis_m146B21CF98A49843D2CF01B589C054D4AAD8E4A7 (intptr_t ___0_node, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t Native_YGNodeNewWithConfig_mE77FEA1B4B94521A7030E33974F7ABAE57E7306C (intptr_t ___0_config, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Native_YGNodeFree_mA56725B1F3BC3902D9766EB0136790F6844AC2BB (intptr_t ___0_ygNode, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Native_YGNodeSetConfig_mF58812F70A23EC909E3AB38B19F781D660F81E00 (intptr_t ___0_ygNode, intptr_t ___1_config, const RuntimeMethod* method) ;
@@ -6927,6 +6928,15 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Native_YGNodeStyleSetFlexBasisAuto_m2948
 	_il2cpp_icall_func = (Native_YGNodeStyleSetFlexBasisAuto_m2948067BBA9F0FDA995FBAF832FCD637FD401600_ftn)il2cpp_codegen_resolve_icall ("UnityEngine.Yoga.Native::YGNodeStyleSetFlexBasisAuto(System.IntPtr)");
 	_il2cpp_icall_func(___0_node);
 }
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Native_YGNodeGetComputedFlexBasis_m146B21CF98A49843D2CF01B589C054D4AAD8E4A7 (intptr_t ___0_node, const RuntimeMethod* method) 
+{
+	typedef float (*Native_YGNodeGetComputedFlexBasis_m146B21CF98A49843D2CF01B589C054D4AAD8E4A7_ftn) (intptr_t);
+	static Native_YGNodeGetComputedFlexBasis_m146B21CF98A49843D2CF01B589C054D4AAD8E4A7_ftn _il2cpp_icall_func;
+	if (!_il2cpp_icall_func)
+	_il2cpp_icall_func = (Native_YGNodeGetComputedFlexBasis_m146B21CF98A49843D2CF01B589C054D4AAD8E4A7_ftn)il2cpp_codegen_resolve_icall ("UnityEngine.Yoga.Native::YGNodeGetComputedFlexBasis(System.IntPtr)");
+	float icallRetVal = _il2cpp_icall_func(___0_node);
+	return icallRetVal;
+}
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Native_YGNodeStyleSetWidth_m3953B145520D90E648B0B09ACE0091585E172D23 (intptr_t ___0_node, float ___1_width, const RuntimeMethod* method) 
 {
 	typedef void (*Native_YGNodeStyleSetWidth_m3953B145520D90E648B0B09ACE0091585E172D23_ftn) (intptr_t, float);
@@ -7650,6 +7660,23 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float YogaNode_get_LayoutBorderBottom_mA7A261
 	}
 
 IL_0010:
+	{
+		float L_2 = V_0;
+		return L_2;
+	}
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float YogaNode_get_ComputedFlexBasis_mE1ADF93B93BFF235AA1BF2F8B2DFF6560A3DBAAE (YogaNode_t9EE7C2B7C0BD1299C28837B1A66CF4660E724C8B* __this, const RuntimeMethod* method) 
+{
+	float V_0 = 0.0f;
+	{
+		intptr_t L_0 = __this->____ygNode;
+		float L_1;
+		L_1 = Native_YGNodeGetComputedFlexBasis_m146B21CF98A49843D2CF01B589C054D4AAD8E4A7(L_0, NULL);
+		V_0 = L_1;
+		goto IL_000f;
+	}
+
+IL_000f:
 	{
 		float L_2 = V_0;
 		return L_2;
@@ -17694,7 +17721,7 @@ IL_007c_1:
 				Type_t* L_21 = V_6;
 				NullCheck(L_21);
 				TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* L_22;
-				L_22 = VirtualFuncInvoker0< TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(154, L_21);
+				L_22 = VirtualFuncInvoker0< TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(163, L_21);
 				Func_2_t7AF8146EC94DFCBB0F1B3E70111C1FB21D39F00E* L_23 = (Func_2_t7AF8146EC94DFCBB0F1B3E70111C1FB21D39F00E*)il2cpp_codegen_object_new(Func_2_t7AF8146EC94DFCBB0F1B3E70111C1FB21D39F00E_il2cpp_TypeInfo_var);
 				Func_2__ctor_mAFDFA2B152082BBF5E0626BF143EDACD61DE9D74(L_23, NULL, (intptr_t)((void*)BaseListViewController_U3CAddItemsU3Eg__IsGenericListU7C15_0_mD5A1E07441AC98E686931F347B1FD1860DA32D17_RuntimeMethod_var), NULL);
 				Type_t* L_24;
@@ -17713,7 +17740,7 @@ IL_007c_1:
 				Type_t* L_27 = V_7;
 				NullCheck(L_27);
 				TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* L_28;
-				L_28 = VirtualFuncInvoker0< TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(58, L_27);
+				L_28 = VirtualFuncInvoker0< TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(67, L_27);
 				NullCheck(L_28);
 				int32_t L_29 = 0;
 				Type_t* L_30 = (L_28)->GetAt(static_cast<il2cpp_array_size_t>(L_29));
@@ -17742,7 +17769,7 @@ IL_00c0_1:
 				Type_t* L_33 = V_7;
 				NullCheck(L_33);
 				TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* L_34;
-				L_34 = VirtualFuncInvoker0< TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(58, L_33);
+				L_34 = VirtualFuncInvoker0< TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(67, L_33);
 				NullCheck(L_34);
 				int32_t L_35 = 0;
 				Type_t* L_36 = (L_34)->GetAt(static_cast<il2cpp_array_size_t>(L_35));
@@ -18424,7 +18451,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeArray* BaseListViewController_AddToArr
 		L_1 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_0, NULL);
 		NullCheck(L_1);
 		Type_t* L_2;
-		L_2 = VirtualFuncInvoker0< Type_t* >::Invoke(54, L_1);
+		L_2 = VirtualFuncInvoker0< Type_t* >::Invoke(63, L_1);
 		V_0 = L_2;
 		Type_t* L_3 = V_0;
 		il2cpp_codegen_runtime_class_init_inline(Type_t_il2cpp_TypeInfo_var);
@@ -18528,7 +18555,7 @@ IL_0026:
 		L_9 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_8, NULL);
 		NullCheck(L_9);
 		Type_t* L_10;
-		L_10 = VirtualFuncInvoker0< Type_t* >::Invoke(54, L_9);
+		L_10 = VirtualFuncInvoker0< Type_t* >::Invoke(63, L_9);
 		V_2 = L_10;
 		int32_t L_11 = V_1;
 		V_7 = (bool)((((int32_t)L_11) == ((int32_t)0))? 1 : 0);
@@ -18851,7 +18878,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool BaseListViewController_U3CAddItemsU3Eg__
 		Type_t* L_0 = ___0_t;
 		NullCheck(L_0);
 		bool L_1;
-		L_1 = VirtualFuncInvoker0< bool >::Invoke(47, L_0);
+		L_1 = VirtualFuncInvoker0< bool >::Invoke(56, L_0);
 		if (!L_1)
 		{
 			goto IL_001f;
@@ -18861,7 +18888,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool BaseListViewController_U3CAddItemsU3Eg__
 		Type_t* L_2 = ___0_t;
 		NullCheck(L_2);
 		Type_t* L_3;
-		L_3 = VirtualFuncInvoker0< Type_t* >::Invoke(56, L_2);
+		L_3 = VirtualFuncInvoker0< Type_t* >::Invoke(65, L_2);
 		RuntimeTypeHandle_t332A452B8B6179E4469B69525D0FE82A88030F7B L_4 = { reinterpret_cast<intptr_t> (IList_1_t8C7C301DAF6E4E4DFA7504EF93E6E2C93AB33AE7_0_0_0_var) };
 		il2cpp_codegen_runtime_class_init_inline(Type_t_il2cpp_TypeInfo_var);
 		Type_t* L_5;
@@ -19623,7 +19650,7 @@ IL_0040:
 		L_12 = BaseVerticalCollectionView_get_scrollView_mB4F44C6276CC57A0D8AD030F3C396650532E83CC_inline(L_11, NULL);
 		NullCheck(L_12);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_13;
-		L_13 = VirtualFuncInvoker0< VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* >::Invoke(99, L_12);
+		L_13 = VirtualFuncInvoker0< VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* >::Invoke(157, L_12);
 		NullCheck(L_13);
 		VirtualActionInvoker0::Invoke(17, L_13);
 		return;
@@ -22598,7 +22625,7 @@ IL_0057:
 IL_0060:
 	{
 		NullCheck(G_B8_1);
-		VirtualActionInvoker1< String_t* >::Invoke(159, G_B8_1, G_B8_0);
+		VirtualActionInvoker1< String_t* >::Invoke(217, G_B8_1, G_B8_0);
 		goto IL_007b;
 	}
 
@@ -23390,7 +23417,7 @@ IL_004d:
 IL_0056:
 	{
 		NullCheck(G_B8_1);
-		VirtualActionInvoker1< String_t* >::Invoke(159, G_B8_1, G_B8_0);
+		VirtualActionInvoker1< String_t* >::Invoke(217, G_B8_1, G_B8_0);
 		goto IL_0071;
 	}
 
@@ -25467,7 +25494,7 @@ IL_000d:
 	{
 		bool L_2 = ___0_expanded;
 		NullCheck(G_B2_0);
-		VirtualActionInvoker1< bool >::Invoke(117, G_B2_0, L_2);
+		VirtualActionInvoker1< bool >::Invoke(175, G_B2_0, L_2);
 	}
 
 IL_0014:
@@ -25517,21 +25544,21 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ReusableTreeViewItem_OnToggleGeometryCha
 		L_1 = VisualElement_get_resolvedStyle_m3885B7534A94E0BCE024A9621465A0F273DA0AEB(L_0, NULL);
 		NullCheck(L_1);
 		float L_2;
-		L_2 = InterfaceFuncInvoker0< float >::Invoke(44, IResolvedStyle_t6A3530BA6147B091C278593F21F86B09CD42BE89_il2cpp_TypeInfo_var, L_1);
+		L_2 = InterfaceFuncInvoker0< float >::Invoke(75, IResolvedStyle_t6A3530BA6147B091C278593F21F86B09CD42BE89_il2cpp_TypeInfo_var, L_1);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_3 = __this->___m_Checkmark;
 		NullCheck(L_3);
 		RuntimeObject* L_4;
 		L_4 = VisualElement_get_resolvedStyle_m3885B7534A94E0BCE024A9621465A0F273DA0AEB(L_3, NULL);
 		NullCheck(L_4);
 		float L_5;
-		L_5 = InterfaceFuncInvoker0< float >::Invoke(22, IResolvedStyle_t6A3530BA6147B091C278593F21F86B09CD42BE89_il2cpp_TypeInfo_var, L_4);
+		L_5 = InterfaceFuncInvoker0< float >::Invoke(35, IResolvedStyle_t6A3530BA6147B091C278593F21F86B09CD42BE89_il2cpp_TypeInfo_var, L_4);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_6 = __this->___m_Checkmark;
 		NullCheck(L_6);
 		RuntimeObject* L_7;
 		L_7 = VisualElement_get_resolvedStyle_m3885B7534A94E0BCE024A9621465A0F273DA0AEB(L_6, NULL);
 		NullCheck(L_7);
 		float L_8;
-		L_8 = InterfaceFuncInvoker0< float >::Invoke(23, IResolvedStyle_t6A3530BA6147B091C278593F21F86B09CD42BE89_il2cpp_TypeInfo_var, L_7);
+		L_8 = InterfaceFuncInvoker0< float >::Invoke(36, IResolvedStyle_t6A3530BA6147B091C278593F21F86B09CD42BE89_il2cpp_TypeInfo_var, L_7);
 		V_0 = ((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(L_2, L_5)), L_8));
 		float L_9 = V_0;
 		float L_10 = __this->___m_IndentWidth;
@@ -25580,7 +25607,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ReusableTreeViewItem_UpdateIndentLayout_
 		StyleLength_tF02B24735FC88BE29BEB36F7A87709CA28AF72D8 L_4;
 		L_4 = StyleLength_op_Implicit_mA1ED6E9AD696C34231A35B83084B1298A700B019(((float)il2cpp_codegen_multiply(L_2, ((float)L_3))), NULL);
 		NullCheck(L_1);
-		InterfaceActionInvoker1< StyleLength_tF02B24735FC88BE29BEB36F7A87709CA28AF72D8 >::Invoke(54, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_1, L_4);
+		InterfaceActionInvoker1< StyleLength_tF02B24735FC88BE29BEB36F7A87709CA28AF72D8 >::Invoke(56, IStyle_t4FD66C97CA5F46BFE328FED0C65277A37E0A89F7_il2cpp_TypeInfo_var, L_1, L_4);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_5 = __this->___m_IndentElement;
 		il2cpp_codegen_runtime_class_init_inline(BaseTreeView_t4B72EA959CB8F22C78269844A43D51C4AB360DD7_il2cpp_TypeInfo_var);
 		String_t* L_6 = ((BaseTreeView_t4B72EA959CB8F22C78269844A43D51C4AB360DD7_StaticFields*)il2cpp_codegen_static_fields_for(BaseTreeView_t4B72EA959CB8F22C78269844A43D51C4AB360DD7_il2cpp_TypeInfo_var))->___itemIndentUssClassName;
@@ -26533,7 +26560,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BaseBoolField__ctor_m03425F09EE8336FD178
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BaseBoolField_OnNavigationSubmit_m6D6494D09510A072D2156DC9F7E71698D14C6C7B (BaseBoolField_t01F8AFD72D18F0EB65F949062615550A9ED30B0D* __this, NavigationSubmitEvent_t193DCBDB6CBC8FF9F0A545B48962188505665BB1* ___0_evt, const RuntimeMethod* method) 
 {
 	{
-		VirtualActionInvoker0::Invoke(119, __this);
+		VirtualActionInvoker0::Invoke(177, __this);
 		NavigationSubmitEvent_t193DCBDB6CBC8FF9F0A545B48962188505665BB1* L_0 = ___0_evt;
 		NullCheck(L_0);
 		EventBase_StopPropagation_mEFC7E5AB7164157065FF19064A6ADCBB0D8AF6FB(L_0, NULL);
@@ -26565,7 +26592,7 @@ IL_000e:
 	{
 		NullCheck(G_B2_0);
 		String_t* L_2;
-		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(158, G_B2_0);
+		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(216, G_B2_0);
 		G_B3_0 = L_2;
 	}
 
@@ -26607,7 +26634,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BaseBoolField_set_text_mEE1205D6F5A9E94D
 		}
 	}
 	{
-		VirtualActionInvoker0::Invoke(118, __this);
+		VirtualActionInvoker0::Invoke(176, __this);
 	}
 
 IL_0025:
@@ -26615,7 +26642,7 @@ IL_0025:
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_5 = __this->___m_Label;
 		String_t* L_6 = ___0_value;
 		NullCheck(L_5);
-		VirtualActionInvoker1< String_t* >::Invoke(159, L_5, L_6);
+		VirtualActionInvoker1< String_t* >::Invoke(217, L_5, L_6);
 		goto IL_0057;
 	}
 
@@ -26772,7 +26799,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BaseBoolField_OnClickEvent_m8CAE14D9EE0A
 		}
 	}
 	{
-		VirtualActionInvoker0::Invoke(119, __this);
+		VirtualActionInvoker0::Invoke(177, __this);
 	}
 
 IL_0030:
@@ -26835,7 +26862,7 @@ IL_0050:
 		}
 	}
 	{
-		VirtualActionInvoker0::Invoke(119, __this);
+		VirtualActionInvoker0::Invoke(177, __this);
 	}
 
 IL_0076:
@@ -26851,8 +26878,8 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BaseBoolField_ToggleValue_m2C02CA1BBE8EE
 {
 	{
 		bool L_0;
-		L_0 = VirtualFuncInvoker0< bool >::Invoke(107, __this);
-		VirtualActionInvoker1< bool >::Invoke(108, __this, (bool)((((int32_t)L_0) == ((int32_t)0))? 1 : 0));
+		L_0 = VirtualFuncInvoker0< bool >::Invoke(165, __this);
+		VirtualActionInvoker1< bool >::Invoke(166, __this, (bool)((((int32_t)L_0) == ((int32_t)0))? 1 : 0));
 		return;
 	}
 }
@@ -27561,7 +27588,7 @@ IL_003f:
 		VisualElement_set_name_m5ABC7B8D2586B1839DD436E1AAF25D81395759BC(L_21, L_22, NULL);
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_23 = L_21;
 		NullCheck(L_23);
-		VirtualActionInvoker1< String_t* >::Invoke(159, L_23, _stringLiteral20E39C3AB7068FAFD9E4B868E16D2E5BC64D4952);
+		VirtualActionInvoker1< String_t* >::Invoke(217, L_23, _stringLiteral20E39C3AB7068FAFD9E4B868E16D2E5BC64D4952);
 		__this->___m_AddButton = L_23;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___m_AddButton), (void*)L_23);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_24 = __this->___m_Footer;
@@ -27578,7 +27605,7 @@ IL_003f:
 		VisualElement_set_name_m5ABC7B8D2586B1839DD436E1AAF25D81395759BC(L_28, L_29, NULL);
 		Button_t8EC3B431665F84C0B637C11B0EA29236828646C2* L_30 = L_28;
 		NullCheck(L_30);
-		VirtualActionInvoker1< String_t* >::Invoke(159, L_30, _stringLiteral3B2C1C62D4D1C2A0C8A9AC42DB00D33C654F9AD0);
+		VirtualActionInvoker1< String_t* >::Invoke(217, L_30, _stringLiteral3B2C1C62D4D1C2A0C8A9AC42DB00D33C654F9AD0);
 		__this->___m_RemoveButton = L_30;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___m_RemoveButton), (void*)L_30);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_31 = __this->___m_Footer;
@@ -27601,7 +27628,7 @@ IL_0104:
 		Foldout_t150CF00C27D0C105EC2831E0BA1C5D8A96EF5DC3* L_35 = __this->___m_Foldout;
 		NullCheck(L_35);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_36;
-		L_36 = VirtualFuncInvoker0< VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* >::Invoke(99, L_35);
+		L_36 = VirtualFuncInvoker0< VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* >::Invoke(157, L_35);
 		VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* L_37 = __this->___m_Footer;
 		NullCheck(L_36);
 		VisualElement_Add_mE2571CCB23C09103F8732EEC73833683F7236A7F(L_36, L_37, NULL);
@@ -27814,7 +27841,7 @@ IL_0040:
 		String_t* L_14;
 		L_14 = ChangeEvent_1_get_previousValue_mF293FF9A279ED1A61169230F85C8134ABFA66ADC_inline(L_13, ChangeEvent_1_get_previousValue_mF293FF9A279ED1A61169230F85C8134ABFA66ADC_RuntimeMethod_var);
 		NullCheck(L_12);
-		VirtualActionInvoker1< String_t* >::Invoke(117, L_12, L_14);
+		VirtualActionInvoker1< String_t* >::Invoke(175, L_12, L_14);
 		goto IL_00e4;
 	}
 
@@ -27947,7 +27974,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BaseListView_UpdateArraySizeField_mC91A0
 	VisualElement_t2667F9D19E62C7A315927506C06F223AB9234115* G_B8_0 = NULL;
 	{
 		bool L_0;
-		L_0 = VirtualFuncInvoker0< bool >::Invoke(109, __this);
+		L_0 = VirtualFuncInvoker0< bool >::Invoke(167, __this);
 		if (!L_0)
 		{
 			goto IL_0014;
@@ -28001,7 +28028,7 @@ IL_001b:
 		String_t* L_9;
 		L_9 = Int32_ToString_m030E01C24E294D6762FB0B6F37CB541581F55CA5((&V_2), NULL);
 		NullCheck(L_6);
-		VirtualActionInvoker1< String_t* >::Invoke(117, L_6, L_9);
+		VirtualActionInvoker1< String_t* >::Invoke(175, L_6, L_9);
 	}
 
 IL_004c:
@@ -28054,7 +28081,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void BaseListView_UpdateListViewLabel_mA4AF11
 	Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* G_B18_0 = NULL;
 	{
 		bool L_0;
-		L_0 = VirtualFuncInvoker0< bool >::Invoke(109, __this);
+		L_0 = VirtualFuncInvoker0< bool >::Invoke(167, __this);
 		V_1 = (bool)((((int32_t)L_0) == ((int32_t)0))? 1 : 0);
 		bool L_1 = V_1;
 		if (!L_1)
@@ -28101,7 +28128,7 @@ IL_0040:
 		Label_tC160668F9119CE0F5567021FB208E64A5B1C5B70* L_8 = __this->___m_ListViewLabel;
 		String_t* L_9 = __this->___m_MaxMultiEditStr;
 		NullCheck(L_8);
-		VirtualActionInvoker1< String_t* >::Invoke(159, L_8, L_9);
+		VirtualActionInvoker1< String_t* >::Invoke(217, L_8, L_9);
 		ScrollView_t7CE209084E084FAA0E8DF3CD8E3B8BB9EB27E8D9* L_10;
 		L_10 = BaseVerticalCollectionView_get_scrollView_mB4F44C6276CC57A0D8AD030F3C396650532E83CC_inline(__this, NULL);
 		NullCheck(L_10);
@@ -28143,7 +28170,7 @@ IL_0085:
 		il2cpp_codegen_runtime_class_init_inline(BaseListView_t325EC1CB0CDB163106851B43AB91FB9EF0A59926_il2cpp_TypeInfo_var);
 		String_t* L_18 = ((BaseListView_t325EC1CB0CDB163106851B43AB91FB9EF0A59926_StaticFields*)il2cpp_codegen_static_fields_for(BaseListView_t325EC1CB0CDB163106851B43AB91FB9EF0A59926_il2cpp_TypeInfo_var))->___k_EmptyListStr;
 		NullCheck(L_17);
-		VirtualActionInvoker1< String_t* >::Invoke(159, L_17, L_18);
+		VirtualActionInvoker1< String_t* >::Invoke(217, L_17, L_18);
 		ScrollView_t7CE209084E084FAA0E8DF3CD8E3B8BB9EB27E8D9* L_19;
 		L_19 = BaseVerticalCollectionView_get_scrollView_mB4F44C6276CC57A0D8AD030F3C396650532E83CC_inline(__this, NULL);
 		NullCheck(L_19);
@@ -28289,7 +28316,7 @@ IL_0036:
 IL_0058:
 	{
 		bool L_7;
-		L_7 = VirtualFuncInvoker0< bool >::Invoke(109, __this);
+		L_7 = VirtualFuncInvoker0< bool >::Invoke(167, __this);
 		if (!L_7)
 		{
 			goto IL_006b;
@@ -28398,7 +28425,7 @@ IL_0032:
 IL_0061:
 	{
 		bool L_13;
-		L_13 = VirtualFuncInvoker0< bool >::Invoke(109, __this);
+		L_13 = VirtualFuncInvoker0< bool >::Invoke(167, __this);
 		if (!L_13)
 		{
 			goto IL_0074;

@@ -1,23 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Contracts;
 using UnityEngine;
 using UnityEngine.Networking;
 using YooAsset;
 
 public sealed class YooAssetLauncher : MonoBehaviour
 {
-    private const string GameConfigUrl =
-        "http://47.97.108.193:8080/LoadConfig/gameConfig.json";
-
-    private const int GameConfigRequestTimeoutSeconds = 15;
-
     // 这些 Location 必须存在于当前激活的 Manifest 中，否则下载器
     // 不会包含它们，后续 HybridCLR 加载必然得到 Location is invalid。
     private static readonly IReadOnlyList<string>
         RequiredStartupLocations = new[]
         {
-            "Game.HotUpdate.dll",
+            HybridCLRAssemblyManifest.ManifestLocation,
+            HybridCLRAssemblyManifest.DefaultEntryAssemblyName +
+            ".dll",
         };
 
     [Serializable]
@@ -487,18 +485,20 @@ public sealed class YooAssetLauncher : MonoBehaviour
     private IEnumerator RequestHostServers(
         Action<bool> completed)
     {
+        string gameConfigUrl = GameRuntimeConfig.GameConfigUrl;
+
         SetStage(
             UpdateStage.RequestingServerConfig,
             0.06f,
             "请求远程资源配置");
         Debug.Log(
-            $"[YooAsset] 请求远程资源配置：{GameConfigUrl}");
+            $"[YooAsset] 请求远程资源配置：{gameConfigUrl}");
 
         using (UnityWebRequest request =
-               UnityWebRequest.Get(GameConfigUrl))
+               UnityWebRequest.Get(gameConfigUrl))
         {
             request.timeout =
-                GameConfigRequestTimeoutSeconds;
+                GameRuntimeConfig.GameConfigRequestTimeoutSeconds;
             yield return request.SendWebRequest();
 
             if (request.result !=

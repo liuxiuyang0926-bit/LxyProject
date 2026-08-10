@@ -54,11 +54,11 @@ MonoBehaviour:
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
-      - CollectPath: Assets/GameResources/UIAtlas
-        CollectorGUID: 787dad044280631408431d757624be51
+      - CollectPath: Assets/GameResources/UIAtlas/UIAtlas_AutoGen
+        CollectorGUID: 2788852bdea360c43a4b738a4135c054
         CollectorType: 0
         AddressRuleName: AddressByFileName
-        PackRuleName: PackDirectory
+        PackRuleName: PackSeparately
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
@@ -76,5 +76,13 @@ MonoBehaviour:
         AddressRuleName: AddressByFileName
         PackRuleName: PackDirectory
         FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/UIAtlas/AtlasScr
+        CollectorGUID: 8a57eb0a3cb5d474eac3d29120251b93
+        CollectorType: 1
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectSprite
         AssetTags: 
         UserData: 
