@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
+using Game.Contracts;
+using Game.Resource;
 using UnityEngine;
 using YooAsset;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace LxyDemo.UIFramework
 {
@@ -16,7 +14,9 @@ namespace LxyDemo.UIFramework
     [DefaultExecutionOrder(-10000)]
     [DisallowMultipleComponent]
     [AddComponentMenu("LxyDemo/UI/UI Startup")]
-    public sealed class UIStartup : MonoBehaviour
+    public sealed class UIStartup :
+        MonoBehaviour,
+        IFirstSceneRuntime
     {
         [Header("资源系统")]
         [SerializeField]
@@ -27,19 +27,6 @@ namespace LxyDemo.UIFramework
         private string uiCanvasRootLocation =
             "Assets/GameResources/Prefabs/UICanvasRoot.prefab";
 
-        [Header("Lua")]
-        [SerializeField]
-        private bool startLuaRuntime = true;
-
-        [Tooltip("Lua 启动模块。Main 表存在 Start 方法时会自动调用。")]
-        [SerializeField]
-        private string mainLuaModule = "Main";
-
-        [Header("UI Manager")]
-        [Tooltip("可选。面板也可以在启动后通过 UIManager.Register 手动注册。")]
-        [SerializeField]
-        private UIManagerSettings settings;
-
         [SerializeField]
         private bool initializeOnStart = true;
 
@@ -49,7 +36,7 @@ namespace LxyDemo.UIFramework
         private static UIStartup instance;
 
         private UILayerRoot layerRoot;
-        private AssetHandle canvasRootHandle;
+        private GameResourceInstanceHandle canvasRootInstanceHandle;
         private bool ownsLayerRoot;
 
         public static UIStartup Instance => instance;
@@ -68,6 +55,7 @@ namespace LxyDemo.UIFramework
             }
 
             instance = this;
+            FirstSceneRuntimeBridge.Register(this);
             resourceLauncher = ResolveResourceLauncher();
             DontDestroyOnLoad(gameObject);
         }
@@ -128,16 +116,17 @@ namespace LxyDemo.UIFramework
             try
             {
                 layerRoot.EnsureInitialized(createEventSystem);
-                UIManager.Instance.Initialize(settings, layerRoot);
+                UIManager.Instance.Initialize(null, layerRoot);
 
-                if (startLuaRuntime)
+                if (UIRuntimeConfig.EnableLuaRuntime)
                 {
                     LuaUIRuntime luaRuntime =
                         LuaUIRuntime.Instance;
                     luaRuntime.ConfigureResourcePackage(
                         resourceLauncher.PackageName);
                     luaRuntime.Initialize(layerRoot);
-                    luaRuntime.StartMain(mainLuaModule);
+                    luaRuntime.StartMain(
+                        UIRuntimeConfig.LuaMainModule);
                 }
             }
             catch (Exception exception)
@@ -152,7 +141,10 @@ namespace LxyDemo.UIFramework
             IsInitialized = true;
             IsInitializing = false;
             Debug.Log(
-                "[UIStartup] 资源、UIManager 和 Lua 启动完成。",
+                UIRuntimeConfig.EnableLuaRuntime
+                    ? "[UIStartup] 资源、UIManager 和 Lua 启动完成。"
+                    : "[UIStartup] 资源和 UIManager 启动完成，" +
+                      "当前为纯 C# 模式。",
                 this);
         }
 
@@ -191,61 +183,34 @@ namespace LxyDemo.UIFramework
 
             string location =
                 NormalizeAssetLocation(uiCanvasRootLocation);
-            GameObject rootInstance = null;
-
-#if UNITY_EDITOR
-            GameObject rootPrefab =
-                AssetDatabase.LoadAssetAtPath<GameObject>(
-                    location);
-            if (rootPrefab == null)
-            {
-                LastError =
-                    "AssetDatabase 无法加载 UICanvasRoot：" +
-                    location;
-                yield break;
-            }
-
-            rootInstance = Instantiate(rootPrefab);
-#else
             ResourcePackage package =
                 resourceLauncher.Package;
+#if !UNITY_EDITOR
             if (package == null)
             {
                 LastError = "YooAsset ResourcePackage 为空。";
                 yield break;
             }
-
-            canvasRootHandle =
-                package.LoadAssetAsync<GameObject>(location);
-            yield return canvasRootHandle;
-            if (canvasRootHandle.Status !=
-                EOperationStatus.Succeeded)
-            {
-                LastError =
-                    "YooAsset 加载 UICanvasRoot 失败：" +
-                    canvasRootHandle.Error;
-                canvasRootHandle.Release();
-                canvasRootHandle = null;
-                yield break;
-            }
-
-            InstantiateOperation instantiateOperation =
-                canvasRootHandle.InstantiateAsync(
-                    new InstantiateOptions(true));
-            yield return instantiateOperation;
-            if (instantiateOperation.Status !=
-                EOperationStatus.Succeeded)
-            {
-                LastError =
-                    "YooAsset 实例化 UICanvasRoot 失败：" +
-                    instantiateOperation.Error;
-                canvasRootHandle.Release();
-                canvasRootHandle = null;
-                yield break;
-            }
-
-            rootInstance = instantiateOperation.Result;
 #endif
+
+            GameResourceManager manager =
+                GameResourceManager.GetOrCreate(gameObject);
+            canvasRootInstanceHandle =
+                manager.InstantiateAsync(package, location);
+            yield return canvasRootInstanceHandle;
+            if (canvasRootInstanceHandle.Status !=
+                EOperationStatus.Succeeded)
+            {
+                LastError =
+                    "加载 UICanvasRoot 失败：" +
+                    canvasRootInstanceHandle.Error;
+                canvasRootInstanceHandle.Release();
+                canvasRootInstanceHandle = null;
+                yield break;
+            }
+
+            GameObject rootInstance =
+                canvasRootInstanceHandle.Result;
 
             if (rootInstance == null)
             {
@@ -290,19 +255,18 @@ namespace LxyDemo.UIFramework
                 return;
             }
 
-            if (ownsLayerRoot && layerRoot != null)
+            if (canvasRootInstanceHandle != null)
+            {
+                canvasRootInstanceHandle.Release();
+            }
+            else if (ownsLayerRoot && layerRoot != null)
             {
                 Destroy(layerRoot.gameObject);
             }
 
-            if (canvasRootHandle != null &&
-                canvasRootHandle.IsValid)
-            {
-                canvasRootHandle.Release();
-            }
-
-            canvasRootHandle = null;
+            canvasRootInstanceHandle = null;
             layerRoot = null;
+            FirstSceneRuntimeBridge.Unregister(this);
             instance = null;
         }
     }

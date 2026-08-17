@@ -215,8 +215,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1737004043}
   - component: {fileID: 1737004042}
-  - component: {fileID: 1737004044}
-  - component: {fileID: 1737004045}
   m_Layer: 0
   m_Name: '[GameMain]'
   m_TagString: Untagged
@@ -236,11 +234,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e99d78604ffb644b8f004d862eaa9d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resourceLauncher: {fileID: 1737004044}
-  hybridCLRLoader: {fileID: 1737004045}
-  loadFirstSceneOnStart: 1
-  firstSceneName: Login
-  waitForUIAndLua: 1
 --- !u!4 &1737004043
 Transform:
   m_ObjectHideFlags: 0
@@ -256,37 +249,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1737004044
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1737004041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d83055a03d5f4d488d5d4bfc4ade60b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playMode: 2
-  packageName: DefaultPackage
-  downloadAllOnStart: 1
-  fallbackToOffline: 0
-  maxDownloadCount: 10
-  downloadRetryCount: 3
-  clearUnusedCacheAfterUpdate: 1
---- !u!114 &1737004045
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1737004041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff43af156372e9b48be6f2cbd0f52b8d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

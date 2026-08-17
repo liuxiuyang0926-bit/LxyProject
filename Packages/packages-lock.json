@@ -13,6 +13,12 @@
       "dependencies": {},
       "hash": "ca7f87b6a72f3739f99a5ad0c957c7aae0cbd922"
     },
+    "com.lxy.battle": {
+      "version": "file:com.lxy.battle",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.lxy.contracts": {
       "version": "file:com.lxy.contracts",
       "depth": 0,
@@ -26,14 +32,6 @@
       "dependencies": {
         "com.unity.textmeshpro": "3.0.7",
         "com.unity.ugui": "1.0.0"
-      }
-    },
-    "com.lxy.hotupdate": {
-      "version": "file:com.lxy.hotupdate",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.lxy.contracts": "1.0.0"
       }
     },
     "com.lxy.lua": {
@@ -55,7 +53,6 @@
         "com.lxy.contracts": "1.0.0",
         "com.lxy.resource": "1.0.0",
         "com.lxy.scene": "1.0.0",
-        "com.lxy.ui": "1.0.0",
         "com.tuyoogame.yooasset": "3.0.5"
       }
     },
@@ -72,16 +69,20 @@
       "version": "file:com.lxy.scene",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.lxy.resource": "1.0.0"
+      }
     },
     "com.lxy.ui": {
       "version": "file:com.lxy.ui",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
+        "com.lxy.contracts": "1.0.0",
         "com.lxy.lua": "1.0.0",
         "com.lxy.resource": "1.0.0",
         "com.tuyoogame.yooasset": "3.0.5",
+        "com.unity.textmeshpro": "3.0.7",
         "com.unity.ugui": "1.0.0"
       }
     },

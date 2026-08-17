@@ -1,7 +1,9 @@
 {
   "name": "Game.Scene",
   "rootNamespace": "LxyDemo.SceneManagement",
-  "references": [],
+  "references": [
+    "Game.Resource"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

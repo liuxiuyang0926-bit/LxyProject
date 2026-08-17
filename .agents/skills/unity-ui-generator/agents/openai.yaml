@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unity UI 自动生成"
+  short_description: "根据设计参考生成符合项目规范的 Unity UI Prefab"
+  default_prompt: "使用 $unity-ui-generator 分析这个设计参考，生成 UISchema，并创建符合项目规范的 UI Prefab。"

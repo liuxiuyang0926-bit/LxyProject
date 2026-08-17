@@ -12,11 +12,6 @@ namespace Game.Contracts
         public const string ManifestLocation =
             "HybridCLRAssemblyManifest";
 
-        public const string DefaultEntryAssemblyName =
-            "Game.HotUpdate";
-
-        public string entryAssemblyName =
-            DefaultEntryAssemblyName;
         public string[] aotMetadataDlls = Array.Empty<string>();
         public string[] hotUpdateDlls = Array.Empty<string>();
     }

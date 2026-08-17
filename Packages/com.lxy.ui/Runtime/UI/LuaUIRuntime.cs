@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Game.Resource;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -35,7 +36,7 @@ namespace LxyDemo.UIFramework
         private sealed class LuaPanelAssetRecord
         {
             public GameObject Instance;
-            public AssetHandle Handle;
+            public GameResourceInstanceHandle Handle;
         }
 
         private static LuaUIRuntime instance;
@@ -53,10 +54,14 @@ namespace LxyDemo.UIFramework
         private float nextTickTime;
         private bool mainStarted;
         private string resourcePackageName = "DefaultPackage";
-        private readonly Dictionary<string, AssetHandle>
+        private readonly Dictionary<
+            string,
+            GameResourceHandle<TextAsset>>
             luaModuleHandles =
-                new Dictionary<string, AssetHandle>(
-                    StringComparer.Ordinal);
+                new Dictionary<
+                    string,
+                    GameResourceHandle<TextAsset>>(
+                        StringComparer.Ordinal);
         private readonly Dictionary<int, LuaPanelAssetRecord>
             panelAssetRecords =
                 new Dictionary<int, LuaPanelAssetRecord>();
@@ -372,7 +377,6 @@ namespace LxyDemo.UIFramework
                     false);
             }
 #else
-            AssetHandle assetHandle = null;
             if (!TryGetResourcePackage(
                     out ResourcePackage package,
                     out errorMessage))
@@ -384,39 +388,38 @@ namespace LxyDemo.UIFramework
                 yield break;
             }
 
-            assetHandle =
-                package.LoadAssetAsync<GameObject>(
-                    normalizedLocation);
-            yield return assetHandle;
-            if (assetHandle.Status !=
+            GameResourceInstanceHandle instanceHandle =
+                GameResourceManager.GetOrCreate(gameObject)
+                    .InstantiateAsync(
+                        package,
+                        normalizedLocation,
+                        parent,
+                        false,
+                        true);
+            yield return instanceHandle;
+            if (instanceHandle.Status !=
                 EOperationStatus.Succeeded)
             {
-                errorMessage = assetHandle.Error;
-                assetHandle.Release();
+                errorMessage = instanceHandle.Error;
+                instanceHandle.Release();
             }
             else
             {
-                InstantiateOperation instantiateOperation =
-                    assetHandle.InstantiateAsync(
-                        new InstantiateOptions(
-                            true,
-                            parent,
-                            false));
-                yield return instantiateOperation;
-                if (instantiateOperation.Status !=
-                    EOperationStatus.Succeeded)
+                panelInstance = instanceHandle.Result;
+                if (panelInstance == null)
                 {
-                    errorMessage = instantiateOperation.Error;
-                    assetHandle.Release();
+                    errorMessage =
+                        "Prefab 实例化结果为空：" +
+                        normalizedLocation;
+                    instanceHandle.Release();
                 }
                 else
                 {
-                    panelInstance = instantiateOperation.Result;
                     panelAssetRecords[panelInstance.GetInstanceID()] =
                         new LuaPanelAssetRecord
                         {
                             Instance = panelInstance,
-                            Handle = assetHandle
+                            Handle = instanceHandle
                         };
                 }
             }
@@ -463,19 +466,23 @@ namespace LxyDemo.UIFramework
         private void ReleasePanelInternal(GameObject panelObject)
         {
             int instanceId = panelObject.GetInstanceID();
+            bool releasedByResourceManager = false;
             if (panelAssetRecords.TryGetValue(
                     instanceId,
                     out LuaPanelAssetRecord record))
             {
                 panelAssetRecords.Remove(instanceId);
-                if (record.Handle != null &&
-                    record.Handle.IsValid)
+                if (record.Handle != null)
                 {
                     record.Handle.Release();
+                    releasedByResourceManager = true;
                 }
             }
 
-            UnityEngine.Object.Destroy(panelObject);
+            if (!releasedByResourceManager)
+            {
+                UnityEngine.Object.Destroy(panelObject);
+            }
         }
 
         private void EnsureReady()
@@ -604,12 +611,12 @@ namespace LxyDemo.UIFramework
                 LuaAssetRoot + relativePath + ".bytes";
             if (luaModuleHandles.TryGetValue(
                     location,
-                    out AssetHandle cachedHandle) &&
-                cachedHandle != null &&
-                cachedHandle.IsValid)
+                    out GameResourceHandle<TextAsset>
+                        cachedHandle) &&
+                    cachedHandle != null &&
+                    cachedHandle.IsValid)
             {
-                TextAsset cachedAsset =
-                    cachedHandle.GetAssetObject<TextAsset>();
+                TextAsset cachedAsset = cachedHandle.Asset;
                 if (cachedAsset != null)
                 {
                     modulePath = location;
@@ -625,8 +632,11 @@ namespace LxyDemo.UIFramework
                 return null;
             }
 
-            AssetHandle handle =
-                package.LoadAssetSync<TextAsset>(location);
+            GameResourceHandle<TextAsset> handle =
+                GameResourceManager.GetOrCreate(gameObject)
+                    .LoadAssetSync<TextAsset>(
+                        package,
+                        location);
             if (handle.Status != EOperationStatus.Succeeded)
             {
                 Debug.LogError(
@@ -636,8 +646,7 @@ namespace LxyDemo.UIFramework
                 return null;
             }
 
-            TextAsset luaAsset =
-                handle.GetAssetObject<TextAsset>();
+            TextAsset luaAsset = handle.Asset;
             if (luaAsset == null)
             {
                 handle.Release();
@@ -781,16 +790,14 @@ namespace LxyDemo.UIFramework
             foreach (LuaPanelAssetRecord record in
                      panelAssetRecords.Values)
             {
-                if (record.Instance != null)
+                if (record.Handle != null)
+                {
+                    record.Handle.Release();
+                }
+                else if (record.Instance != null)
                 {
                     UnityEngine.Object.Destroy(
                         record.Instance);
-                }
-
-                if (record.Handle != null &&
-                    record.Handle.IsValid)
-                {
-                    record.Handle.Release();
                 }
             }
 
@@ -799,7 +806,7 @@ namespace LxyDemo.UIFramework
 
         private void ReleaseAllLuaModuleHandles()
         {
-            foreach (AssetHandle handle in
+            foreach (GameResourceHandle<TextAsset> handle in
                      luaModuleHandles.Values)
             {
                 if (handle != null && handle.IsValid)

@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.code-philosophy.hybridclr": "https://gitee.com/focus-creative-games/hybridclr_unity.git",
+    "com.lxy.battle": "file:com.lxy.battle",
     "com.lxy.contracts": "file:com.lxy.contracts",
     "com.lxy.core": "file:com.lxy.core",
-    "com.lxy.hotupdate": "file:com.lxy.hotupdate",
     "com.lxy.lua": "file:com.lxy.lua",
     "com.lxy.main": "file:com.lxy.main",
     "com.lxy.resource": "file:com.lxy.resource",

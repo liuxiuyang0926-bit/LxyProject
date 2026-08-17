@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c4e2a1f6b8473a9c01000000000017, type: 3}
+  m_Name: BattleConfigDatabase
+  m_EditorClassIdentifier: 
+  skills:
+  - id: 1001
+    displayName: "\u666E\u901A\u653B\u51FB"
+    totalFrames: 12
+    cooldownFrames: 20
+    frameOperations:
+    - frame: 4
+      operationType: 0
+      hitShape: 0
+      damage: 100
+      buffId: 2001
+      offsetXRaw: 17500
+      offsetYRaw: 0
+      halfWidthRaw: 17500
+      halfHeightRaw: 10000
+      rotationDegreesRaw: 0
+      displacementXRaw: 0
+      displacementYRaw: 0
+    hitFrame: 4
+    damage: 100
+    rangeRaw: 35000
+    buffId: 2001
+  buffs:
+  - id: 2001
+    displayName: "\u707C\u70E7"
+    type: 0
+    durationFrames: 60
+    intervalFrames: 20
+    value: 20
+    stackMode: 0
+    maxStacks: 1

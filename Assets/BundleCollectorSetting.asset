@@ -25,13 +25,42 @@ MonoBehaviour:
     AutoCollectShaders: 1
     IgnoreRuleName: NormalIgnoreRule
     Groups:
-    - GroupName: GameRes
-      GroupDesc: "\u6E38\u620F\u8D44\u6E90"
-      AssetTags: 
+    - GroupName: Builtin
+      GroupDesc: APK built-in startup resources
+      AssetTags: Builtin;Mandatory
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/GameResources/Fonts
-        CollectorGUID: 9d0e3a849e609c14d9bb3b293b8352d1
+      - CollectPath: Assets/GameResources/HybridCLR/AOT
+        CollectorGUID: ddcdb345da907ac44864ecd37fe1b9e1
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/Prefabs/UICanvasRoot.prefab
+        CollectorGUID: 764229c25b914934cacdea716773b027
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackSeparately
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+    - GroupName: Mandatory
+      GroupDesc: Required before entering Login
+      AssetTags: Mandatory
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/GameResources/HybridCLR/HotUpdate
+        CollectorGUID: 19cf557309a323c43b0a56eea4769d32
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/HybridCLR/HybridCLRAssemblyManifest.bytes
+        CollectorGUID: 8b19b5a917204857b3abfeb449fbd7cc
         CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackSeparately
@@ -46,8 +75,32 @@ MonoBehaviour:
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
-      - CollectPath: Assets/GameResources/Prefabs
-        CollectorGUID: 7fcda9f8b7dda3b478c9952baa845fec
+      - CollectPath: Assets/GameResources/Fonts
+        CollectorGUID: 9d0e3a849e609c14d9bb3b293b8352d1
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackSeparately
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/Prefabs/UIRes/Login
+        CollectorGUID: 37b387ead8c15c147a4eab715cbc265d
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/UITexture/StartupBackgroundConfig.json
+        CollectorGUID: 963dc16cb0947234db20d9e5c9a21599
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackSeparately
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+      - CollectPath: Assets/GameResources/Prefabs/UIRes/Main
+        CollectorGUID: 04925f072bf38e249a0cefac3dac7177
         CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackDirectory
@@ -62,27 +115,19 @@ MonoBehaviour:
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
-      - CollectPath: Assets/GameResources/UITexture
-        CollectorGUID: 1fbeb4f9886c2da4e8f4ce5b44ed3a68
+      - CollectPath: Assets/GameResources/UITexture/Startup
+        CollectorGUID: c8967df9a51a71c4894f058a5126ee68
         CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackDirectory
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
-      - CollectPath: Assets/GameResources/HybridCLR
-        CollectorGUID: d58eb5aa1b9e2af46b797bf7c12875e9
+      - CollectPath: Assets/GameResources/Battle
+        CollectorGUID: e43960df78524bf2bd87ee84b56b762a
         CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackDirectory
         FilterRuleName: CollectAll
-        AssetTags: 
-        UserData: 
-      - CollectPath: Assets/GameResources/UIAtlas/AtlasScr
-        CollectorGUID: 8a57eb0a3cb5d474eac3d29120251b93
-        CollectorType: 1
-        AddressRuleName: AddressByFileName
-        PackRuleName: PackDirectory
-        FilterRuleName: CollectSprite
-        AssetTags: 
-        UserData: 
+        AssetTags:
+        UserData:

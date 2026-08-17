@@ -2,6 +2,7 @@
   "name": "Game.UI",
   "rootNamespace": "LxyDemo.UIFramework",
   "references": [
+    "Game.Contracts",
     "Game.Lua",
     "Game.Resource",
     "XLua.Runtime",

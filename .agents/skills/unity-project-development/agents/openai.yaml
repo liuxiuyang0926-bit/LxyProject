@@ -1,0 +1,4 @@
+interface:
+  display_name: "LxyDemo Unity 项目开发"
+  short_description: "按照 LxyDemo Unity 规范开发、调试和审查项目代码"
+  default_prompt: "使用 $unity-project-development 实现这项 Unity 改动，并保持项目现有架构。"

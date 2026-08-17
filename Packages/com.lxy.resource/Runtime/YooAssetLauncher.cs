@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Game.Contracts;
+using Game.Resource;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Serialization;
 using YooAsset;
 
 public sealed class YooAssetLauncher : MonoBehaviour
@@ -14,8 +16,6 @@ public sealed class YooAssetLauncher : MonoBehaviour
         RequiredStartupLocations = new[]
         {
             HybridCLRAssemblyManifest.ManifestLocation,
-            HybridCLRAssemblyManifest.DefaultEntryAssemblyName +
-            ".dll",
         };
 
     [Serializable]
@@ -31,6 +31,10 @@ public sealed class YooAssetLauncher : MonoBehaviour
     {
         public string version;
         public string downloadUrl;
+        public string minimumAppVersion;
+        public int minimumAndroidVersionCode;
+        public string appDownloadUrl;
+        public string forceUpdateMessage;
     }
 
     public enum PlayMode
@@ -56,6 +60,8 @@ public sealed class YooAssetLauncher : MonoBehaviour
         Idle,
         Initializing,
         RequestingServerConfig,
+        CheckingAppVersion,
+        ForceUpdateRequired,
         InitializingPackage,
         RequestingVersion,
         LoadingManifest,
@@ -106,13 +112,14 @@ public sealed class YooAssetLauncher : MonoBehaviour
     [SerializeField]
     private string packageName = "DefaultPackage";
 
-    [Header("Host 模式启动时下载全部缺失资源")]
+    [FormerlySerializedAs("downloadAllOnStart")]
+    [Header("Host 模式启动时下载 Mandatory 强更资源")]
     [SerializeField]
-    private bool downloadAllOnStart = true;
+    private bool downloadMandatoryOnStart = true;
 
-    [Header("服务器异常时切换到 APK 内置资源")]
+    [Header("服务器异常时允许降级到内置资源（强更正式包应关闭）")]
     [SerializeField]
-    private bool fallbackToOffline = true;
+    private bool fallbackToOffline = false;
 
     [Header("同时下载文件数量")]
     [SerializeField]
@@ -125,6 +132,17 @@ public sealed class YooAssetLauncher : MonoBehaviour
     [Header("更新成功后清理废弃 Bundle 缓存")]
     [SerializeField]
     private bool clearUnusedCacheAfterUpdate = true;
+
+    [Header("仅编辑器：模拟客户端整包强更")]
+    [SerializeField]
+    private bool simulateForceUpdateInEditor;
+
+    [SerializeField]
+    private string simulatedMinimumAppVersion = "99.0.0";
+
+    [SerializeField]
+    private string simulatedAppDownloadUrl =
+        "https://example.com/download";
 
     public static YooAssetLauncher Instance { get; private set; }
 
@@ -149,6 +167,13 @@ public sealed class YooAssetLauncher : MonoBehaviour
     public long TotalDownloadBytes { get; private set; }
     public string CurrentDownloadFile { get; private set; }
     public bool IsDownloadPaused { get; private set; }
+    public bool IsForceUpdateRequired { get; private set; }
+    public string CurrentAppVersion { get; private set; }
+    public int CurrentAndroidVersionCode { get; private set; } = -1;
+    public string MinimumAppVersion { get; private set; }
+    public int MinimumAndroidVersionCode { get; private set; }
+    public string AppDownloadUrl { get; private set; }
+    public string ForceUpdateMessage { get; private set; }
 
     public event Action<UpdateSnapshot> StatusChanged;
     public event Action<DownloadProgressChangedEventArgs>
@@ -158,6 +183,8 @@ public sealed class YooAssetLauncher : MonoBehaviour
     private PlayMode _activeMode;
     private DownloaderOperation activeDownloader;
     private bool downloadCancelled;
+    private bool preventOfflineFallback;
+    private GameResourceManager resourceManager;
 
     private void Awake()
     {
@@ -168,16 +195,27 @@ public sealed class YooAssetLauncher : MonoBehaviour
         }
 
         Instance = this;
+        resourceManager =
+            GameResourceManager.GetOrCreate(gameObject);
     }
 
     /// <summary>
     /// 由 UIStartup 统一调用。编辑器不初始化 YooAsset，Player 才执行
     /// Offline/Host、版本清单和资源下载流程。
     /// </summary>
-    public IEnumerator InitializeAsync()
+    /// <param name="prepareBeforeDownload">
+    /// 可选的启动资源准备流程。在 Manifest 生效后、启动强更下载前执行。
+    /// </param>
+    public IEnumerator InitializeAsync(
+        Func<ResourcePackage, IEnumerator> prepareBeforeDownload = null)
     {
         if (IsReady)
         {
+            if (prepareBeforeDownload != null)
+            {
+                yield return prepareBeforeDownload(Package);
+            }
+
             yield break;
         }
 
@@ -188,6 +226,11 @@ public sealed class YooAssetLauncher : MonoBehaviour
                 yield return null;
             }
 
+            if (IsReady && prepareBeforeDownload != null)
+            {
+                yield return prepareBeforeDownload(Package);
+            }
+
             yield break;
         }
 
@@ -195,6 +238,8 @@ public sealed class YooAssetLauncher : MonoBehaviour
         IsReady = false;
         LastError = null;
         downloadCancelled = false;
+        preventOfflineFallback = false;
+        ResetForceUpdateState();
         ResetDownloadStatistics();
         packageName = string.IsNullOrWhiteSpace(packageName)
             ? "DefaultPackage"
@@ -206,7 +251,23 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
 #if UNITY_EDITOR
         _activeMode = PlayMode.EditorAssetDatabase;
+        if (simulateForceUpdateInEditor)
+        {
+            ActivateForceUpdate(
+                simulatedMinimumAppVersion,
+                0,
+                simulatedAppDownloadUrl,
+                "当前为编辑器整包强更模拟，请点击前往更新。");
+            IsInitializing = false;
+            yield break;
+        }
+
         PackageVersion = "Editor";
+        if (prepareBeforeDownload != null)
+        {
+            yield return prepareBeforeDownload(null);
+        }
+
         IsReady = true;
         IsInitializing = false;
         SetStage(
@@ -271,6 +332,12 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
         if (!initialized)
         {
+            if (IsForceUpdateRequired)
+            {
+                IsInitializing = false;
+                yield break;
+            }
+
             FailInitialization(
                 string.IsNullOrEmpty(LastError)
                     ? "资源系统初始化失败"
@@ -278,8 +345,17 @@ public sealed class YooAssetLauncher : MonoBehaviour
             yield break;
         }
 
+        resourceManager ??=
+            GameResourceManager.GetOrCreate(gameObject);
+        resourceManager.SetDefaultPackage(Package);
+
+        if (prepareBeforeDownload != null)
+        {
+            yield return prepareBeforeDownload(Package);
+        }
+
         if (_activeMode == PlayMode.Host &&
-            downloadAllOnStart)
+            downloadMandatoryOnStart)
         {
             bool downloaded = false;
 
@@ -387,7 +463,11 @@ public sealed class YooAssetLauncher : MonoBehaviour
             result => hostServerReady = result);
         if (!hostServerReady)
         {
-            if (fallbackToOffline)
+            if (preventOfflineFallback)
+            {
+                completed?.Invoke(false);
+            }
+            else if (fallbackToOffline)
             {
                 Debug.LogWarning(
                     "[YooAsset] 获取远程资源地址失败，" +
@@ -511,11 +591,46 @@ public sealed class YooAssetLauncher : MonoBehaviour
                 yield break;
             }
 
-            if (!TryBuildHostServer(
+            if (!TryParseGameConfig(
                     request.downloadHandler.text,
+                    out GameConfigData config,
+                    out string error))
+            {
+                Debug.LogWarning(
+                    "[YooAsset] 远程资源配置无效：\n" +
+                    error);
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            SetStage(
+                UpdateStage.CheckingAppVersion,
+                0.08f,
+                "检查客户端版本");
+            if (!TryApplyAppVersionPolicy(
+                    config,
+                    Application.platform,
+                    out error))
+            {
+                preventOfflineFallback = true;
+                LastError = "客户端强更配置无效：" + error;
+                Debug.LogError("[YooAsset] " + LastError);
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            if (IsForceUpdateRequired)
+            {
+                preventOfflineFallback = true;
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            if (!TryBuildHostServer(
+                    config,
                     Application.platform,
                     out string hostServer,
-                    out string error))
+                    out error))
             {
                 Debug.LogWarning(
                     "[YooAsset] 远程资源配置无效：\n" +
@@ -533,13 +648,12 @@ public sealed class YooAssetLauncher : MonoBehaviour
         }
     }
 
-    private static bool TryBuildHostServer(
+    private static bool TryParseGameConfig(
         string json,
-        RuntimePlatform platform,
-        out string hostServer,
+        out GameConfigData config,
         out string error)
     {
-        hostServer = null;
+        config = null;
         error = null;
 
         if (string.IsNullOrWhiteSpace(json))
@@ -581,11 +695,24 @@ public sealed class YooAssetLauncher : MonoBehaviour
             return false;
         }
 
+        config = response.data;
+        return true;
+    }
+
+    private static bool TryBuildHostServer(
+        GameConfigData config,
+        RuntimePlatform platform,
+        out string hostServer,
+        out string error)
+    {
+        hostServer = null;
+        error = null;
+
         string version =
-            response.data.version?.Trim().Trim('/') ??
+            config.version?.Trim().Trim('/') ??
             string.Empty;
         string downloadUrl =
-            response.data.downloadUrl?.Trim().TrimEnd('/') ??
+            config.downloadUrl?.Trim().TrimEnd('/') ??
             string.Empty;
         if (version.Length == 0 || downloadUrl.Length == 0)
         {
@@ -621,6 +748,273 @@ public sealed class YooAssetLauncher : MonoBehaviour
         hostServer =
             $"{downloadUrl}/{platformFolder}/{version}";
         return true;
+    }
+
+    private bool TryApplyAppVersionPolicy(
+        GameConfigData config,
+        RuntimePlatform platform,
+        out string error)
+    {
+        error = null;
+        string minimumVersion =
+            config.minimumAppVersion?.Trim() ?? string.Empty;
+        int minimumVersionCode =
+            config.minimumAndroidVersionCode;
+
+        if (minimumVersionCode < 0)
+        {
+            error = "minimumAndroidVersionCode 不能小于 0。";
+            return false;
+        }
+
+        bool versionNameRequiresUpdate = false;
+        if (minimumVersion.Length > 0)
+        {
+            if (!TryCompareVersionNames(
+                    CurrentAppVersion,
+                    minimumVersion,
+                    out int comparison,
+                    out error))
+            {
+                return false;
+            }
+
+            versionNameRequiresUpdate = comparison < 0;
+        }
+
+        bool versionCodeRequiresUpdate = false;
+        if (platform == RuntimePlatform.Android &&
+            minimumVersionCode > 0)
+        {
+            if (!TryGetAndroidVersionCode(
+                    out int currentVersionCode,
+                    out error))
+            {
+                return false;
+            }
+
+            CurrentAndroidVersionCode = currentVersionCode;
+            versionCodeRequiresUpdate =
+                currentVersionCode < minimumVersionCode;
+        }
+
+        if (!versionNameRequiresUpdate &&
+            !versionCodeRequiresUpdate)
+        {
+            return true;
+        }
+
+        string updateUrl = config.appDownloadUrl?.Trim();
+        if (!TryGetHttpUri(updateUrl, out Uri normalizedUri))
+        {
+            error = "触发整包强更时 appDownloadUrl 必须是" +
+                    "有效的 HTTP/HTTPS 地址。";
+            return false;
+        }
+
+        ActivateForceUpdate(
+            minimumVersion,
+            minimumVersionCode,
+            normalizedUri.AbsoluteUri,
+            config.forceUpdateMessage);
+        return true;
+    }
+
+    private void ActivateForceUpdate(
+        string minimumVersion,
+        int minimumVersionCode,
+        string updateUrl,
+        string message)
+    {
+        IsForceUpdateRequired = true;
+        MinimumAppVersion = minimumVersion?.Trim() ?? string.Empty;
+        MinimumAndroidVersionCode = Mathf.Max(0, minimumVersionCode);
+        AppDownloadUrl = updateUrl?.Trim() ?? string.Empty;
+        ForceUpdateMessage = string.IsNullOrWhiteSpace(message)
+            ? "检测到必须安装的新客户端版本，" +
+              "请更新后重新进入游戏。"
+            : message.Trim();
+        LastError = ForceUpdateMessage;
+
+        SetStage(
+            UpdateStage.ForceUpdateRequired,
+            0.08f,
+            ForceUpdateMessage);
+        Debug.LogWarning(
+            $"[YooAsset] 客户端需要整包强更：" +
+            $"当前 version={CurrentAppVersion}, " +
+            $"versionCode={CurrentAndroidVersionCode}；" +
+            $"最低 version={MinimumAppVersion}, " +
+            $"versionCode={MinimumAndroidVersionCode}。");
+    }
+
+    public bool TryOpenForceUpdatePage(out string error)
+    {
+        if (!IsForceUpdateRequired)
+        {
+            error = "当前没有需要执行的整包强更。";
+            return false;
+        }
+
+        if (!TryGetHttpUri(AppDownloadUrl, out Uri updateUri))
+        {
+            error = "整包下载地址无效。";
+            return false;
+        }
+
+        Application.OpenURL(updateUri.AbsoluteUri);
+        error = null;
+        return true;
+    }
+
+    private static bool TryCompareVersionNames(
+        string current,
+        string minimum,
+        out int comparison,
+        out string error)
+    {
+        comparison = 0;
+        if (!TryParseVersionParts(
+                current,
+                out int[] currentParts))
+        {
+            error = $"当前 Application.version 无效：{current}。" +
+                    "版本号必须是 1 到 4 段非负整数。";
+            return false;
+        }
+
+        if (!TryParseVersionParts(
+                minimum,
+                out int[] minimumParts))
+        {
+            error = $"minimumAppVersion 无效：{minimum}。" +
+                    "版本号必须是 1 到 4 段非负整数。";
+            return false;
+        }
+
+        const int maxVersionParts = 4;
+        for (int i = 0; i < maxVersionParts; i++)
+        {
+            int currentPart = i < currentParts.Length
+                ? currentParts[i]
+                : 0;
+            int minimumPart = i < minimumParts.Length
+                ? minimumParts[i]
+                : 0;
+            if (currentPart == minimumPart)
+            {
+                continue;
+            }
+
+            comparison = currentPart < minimumPart ? -1 : 1;
+            break;
+        }
+
+        error = null;
+        return true;
+    }
+
+    private static bool TryParseVersionParts(
+        string value,
+        out int[] parts)
+    {
+        parts = null;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        string[] sourceParts = value.Trim().Split('.');
+        if (sourceParts.Length == 0 || sourceParts.Length > 4)
+        {
+            return false;
+        }
+
+        parts = new int[sourceParts.Length];
+        for (int i = 0; i < sourceParts.Length; i++)
+        {
+            if (sourceParts[i].Length == 0 ||
+                !int.TryParse(sourceParts[i], out int part) ||
+                part < 0)
+            {
+                parts = null;
+                return false;
+            }
+
+            parts[i] = part;
+        }
+
+        return true;
+    }
+
+    private static bool TryGetAndroidVersionCode(
+        out int versionCode,
+        out string error)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        try
+        {
+            using (var unityPlayer = new AndroidJavaClass(
+                       "com.unity3d.player.UnityPlayer"))
+            using (AndroidJavaObject activity =
+                   unityPlayer.GetStatic<AndroidJavaObject>(
+                       "currentActivity"))
+            using (AndroidJavaObject packageManager =
+                   activity.Call<AndroidJavaObject>(
+                       "getPackageManager"))
+            using (AndroidJavaObject packageInfo =
+                   packageManager.Call<AndroidJavaObject>(
+                       "getPackageInfo",
+                       activity.Call<string>("getPackageName"),
+                       0))
+            {
+                versionCode = packageInfo.Get<int>("versionCode");
+            }
+
+            if (versionCode <= 0)
+            {
+                error = "Android versionCode 必须大于 0。";
+                return false;
+            }
+
+            error = null;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            versionCode = -1;
+            error = "读取 Android versionCode 失败：" +
+                    exception.Message;
+            return false;
+        }
+#else
+        versionCode = -1;
+        error = "当前运行环境无法读取 Android versionCode。";
+        return false;
+#endif
+    }
+
+    private static bool TryGetHttpUri(
+        string value,
+        out Uri uri)
+    {
+        return Uri.TryCreate(value, UriKind.Absolute, out uri) &&
+               (uri.Scheme == Uri.UriSchemeHttp ||
+                uri.Scheme == Uri.UriSchemeHttps);
+    }
+
+    private void ResetForceUpdateState()
+    {
+        IsForceUpdateRequired = false;
+        CurrentAppVersion =
+            string.IsNullOrWhiteSpace(Application.version)
+                ? string.Empty
+                : Application.version.Trim();
+        CurrentAndroidVersionCode = -1;
+        MinimumAppVersion = string.Empty;
+        MinimumAndroidVersionCode = 0;
+        AppDownloadUrl = string.Empty;
+        ForceUpdateMessage = string.Empty;
     }
 
     #endregion
@@ -753,6 +1147,7 @@ public sealed class YooAssetLauncher : MonoBehaviour
             "计算需要更新的资源");
 
         var options = new ResourceDownloaderOptions(
+            YooAssetContentTags.Mandatory,
             Mathf.Max(1, maxDownloadCount),
             Mathf.Max(0, downloadRetryCount)
         );
@@ -769,9 +1164,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
             SetStage(
                 UpdateStage.Downloading,
                 0.9f,
-                "当前已是最新资源");
+                "启动强更资源已是最新版本");
             Debug.Log(
-                "[YooAsset] 当前没有需要下载的资源"
+                "[YooAsset] 当前没有需要下载的 Mandatory 资源"
             );
 
             activeDownloader = null;
@@ -780,7 +1175,7 @@ public sealed class YooAssetLauncher : MonoBehaviour
         }
 
         Debug.Log(
-            $"[YooAsset] 需要下载文件：" +
+            $"[YooAsset] 启动强更需要下载：" +
             $"{downloader.TotalDownloadCount} 个，" +
             $"大小：{FormatBytes(downloader.TotalDownloadBytes)}"
         );
@@ -788,7 +1183,7 @@ public sealed class YooAssetLauncher : MonoBehaviour
         SetStage(
             UpdateStage.Downloading,
             0.5f,
-            $"准备下载 {TotalDownloadCount} 个文件，" +
+            $"准备下载启动强更资源 {TotalDownloadCount} 个文件，" +
             FormatBytes(TotalDownloadBytes));
 
         downloader.DownloadProgressChanged +=
@@ -821,13 +1216,13 @@ public sealed class YooAssetLauncher : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("[YooAsset] 资源下载完成");
+        Debug.Log("[YooAsset] 启动强更资源下载完成");
         CurrentDownloadCount = TotalDownloadCount;
         CurrentDownloadBytes = TotalDownloadBytes;
         SetStage(
             UpdateStage.Downloading,
             0.9f,
-            "资源下载完成");
+            "启动强更资源下载完成");
 
         completed?.Invoke(true);
     }
@@ -958,6 +1353,11 @@ public sealed class YooAssetLauncher : MonoBehaviour
             string oldPackageName =
                 Package.PackageName;
 
+            resourceManager ??=
+                GameResourceManager.GetOrCreate(gameObject);
+            resourceManager.ReleaseAll();
+            resourceManager.SetDefaultPackage(null);
+
             var destroyOperation =
                 Package.DestroyPackageAsync();
 
@@ -976,6 +1376,11 @@ public sealed class YooAssetLauncher : MonoBehaviour
         yield return InitializeOffline(
             result => offlineReady = result
         );
+
+        if (offlineReady)
+        {
+            resourceManager.SetDefaultPackage(Package);
+        }
 
         completed?.Invoke(offlineReady);
     }

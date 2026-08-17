@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Game.Resource;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnitySceneManager = UnityEngine.SceneManagement.SceneManager;
@@ -17,6 +18,10 @@ namespace LxyDemo.SceneManagement
         private static GameSceneManager instance;
 
         private float minimumLoadingSeconds = 0.1f;
+
+        [SerializeField]
+        [Tooltip("场景切换完成后回收引用计数已经归零的 YooAsset Bundle。")]
+        private bool unloadUnusedAssetsAfterSceneChanged = true;
 
         private Coroutine activeLoadCoroutine;
         private Action<float> activeProgressCallback;
@@ -227,6 +232,15 @@ namespace LxyDemo.SceneManagement
             while (!operation.isDone)
             {
                 yield return null;
+            }
+
+            if (unloadUnusedAssetsAfterSceneChanged &&
+                GameResourceManager.Instance != null)
+            {
+                // 等待旧场景对象的 OnDestroy 完成，确保 UI 已归还句柄。
+                yield return null;
+                yield return GameResourceManager.Instance
+                    .UnloadUnusedAssetsAsync();
             }
 
             IsLoading = false;

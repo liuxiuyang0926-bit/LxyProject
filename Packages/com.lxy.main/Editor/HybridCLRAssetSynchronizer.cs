@@ -14,7 +14,6 @@ namespace Game.Main.Editor
 {
     public static class HybridCLRAssetSynchronizer
     {
-        private const string EntryAssemblyName = "Game.HotUpdate";
         private const string AotAssetDirectory =
             "Assets/GameResources/HybridCLR/AOT";
         private const string HotUpdateAssetDirectory =
@@ -58,7 +57,6 @@ namespace Game.Main.Editor
             IReadOnlyList<string> hotUpdateDlls =
                 GetConfiguredHotUpdateDlls();
 
-            ValidateEntryAssembly(hotUpdateDlls);
             ValidateHotUpdateLoadOrder(hotUpdateDlls);
 
             string projectDirectory = SettingsUtil.ProjectDir;
@@ -162,39 +160,12 @@ namespace Game.Main.Editor
         private static IReadOnlyList<string>
             GetConfiguredHotUpdateDlls()
         {
-            string entryDll = EntryAssemblyName + ".dll";
-            var dlls = SettingsUtil
+            return SettingsUtil
                 .HotUpdateAssemblyFilesExcludePreserved
                 .Where(name => !string.IsNullOrWhiteSpace(name))
                 .Select(name => name.Trim())
                 .Distinct(StringComparer.Ordinal)
-                .Where(name => !string.Equals(
-                    name,
-                    entryDll,
-                    StringComparison.Ordinal))
-                .ToList();
-
-            if (SettingsUtil.HotUpdateAssemblyFilesExcludePreserved
-                .Contains(entryDll))
-            {
-                // 入口最后加载；此前的 DLL 可作为它的热更新依赖。
-                dlls.Add(entryDll);
-            }
-
-            return dlls;
-        }
-
-        private static void ValidateEntryAssembly(
-            IReadOnlyList<string> hotUpdateDlls)
-        {
-            string entryDll = EntryAssemblyName + ".dll";
-            if (!hotUpdateDlls.Contains(entryDll))
-            {
-                throw new BuildFailedException(
-                    $"HybridCLR Settings 没有配置入口程序集：" +
-                    $"{EntryAssemblyName}。请将其 asmdef 添加到 " +
-                    "Hot Update Assembly Definitions。");
-            }
+                .ToArray();
         }
 
         private static void ValidateHotUpdateLoadOrder(
@@ -217,8 +188,8 @@ namespace Game.Main.Editor
                 "Assembly-CSharp.dll");
             ValidateDependencyBefore(
                 hotUpdateDlls,
-                "Game.UI.dll",
-                EntryAssemblyName + ".dll");
+                "Game.Battle.dll",
+                "Assembly-CSharp.dll");
         }
 
         private static void ValidateDependencyBefore(
@@ -351,9 +322,6 @@ namespace Game.Main.Editor
         {
             var builder = new StringBuilder();
             builder.AppendLine("{");
-            builder.AppendLine(
-                $"  \"entryAssemblyName\": " +
-                $"\"{Escape(EntryAssemblyName)}\",");
             AppendJsonArray(
                 builder,
                 "aotMetadataDlls",

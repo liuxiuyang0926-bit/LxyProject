@@ -1,14 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Resource;
 using LuaObjectBind;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using YooAsset;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace LxyDemo.UIFramework
 {
@@ -29,8 +26,7 @@ namespace LxyDemo.UIFramework
             public bool CloseSkipAnimation;
             public UILayer ResolvedLayer;
             public GameObject Backdrop;
-            public AssetHandle AssetHandle;
-            public InstantiateOperation InstantiateOperation;
+            public GameResourceInstanceHandle InstanceHandle;
             public GameObject Instance;
             public bool IsLoading;
             public readonly List<UIAsyncOperation<UIPanelLogic>>
@@ -855,37 +851,15 @@ namespace LxyDemo.UIFramework
                 }
                 else
                 {
-#if UNITY_EDITOR
-                    GameObject editorPrefab =
-                        AssetDatabase.LoadAssetAtPath<GameObject>(
-                            record.Config.Location);
-                    if (editorPrefab == null)
-                    {
-                        throw new InvalidOperationException(
-                            "AssetDatabase 无法加载 UI Prefab：" +
-                            record.Config.Location +
-                            "。编辑器模式请填写完整 Assets 路径。");
-                    }
-
-                    record.Instance =
-                        UnityEngine.Object.Instantiate(
-                            editorPrefab,
+                    GameResourceManager resourceManager =
+                        GameResourceManager.GetOrCreate(gameObject);
+                    record.InstanceHandle =
+                        resourceManager.InstantiateAsync(
+                            record.Config.Location,
                             parent,
-                            false);
-#else
-                    ResourcePackage package =
-                        GetInitializedYooAssetPackage(
-                            record.Config);
-                    record.AssetHandle =
-                        package.LoadAssetAsync<GameObject>(
-                            record.Config.Location);
-                    record.InstantiateOperation =
-                        record.AssetHandle.InstantiateAsync(
-                            new InstantiateOptions(
-                                true,
-                                parent,
-                                false));
-#endif
+                            false,
+                            true,
+                            record.Config.PackageName);
                 }
 
                 StartCoroutine(
@@ -908,35 +882,29 @@ namespace LxyDemo.UIFramework
             UIPanelRecord record,
             long requestId)
         {
-            AssetHandle assetHandle = record.AssetHandle;
-            InstantiateOperation instantiateOperation =
-                record.InstantiateOperation;
+            GameResourceInstanceHandle instanceHandle =
+                record.InstanceHandle;
             GameObject localInstance = record.Instance;
 
-            while (instantiateOperation != null &&
-                   !instantiateOperation.IsDone)
+            while (instanceHandle != null &&
+                   !instanceHandle.IsDone)
             {
-                float loadProgress =
-                    assetHandle != null && assetHandle.IsValid
-                        ? assetHandle.Progress
-                        : instantiateOperation.Progress;
                 SetWaiterProgress(
                     record,
-                    0.1f + loadProgress * 0.75f);
+                    0.1f + instanceHandle.Progress * 0.75f);
                 yield return null;
             }
 
             if (record.RequestId != requestId)
             {
                 ReleaseDetachedLoad(
-                    assetHandle,
-                    instantiateOperation,
+                    instanceHandle,
                     localInstance);
                 yield break;
             }
 
-            if (instantiateOperation != null &&
-                instantiateOperation.Status !=
+            if (instanceHandle != null &&
+                instanceHandle.Status !=
                 EOperationStatus.Succeeded)
             {
                 HandlePanelFailure(
@@ -946,13 +914,13 @@ namespace LxyDemo.UIFramework
                         $"加载 UI Prefab 失败：{record.Config.Id}",
                         record.Config.Id,
                         new InvalidOperationException(
-                            instantiateOperation.Error)));
+                            instanceHandle.Error)));
                 yield break;
             }
 
             GameObject panelObject =
-                instantiateOperation != null
-                    ? instantiateOperation.Result
+                instanceHandle != null
+                    ? instanceHandle.Result
                     : localInstance;
             if (panelObject == null)
             {
@@ -966,7 +934,6 @@ namespace LxyDemo.UIFramework
                 yield break;
             }
 
-            record.InstantiateOperation = null;
             record.Instance = panelObject;
             record.IsLoading = false;
 
@@ -1717,109 +1684,34 @@ namespace LxyDemo.UIFramework
             };
         }
 
-        private static ResourcePackage
-            GetInitializedYooAssetPackage(
-                UIPanelConfig config)
-        {
-            if (!YooAssets.IsInitialized)
-            {
-                throw new InvalidOperationException(
-                    "YooAssets 尚未初始化。请先完成 " +
-                    "YooAssets.Initialize 和 ResourcePackage 初始化，" +
-                    "再打开 UI。");
-            }
-
-            if (string.Equals(
-                    config.PackageName,
-                    "@local",
-                    StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException(
-                    $"面板 {config.Id} 注册为本地 Prefab，" +
-                    "但对应的本地资源已失效。");
-            }
-
-            if (!YooAssets.TryGetPackage(
-                    config.PackageName,
-                    out ResourcePackage package))
-            {
-                throw new InvalidOperationException(
-                    $"YooAsset Package 不存在：" +
-                    config.PackageName);
-            }
-
-            if (package.InitializeStatus !=
-                EOperationStatus.Succeeded)
-            {
-                throw new InvalidOperationException(
-                    $"YooAsset Package 尚未初始化成功：" +
-                    $"{config.PackageName}，当前状态 " +
-                    $"{package.InitializeStatus}。");
-            }
-
-            return package;
-        }
-
         private static void ReleasePanelResources(
             UIPanelRecord record)
         {
-            InstantiateOperation instantiateOperation =
-                record.InstantiateOperation;
-            if (instantiateOperation != null &&
-                !instantiateOperation.IsDone)
+            if (record.InstanceHandle != null)
             {
-                instantiateOperation.Cancel();
+                record.InstanceHandle.Release();
+            }
+            else if (record.Instance != null)
+            {
+                UnityEngine.Object.Destroy(record.Instance);
             }
 
-            GameObject instance = record.Instance;
-            if (instance == null &&
-                instantiateOperation != null)
-            {
-                instance = instantiateOperation.Result;
-            }
-
-            if (instance != null)
-            {
-                UnityEngine.Object.Destroy(instance);
-            }
-
-            ReleaseYooAssetHandle(record.AssetHandle);
-            record.AssetHandle = null;
-            record.InstantiateOperation = null;
+            record.InstanceHandle = null;
             record.Instance = null;
             record.IsLoading = false;
         }
 
         private static void ReleaseDetachedLoad(
-            AssetHandle assetHandle,
-            InstantiateOperation instantiateOperation,
+            GameResourceInstanceHandle instanceHandle,
             GameObject localInstance)
         {
-            if (instantiateOperation != null &&
-                !instantiateOperation.IsDone)
+            if (instanceHandle != null)
             {
-                instantiateOperation.Cancel();
+                instanceHandle.Release();
             }
-
-            GameObject instance =
-                localInstance != null
-                    ? localInstance
-                    : instantiateOperation?.Result;
-            if (instance != null)
+            else if (localInstance != null)
             {
-                UnityEngine.Object.Destroy(instance);
-            }
-
-            ReleaseYooAssetHandle(assetHandle);
-        }
-
-        private static void ReleaseYooAssetHandle(
-            AssetHandle assetHandle)
-        {
-            if (assetHandle != null &&
-                assetHandle.IsValid)
-            {
-                assetHandle.Release();
+                UnityEngine.Object.Destroy(localInstance);
             }
         }
 

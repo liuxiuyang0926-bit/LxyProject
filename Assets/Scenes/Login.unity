@@ -153,9 +153,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resourceLauncher: {fileID: 0}
   uiCanvasRootLocation: Assets/GameResources/Prefabs/UICanvasRoot.prefab
-  startLuaRuntime: 1
-  mainLuaModule: Main
-  settings: {fileID: 0}
   initializeOnStart: 1
   createEventSystem: 1
 --- !u!4 &556541022

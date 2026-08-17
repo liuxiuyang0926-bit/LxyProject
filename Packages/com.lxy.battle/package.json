@@ -1,0 +1,11 @@
+{
+  "name": "com.lxy.battle",
+  "version": "1.0.0",
+  "displayName": "Lxy Deterministic Battle",
+  "description": "Deterministic local lockstep battle runtime with ECS-style logic, Unity views, and skill/buff authoring tools.",
+  "unity": "2022.3",
+  "dependencies": {},
+  "author": {
+    "name": "Lxy"
+  }
+}

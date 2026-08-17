@@ -9,16 +9,18 @@ namespace LxyDemo
 {
     /// <summary>
     /// 游戏唯一启动编排器。严格保证资源清单和差异资源完成后才加载
-    /// HybridCLR 程序集，热更入口完成后才允许加载业务场景及 XLua。
+    /// HybridCLR 程序集，程序集加载完成后才允许进入业务场景并启动 UI。
     /// </summary>
     [DefaultExecutionOrder(-19000)]
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(YooAssetLauncher))]
-    [RequireComponent(typeof(HybridCLRLoader))]
     public class GameMain : MonoBehaviour
     {
         private const string StartupDownloadViewResourcePath =
             "UI/UISlider";
+        private const bool LoadFirstSceneOnStart = true;
+        private const string FirstSceneName = "Login";
+        private const bool InitializeFirstSceneRuntime = true;
+        private const float FirstSceneRuntimeTimeoutSeconds = 30f;
 
         public enum BootstrapStage
         {
@@ -27,6 +29,7 @@ namespace LxyDemo
             StartingHotUpdateRuntime,
             LoadingFirstScene,
             StartingUIAndLua,
+            ForceUpdateRequired,
             Ready,
             Failed
         }
@@ -49,25 +52,8 @@ namespace LxyDemo
         }
 
         private static GameMain instance;
-
-        [Header("启动服务")]
-        [SerializeField]
         private YooAssetLauncher resourceLauncher;
-
-        [SerializeField]
         private HybridCLRLoader hybridCLRLoader;
-
-        [Header("首个业务场景")]
-        [SerializeField]
-        private bool loadFirstSceneOnStart = true;
-
-        [SerializeField]
-        private string firstSceneName = "Login";
-
-        [Header("业务运行时")]
-        [Tooltip("进入首场景后调用热更新入口启动场景级 UI 与 Lua。")]
-        [SerializeField]
-        private bool waitForUIAndLua = true;
 
         public static GameMain Instance => instance;
         public bool IsInitializing { get; private set; }
@@ -91,10 +77,13 @@ namespace LxyDemo
             }
 
             instance = this;
-            resourceLauncher ??=
-                GetComponent<YooAssetLauncher>();
-            hybridCLRLoader ??=
-                GetComponent<HybridCLRLoader>();
+            resourceLauncher =
+                YooAssetLauncher.Instance ??
+                GetComponent<YooAssetLauncher>() ??
+                gameObject.AddComponent<YooAssetLauncher>();
+            hybridCLRLoader =
+                GetComponent<HybridCLRLoader>() ??
+                gameObject.AddComponent<HybridCLRLoader>();
             DontDestroyOnLoad(gameObject);
         }
 
@@ -109,8 +98,8 @@ namespace LxyDemo
                 yield break;
             }
 
-            string targetScene = firstSceneName?.Trim();
-            if (loadFirstSceneOnStart &&
+            string targetScene = FirstSceneName;
+            if (LoadFirstSceneOnStart &&
                 string.IsNullOrEmpty(targetScene))
             {
                 Fail("首个业务场景名称不能为空。");
@@ -123,7 +112,7 @@ namespace LxyDemo
                 yield break;
             }
 
-            if (loadFirstSceneOnStart)
+            if (LoadFirstSceneOnStart)
             {
                 startupDownloadView?.ShowStartingGame(
                     $"正在进入 {targetScene}");
@@ -133,9 +122,9 @@ namespace LxyDemo
                     yield break;
                 }
 
-                if (waitForUIAndLua)
+                if (InitializeFirstSceneRuntime)
                 {
-                    yield return WaitForUIAndLuaAsync();
+                    yield return WaitForFirstSceneRuntimeAsync();
                     if (!string.IsNullOrEmpty(LastError))
                     {
                         yield break;
@@ -150,7 +139,7 @@ namespace LxyDemo
                 1f,
                 "游戏启动完成");
             Debug.Log(
-                "[GameMain] 资源、热更新代码、业务场景和 Lua " +
+                "[GameMain] 资源、热更新代码、业务场景和 UI 运行时" +
                 "启动完成。",
                 this);
         }
@@ -179,12 +168,19 @@ namespace LxyDemo
                 "检查资源更新");
             resourceLauncher.StatusChanged +=
                 OnResourceStatusChanged;
-            yield return resourceLauncher.InitializeAsync();
+            yield return resourceLauncher.InitializeAsync(
+                startupDownloadView.PrepareBackgroundsAsync);
             resourceLauncher.StatusChanged -=
                 OnResourceStatusChanged;
 
             if (!resourceLauncher.IsReady)
             {
+                if (resourceLauncher.IsForceUpdateRequired)
+                {
+                    RequireForceUpdate();
+                    yield break;
+                }
+
                 Fail(
                     resourceLauncher.LastError ??
                     "YooAsset 资源流程失败。");
@@ -212,7 +208,7 @@ namespace LxyDemo
                 string.IsNullOrWhiteSpace(Application.version)
                     ? "Unknown"
                     : Application.version,
-                firstSceneName?.Trim(),
+                FirstSceneName,
                 Application.isEditor,
                 OnHotUpdateStatusChanged);
 
@@ -285,35 +281,46 @@ namespace LxyDemo
             }
         }
 
-        private IEnumerator WaitForUIAndLuaAsync()
+        private IEnumerator WaitForFirstSceneRuntimeAsync()
         {
             SetStage(
                 BootstrapStage.StartingUIAndLua,
                 0.92f,
-                "初始化 UIManager 与 XLua");
+                "初始化首场景 UI 运行时");
 
-            if (hotUpdateContext == null)
+            float deadline = Time.realtimeSinceStartup +
+                             FirstSceneRuntimeTimeoutSeconds;
+            while (FirstSceneRuntimeBridge.Current == null)
             {
-                Fail("缺少热更新启动上下文。");
-                yield break;
+                if (Time.realtimeSinceStartup >= deadline)
+                {
+                    Fail(
+                        "等待首场景 UI 运行时超时，请确认场景中已" +
+                        "创建实现 IFirstSceneRuntime 的启动组件。");
+                    yield break;
+                }
+
+                yield return null;
             }
 
-            yield return hybridCLRLoader.StartFirstScene(
-                hotUpdateContext);
-            if (!string.IsNullOrEmpty(hybridCLRLoader.LastError) ||
-                !hotUpdateContext.FirstSceneRuntimeSucceeded)
+            IFirstSceneRuntime runtime =
+                FirstSceneRuntimeBridge.Current;
+            yield return runtime.InitializeAsync();
+            if (!runtime.IsInitialized)
             {
                 Fail(
-                    hybridCLRLoader.LastError ??
-                    hotUpdateContext.FirstSceneRuntimeError ??
-                    "UIManager 或 XLua 初始化失败。");
+                    string.IsNullOrWhiteSpace(runtime.LastError)
+                        ? "首场景 UI 运行时初始化失败。"
+                        : runtime.LastError);
                 yield break;
             }
+
+            hotUpdateContext?.CompleteFirstSceneRuntime();
 
             SetStage(
                 BootstrapStage.StartingUIAndLua,
                 0.99f,
-                "UIManager 与 XLua 已就绪");
+                "首场景 UI 运行时已就绪");
         }
 
         private void OnResourceStatusChanged(
@@ -354,6 +361,7 @@ namespace LxyDemo
             StatusMessage = message ?? string.Empty;
 
             if (stage != BootstrapStage.UpdatingResources &&
+                stage != BootstrapStage.ForceUpdateRequired &&
                 stage != BootstrapStage.Failed)
             {
                 startupDownloadView?.ShowStartingGame(
@@ -385,6 +393,31 @@ namespace LxyDemo
                 message);
             startupDownloadView?.ShowFailure(message);
             Debug.LogError("[GameMain] " + message, this);
+        }
+
+        private void RequireForceUpdate()
+        {
+            string message =
+                string.IsNullOrWhiteSpace(
+                    resourceLauncher.ForceUpdateMessage)
+                    ? "当前客户端需要安装新版本。"
+                    : resourceLauncher.ForceUpdateMessage;
+            LastError = message;
+            IsInitialized = false;
+            IsInitializing = false;
+            SetStage(
+                BootstrapStage.ForceUpdateRequired,
+                Progress,
+                message);
+            startupDownloadView?.ShowForceUpdate(
+                message,
+                resourceLauncher.CurrentAppVersion,
+                resourceLauncher.MinimumAppVersion,
+                resourceLauncher.CurrentAndroidVersionCode,
+                resourceLauncher.MinimumAndroidVersionCode);
+            Debug.LogWarning(
+                "[GameMain] 已停止启动，等待客户端整包更新。",
+                this);
         }
 
         private bool TryCreateStartupDownloadView(out string error)

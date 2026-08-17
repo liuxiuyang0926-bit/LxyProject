@@ -1,5 +1,4 @@
 {
-  "entryAssemblyName": "Game.HotUpdate",
   "aotMetadataDlls": [
     "System.Core.dll",
     "UnityEngine.CoreModule.dll",
@@ -11,7 +10,6 @@
     "Game.Common.dll",
     "Game.Lua.dll",
     "Game.UI.dll",
-    "Assembly-CSharp.dll",
-    "Game.HotUpdate.dll"
+    "Assembly-CSharp.dll"
   ]
 }

@@ -1,0 +1,7 @@
+{
+  "enabled": false,
+  "enableRotation": false,
+  "rotationIntervalSeconds": 5.0,
+  "fadeDurationSeconds": 0.5,
+  "backgroundLocations": ["jiedaoye","login_bg"]
+}
