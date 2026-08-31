@@ -15,7 +15,8 @@
 
 目标项目需要 Unity 2022.3、UGUI 和 TextMeshPro。高精度/轻量 AI 分析还
 要求制作机能够执行 `codex --version`，并已完成 Codex CLI 登录。默认高精度
-模式不依赖 UnityMCP。
+模式不依赖 UnityMCP。目标工程可以不是 Git 仓库；包调用 `codex exec` 时会
+使用官方 `--skip-git-repo-check` 参数，同时继续保持只读沙箱。
 
 ## 通用项目默认行为
 

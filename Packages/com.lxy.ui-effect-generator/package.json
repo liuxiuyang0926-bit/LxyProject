@@ -1,6 +1,6 @@
 {
   "name": "com.lxy.ui-effect-generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Lxy UI Effect Generator",
   "description": "Portable screenshot and Figma to Unity UGUI Prefab generator with deterministic Sprite matching.",
   "unity": "2022.3",

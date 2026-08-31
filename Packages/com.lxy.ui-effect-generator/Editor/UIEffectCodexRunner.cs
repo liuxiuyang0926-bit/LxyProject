@@ -335,6 +335,7 @@ namespace Lxy.UIEffectGenerator.Editor
             var argumentParts = new List<string>
             {
                 "exec",
+                "--skip-git-repo-check",
                 "--json",
                 "--ephemeral",
             };
