@@ -1,4 +1,4 @@
 interface:
   display_name: "Unity UI 自动生成"
-  short_description: "根据设计参考生成符合项目规范的 Unity UI Prefab"
-  default_prompt: "使用 $unity-ui-generator 分析这个设计参考，生成 UISchema，并创建符合项目规范的 UI Prefab。"
+  short_description: "按原图像素精准还原 Unity UI Prefab"
+  default_prompt: "使用 $unity-ui-generator 从本地设计图或 Figma Frame 链接生成 UI；本地效果图优先采用高精度单轮模式，对照高清原图和 Sprite 联系图输出完整 UISchema，再由 Unity Editor 的现有 Builder 创建 Prefab。"

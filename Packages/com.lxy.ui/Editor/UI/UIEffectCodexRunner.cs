@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -11,12 +12,21 @@ namespace LxyDemo.UIFramework.Editor
 {
     internal sealed class UIEffectCodexRequest
     {
+        public string provider = "Codex";
         public string codexCommand = "codex";
         public string projectRoot = string.Empty;
         public string imagePath = string.Empty;
+        public string[] imagePaths = Array.Empty<string>();
         public string prompt = string.Empty;
         public string outputSchemaPath = string.Empty;
         public string outputPath = string.Empty;
+        public bool requiresFigmaMcp;
+        public bool requiresUnityMcp;
+        public bool allowWorkspaceWrite;
+        public string unityMcpServerPath = string.Empty;
+        public string unityMcpNodeCommand = "node";
+        public int unityBridgePort;
+        public string reasoningEffort = "high";
     }
 
     internal sealed class UIEffectCodexRunResult
@@ -41,9 +51,9 @@ namespace LxyDemo.UIFramework.Editor
     }
 
     /// <summary>
-    /// Runs the official Codex non-interactive command without opening a
-    /// terminal window. The agent receives read-only access; Unity remains
-    /// responsible for validating and writing the returned UISchema.
+    /// Runs a configured AI CLI without opening a terminal window. Local image
+    /// analysis is read-only and explicitly disables unrelated MCP servers;
+    /// callers that genuinely need Figma or Unity MCP opt in per request.
     /// </summary>
     internal sealed class UIEffectCodexRunner : IDisposable
     {
@@ -60,6 +70,7 @@ namespace LxyDemo.UIFramework.Editor
         private int isRunning;
         private int completionAvailable;
         private int cancelRequested;
+        private int exitHandled;
         private bool disposed;
         private UIEffectCodexUsage usage;
 
@@ -93,8 +104,17 @@ namespace LxyDemo.UIFramework.Editor
             }
 
             ValidateRequest(runRequest);
-            string executable = ResolveExecutable(
-                runRequest.codexCommand);
+            string executable = ResolveExecutable(runRequest.codexCommand);
+            if (runRequest.requiresFigmaMcp)
+            {
+                ValidateFigmaMcpConfiguration(
+                    executable,
+                    runRequest);
+            }
+            if (runRequest.requiresUnityMcp)
+            {
+                ValidateUnityMcpConfiguration(runRequest);
+            }
             Directory.CreateDirectory(
                 Path.GetDirectoryName(runRequest.outputSchemaPath));
             Directory.CreateDirectory(
@@ -110,6 +130,7 @@ namespace LxyDemo.UIFramework.Editor
 
             Interlocked.Exchange(ref completionAvailable, 0);
             Interlocked.Exchange(ref cancelRequested, 0);
+            Interlocked.Exchange(ref exitHandled, 0);
             Interlocked.Exchange(ref isRunning, 1);
 
             ProcessStartInfo startInfo = CreateStartInfo(
@@ -118,11 +139,13 @@ namespace LxyDemo.UIFramework.Editor
             process = new Process
             {
                 StartInfo = startInfo,
-                EnableRaisingEvents = true,
+                // Attach Exited only after the stdin request has been written.
+                // Otherwise a CLI bootstrap failure races the pipe write and
+                // Unity only reports Win32 IO 232 instead of the real stderr.
+                EnableRaisingEvents = false,
             };
             process.OutputDataReceived += HandleOutputDataReceived;
             process.ErrorDataReceived += HandleErrorDataReceived;
-            process.Exited += HandleProcessExited;
 
             try
             {
@@ -136,14 +159,22 @@ namespace LxyDemo.UIFramework.Editor
                 process.BeginErrorReadLine();
                 process.StandardInput.Write(runRequest.prompt);
                 process.StandardInput.Close();
+                process.Exited += HandleProcessExited;
+                process.EnableRaisingEvents = true;
+                if (process.HasExited)
+                {
+                    HandleProcessExited(process, EventArgs.Empty);
+                }
                 progressMessages.Enqueue(
-                    "Codex 已在后台启动，正在读取 Skill 和效果图…");
+                    runRequest.provider +
+                    " 已在后台启动，正在读取设计输入…");
             }
-            catch
+            catch (Exception exception)
             {
+                Exception startupException = BuildStartupException(exception);
                 Interlocked.Exchange(ref isRunning, 0);
                 DisposeProcess();
-                throw;
+                throw startupException;
             }
         }
 
@@ -182,6 +213,7 @@ namespace LxyDemo.UIFramework.Editor
 
             Interlocked.Exchange(ref cancelRequested, 1);
             progressMessages.Enqueue("正在取消 Codex 分析任务…");
+
             Process current = process;
             if (current == null)
             {
@@ -292,8 +324,7 @@ namespace LxyDemo.UIFramework.Editor
             }
 
             throw new FileNotFoundException(
-                "找不到 Codex 命令。请确认已安装 Codex CLI，" +
-                "或在窗口中填写 codex.cmd/codex.exe 的完整路径。",
+                "找不到 Codex 命令。请确认已安装 Codex CLI，或在窗口中填写 codex.cmd/codex.exe 的完整路径。",
                 value);
         }
 
@@ -301,22 +332,76 @@ namespace LxyDemo.UIFramework.Editor
             string executable,
             UIEffectCodexRequest runRequest)
         {
-            string arguments = string.Join(
-                " ",
+            var argumentParts = new List<string>
+            {
                 "exec",
                 "--json",
                 "--ephemeral",
-                "--sandbox",
-                "read-only",
-                "--cd",
-                QuoteArgument(runRequest.projectRoot),
-                "--image",
-                QuoteArgument(runRequest.imagePath),
-                "--output-schema",
-                QuoteArgument(runRequest.outputSchemaPath),
-                "--output-last-message",
-                QuoteArgument(runRequest.outputPath),
-                "-");
+            };
+            if (runRequest.allowWorkspaceWrite)
+            {
+                argumentParts.Add("--approve-for-me");
+            }
+            else
+            {
+                argumentParts.Add("--sandbox");
+                argumentParts.Add("read-only");
+            }
+
+            argumentParts.Add("--cd");
+            argumentParts.Add(QuoteArgument(runRequest.projectRoot));
+            argumentParts.Add("--config");
+            argumentParts.Add(QuoteArgument(
+                "model_reasoning_effort=\"" +
+                NormalizeReasoningEffort(runRequest.reasoningEffort) +
+                "\""));
+            if (!runRequest.requiresUnityMcp &&
+                !runRequest.requiresFigmaMcp)
+            {
+                // A dotted `mcp_servers.foo.enabled=false` override replaces an
+                // inherited server table in Codex CLI 0.150 and leaves it without
+                // a transport. The CLI then exits before reading stdin. Replace
+                // the complete map for image-only analysis instead: this is both
+                // valid TOML and guarantees that no unrelated MCP catalog is
+                // injected into the request.
+                AddConfigArgument(argumentParts, "mcp_servers={}");
+            }
+            else if (runRequest.requiresUnityMcp)
+            {
+                AddUnityMcpArguments(argumentParts, runRequest);
+            }
+            else
+            {
+                // The user's global Codex configuration may already contain a
+                // server named "unity". Explicitly disable it for image-only
+                // analysis so its large tool catalog is not injected into every
+                // reasoning step.
+                AddDisabledMcpServer(argumentParts, "unity");
+            }
+            if (!runRequest.requiresFigmaMcp)
+            {
+                if (runRequest.requiresUnityMcp)
+                {
+                    AddDisabledMcpServer(argumentParts, "figma");
+                }
+            }
+
+            List<string> imagePaths = GetImagePaths(runRequest);
+            if (imagePaths.Count > 0)
+            {
+                argumentParts.Add("--image");
+                foreach (string imagePath in imagePaths)
+                {
+                    argumentParts.Add(QuoteArgument(imagePath));
+                }
+            }
+
+            argumentParts.Add("--output-schema");
+            argumentParts.Add(QuoteArgument(runRequest.outputSchemaPath));
+            argumentParts.Add("--output-last-message");
+            argumentParts.Add(QuoteArgument(runRequest.outputPath));
+            argumentParts.Add("-");
+            string arguments = string.Join(" ", argumentParts);
 
             var startInfo = new ProcessStartInfo
             {
@@ -353,8 +438,133 @@ namespace LxyDemo.UIFramework.Editor
                     QuoteArgument(executable),
                     arguments);
             }
+            else if (IsCommandScript(executable))
+            {
+                startInfo.FileName = Environment.GetEnvironmentVariable(
+                    "ComSpec") ?? "cmd.exe";
+                startInfo.Arguments =
+                    "/d /s /c \"\"" + executable + "\" " +
+                    arguments + "\"";
+            }
 
             return startInfo;
+        }
+
+        private static void AddUnityMcpArguments(
+            List<string> argumentParts,
+            UIEffectCodexRequest runRequest)
+        {
+            string nodeCommand = NormalizeTomlPath(
+                ResolveExecutable(runRequest.unityMcpNodeCommand));
+            string serverPath = NormalizeTomlPath(
+                Path.GetFullPath(runRequest.unityMcpServerPath));
+            AddConfigArgument(
+                argumentParts,
+                "mcp_servers.unity.command=\"" +
+                EscapeTomlString(nodeCommand) + "\"");
+            AddConfigArgument(
+                argumentParts,
+                "mcp_servers.unity.args=[\"" +
+                EscapeTomlString(serverPath) + "\"]");
+            AddConfigArgument(
+                argumentParts,
+                "mcp_servers.unity.env.UNITY_BRIDGE_PORT=\"" +
+                runRequest.unityBridgePort + "\"");
+            AddConfigArgument(
+                argumentParts,
+                "mcp_servers.unity.startup_timeout_sec=120");
+            AddConfigArgument(
+                argumentParts,
+                "mcp_servers.unity.tool_timeout_sec=300");
+        }
+
+        private static void AddConfigArgument(
+            List<string> argumentParts,
+            string value)
+        {
+            argumentParts.Add("--config");
+            argumentParts.Add(QuoteArgument(value));
+        }
+
+        private static void AddDisabledMcpServer(
+            List<string> argumentParts,
+            string serverName)
+        {
+            // A disabled server still needs a syntactically complete transport
+            // in current Codex CLI versions. It is never started because enabled
+            // is false; the placeholder only prevents bootstrap validation from
+            // rejecting a partial table.
+            AddConfigArgument(
+                argumentParts,
+                "mcp_servers." + serverName +
+                "={enabled=false,command=\"codex\",args=[\"--version\"]}");
+        }
+
+        private static string NormalizeReasoningEffort(string value)
+        {
+            string normalized = (value ?? string.Empty)
+                .Trim()
+                .ToLowerInvariant();
+            switch (normalized)
+            {
+                case "low":
+                case "medium":
+                case "high":
+                case "xhigh":
+                    return normalized;
+                default:
+                    return "high";
+            }
+        }
+
+        private static string NormalizeTomlPath(string value)
+        {
+            return (value ?? string.Empty).Replace('\\', '/');
+        }
+
+        private static string EscapeTomlString(string value)
+        {
+            return (value ?? string.Empty)
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"");
+        }
+
+        private static bool IsCommandScript(string executable)
+        {
+            string extension = Path.GetExtension(executable);
+            return string.Equals(
+                       extension,
+                       ".cmd",
+                       StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(
+                       extension,
+                       ".bat",
+                       StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static List<string> GetImagePaths(
+            UIEffectCodexRequest runRequest)
+        {
+            var paths = new List<string>();
+            if (runRequest.imagePaths != null)
+            {
+                foreach (string path in runRequest.imagePaths)
+                {
+                    if (!string.IsNullOrWhiteSpace(path) &&
+                        !paths.Contains(path))
+                    {
+                        paths.Add(path);
+                    }
+                }
+            }
+
+            if (paths.Count == 0 &&
+                !string.IsNullOrWhiteSpace(runRequest.imagePath))
+            {
+                paths.Add(runRequest.imagePath);
+            }
+
+            return paths;
         }
 
         private void HandleOutputDataReceived(
@@ -387,6 +597,11 @@ namespace LxyDemo.UIFramework.Editor
 
         private void HandleProcessExited(object sender, EventArgs eventArgs)
         {
+            if (Interlocked.CompareExchange(ref exitHandled, 1, 0) != 0)
+            {
+                return;
+            }
+
             int exitCode = -1;
             try
             {
@@ -444,6 +659,203 @@ namespace LxyDemo.UIFramework.Editor
             Interlocked.Exchange(ref completionAvailable, 1);
         }
 
+        private Exception BuildStartupException(Exception cause)
+        {
+            Process current = process;
+            int exitCode = -1;
+            bool exited = false;
+            try
+            {
+                if (current != null)
+                {
+                    exited = current.WaitForExit(3000);
+                    if (exited)
+                    {
+                        // Parameterless WaitForExit waits for redirected async
+                        // output handlers to flush after the native process exits.
+                        current.WaitForExit();
+                        exitCode = current.ExitCode;
+                    }
+                }
+            }
+            catch
+            {
+                // Preserve the original startup exception below.
+            }
+
+            string detail;
+            lock (stateLock)
+            {
+                detail = errorOutput.ToString().Trim();
+            }
+
+            if (!exited && !(cause is IOException))
+            {
+                return cause;
+            }
+
+            string exitSummary = exitCode >= 0
+                ? "（ExitCode " + exitCode + "）"
+                : string.Empty;
+            string cliDetail = string.IsNullOrWhiteSpace(detail)
+                ? cause.Message
+                : detail;
+            return new InvalidOperationException(
+                "Codex 后台进程在接收 UI 分析请求前退出" +
+                exitSummary + "。\nCLI 详情：" + cliDetail,
+                cause);
+        }
+
+        private static void ValidateFigmaMcpConfiguration(
+            string executable,
+            UIEffectCodexRequest runRequest)
+        {
+            ProcessStartInfo startInfo = CreateMcpInspectionStartInfo(
+                executable,
+                runRequest.projectRoot);
+            using (Process inspection = Process.Start(startInfo))
+            {
+                if (inspection == null)
+                {
+                    throw new InvalidOperationException(
+                        "无法启动 Figma MCP 配置检查。");
+                }
+
+                if (!inspection.WaitForExit(5000))
+                {
+                    try { inspection.Kill(); } catch { }
+                    throw new TimeoutException(
+                        "检查 Figma MCP 配置超时。");
+                }
+
+                string output = inspection.StandardOutput.ReadToEnd();
+                string error = inspection.StandardError.ReadToEnd();
+                bool needsAuthentication =
+                    ContainsAuthenticationFailure(output) ||
+                    ContainsAuthenticationFailure(error);
+                if (inspection.ExitCode == 0 && !needsAuthentication)
+                {
+                    return;
+                }
+
+                const string provider = "Codex";
+                const string setup =
+                    "codex mcp add figma --url " +
+                    "https://mcp.figma.com/mcp，然后执行 " +
+                    "codex mcp login figma 完成 OAuth 授权";
+                string detail = string.IsNullOrWhiteSpace(error)
+                    ? output
+                    : error;
+                throw new InvalidOperationException(
+                    (needsAuthentication
+                        ? provider +
+                          " CLI 已配置 Figma MCP，但尚未完成 OAuth。"
+                        : provider +
+                          " CLI 未配置名为 figma 的官方 MCP。") +
+                    "请执行：" + setup + "。" +
+                    (string.IsNullOrWhiteSpace(detail)
+                        ? string.Empty
+                        : "\nCLI 详情：" + detail.Trim()));
+            }
+        }
+
+        private static void ValidateUnityMcpConfiguration(
+            UIEffectCodexRequest runRequest)
+        {
+            if (!runRequest.allowWorkspaceWrite)
+            {
+                throw new InvalidOperationException(
+                    "UnityMCP 直建模式必须启用项目 workspace-write 沙箱。");
+            }
+
+            if (runRequest.unityBridgePort < 1 ||
+                runRequest.unityBridgePort > 65535)
+            {
+                throw new InvalidOperationException(
+                    "当前 UnityMCP Bridge 未运行或端口无效。" +
+                    "请在 Window/AB Unity MCP 中启动 Server。");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                    runRequest.unityMcpServerPath) ||
+                !File.Exists(runRequest.unityMcpServerPath))
+            {
+                throw new FileNotFoundException(
+                    "找不到 Unity MCP Server 的 src/index.js。" +
+                    "请在生成窗口的 Codex 设置中选择它。",
+                    runRequest.unityMcpServerPath);
+            }
+
+            ResolveExecutable(runRequest.unityMcpNodeCommand);
+        }
+
+        private static bool ContainsAuthenticationFailure(string value)
+        {
+            string text = value ?? string.Empty;
+            return text.IndexOf(
+                       "needs authentication",
+                       StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   text.IndexOf(
+                       "authentication required",
+                       StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   text.IndexOf(
+                       "not authenticated",
+                       StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   text.IndexOf(
+                       "oauth required",
+                       StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static ProcessStartInfo CreateMcpInspectionStartInfo(
+            string executable,
+            string projectRoot)
+        {
+            const string arguments = "mcp get figma";
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = executable,
+                Arguments = arguments,
+                WorkingDirectory = projectRoot,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                StandardOutputEncoding = new UTF8Encoding(false),
+                StandardErrorEncoding = new UTF8Encoding(false),
+            };
+
+            if (string.Equals(
+                    Path.GetExtension(executable),
+                    ".ps1",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                startInfo.FileName = IsWindows()
+                    ? "powershell.exe"
+                    : "pwsh";
+                startInfo.Arguments = string.Join(
+                    " ",
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    QuoteArgument(executable),
+                    arguments);
+            }
+            else if (IsCommandScript(executable))
+            {
+                startInfo.FileName = Environment.GetEnvironmentVariable(
+                    "ComSpec") ?? "cmd.exe";
+                startInfo.Arguments =
+                    "/d /s /c \"\"" + executable + "\" " +
+                    arguments + "\"";
+            }
+
+            return startInfo;
+        }
+
         private void AppendError(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
@@ -466,20 +878,24 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
-        private static string GetProgressMessage(string jsonLine)
+        private string GetProgressMessage(string jsonLine)
         {
             if (jsonLine.IndexOf(
                     "\"type\":\"thread.started\"",
                     StringComparison.Ordinal) >= 0)
             {
-                return "Codex 会话已建立，正在加载 unity-ui-generator…";
+                return request != null && request.requiresUnityMcp
+                    ? "Codex 会话已建立，正在连接当前 UnityMCP…"
+                    : "Codex 会话已建立，正在加载 unity-ui-generator…";
             }
 
             if (jsonLine.IndexOf(
                     "\"type\":\"turn.started\"",
                     StringComparison.Ordinal) >= 0)
             {
-                return "正在分析效果图和项目 UI 资源…";
+                return request != null && request.requiresUnityMcp
+                    ? "正在完整分析效果图、项目 Sprite 与 Prefab 层级…"
+                    : "正在读取设计输入并生成 UISchema…";
             }
 
             if (jsonLine.IndexOf(
@@ -489,14 +905,18 @@ namespace LxyDemo.UIFramework.Editor
                     "command_execution",
                     StringComparison.Ordinal) >= 0)
             {
-                return "正在检查项目资源和 UI 规范…";
+                return request != null && request.requiresUnityMcp
+                    ? "正在通过 UnityMCP 创建或复核 Prefab…"
+                    : "正在处理设计上下文…";
             }
 
             if (jsonLine.IndexOf(
                     "\"type\":\"turn.completed\"",
                     StringComparison.Ordinal) >= 0)
             {
-                return "AI 分析完成，正在验证 UISchema…";
+                return request != null && request.requiresUnityMcp
+                    ? "Codex 直建完成，正在接收已保存的 Prefab 路径…"
+                    : "AI 分析完成，正在验证 UISchema…";
             }
 
             if (jsonLine.IndexOf(
@@ -546,12 +966,14 @@ namespace LxyDemo.UIFramework.Editor
                     "找不到 Unity 项目根目录。");
             }
 
-            if (string.IsNullOrWhiteSpace(value.imagePath) ||
-                !File.Exists(value.imagePath))
+            foreach (string imagePath in GetImagePaths(value))
             {
-                throw new FileNotFoundException(
-                    "找不到待分析的效果图。",
-                    value.imagePath);
+                if (!File.Exists(imagePath))
+                {
+                    throw new FileNotFoundException(
+                        "找不到待分析的效果图输入。",
+                        imagePath);
+                }
             }
 
             if (string.IsNullOrWhiteSpace(value.prompt))
@@ -625,6 +1047,7 @@ namespace LxyDemo.UIFramework.Editor
             current.Exited -= HandleProcessExited;
             current.Dispose();
         }
+
     }
 }
 #endif
