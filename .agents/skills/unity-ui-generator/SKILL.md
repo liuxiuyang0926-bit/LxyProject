@@ -1,6 +1,6 @@
 ---
 name: unity-ui-generator
-description: 根据截图、本地图片、Figma Frame/Component 节点链接或 UISchema，为 LxyDemo 分析、生成、审查或调试 Unity UI Prefab。适用于 FigmaNodeUrl 自动导入、效果图转精简 UISchema、重复 UI 模板、Sprite 自动匹配、缺失资源占位，以及项目 UI 生成器维护。
+description: 根据截图、本地图片、Figma Frame/Component 节点链接或 UISchema，分析、生成、审查或调试可移植 Unity UGUI Prefab。适用于独立效果图生成包、LxyDemo 项目适配器、FigmaNodeUrl 导入、重复 UI 模板、Sprite 自动匹配、缺失资源占位和生成器维护。
 ---
 
 # Unity UI 生成器
@@ -41,7 +41,7 @@ description: 根据截图、本地图片、Figma Frame/Component 节点链接或
 - 在高置信像素证据下执行资源感知结构校正：从局部可见矩形恢复父级完整背景、相邻区域联合、缺失文字承载背景补建、同构同级视觉的已验证资源补全、艺术字单层/多层 Sprite 转换、父 Sprite 已烘焙文字抑制，以及资源相关运行时模板候选的确定性裁剪；校正必须保持其他节点累计绝对坐标并稳定排序；
 - 对后台偶发漏标的运行时模板做严格、确定性的候选标注：只处理同一父级下名称仅一个颜色/阵营变体 token 不同、根类型为 Container/Image、根语义为 Card/Item/Row/Cell/Entry 或明确业务 Panel、至少包含三个节点，且整棵子树类型、顺序、局部矩形与非视觉属性同构的兄弟节点；标注阶段不删除节点，全部候选完成资源匹配后才裁成一个。左右/上下布局 token、Button、Toggle、简单样式状态、结构不同或固定常驻面板永不自动标注；
 - 创建组件、计算 ScrollRect Content、保存 Prefab；
-- 复用 `CSharpUIGenerator` 刷新 Canvas、Binder 和脚本；
+- 通过 `UIEffectProjectAdapterRegistry.Active` 创建 Prefab 外壳并刷新项目集成；LxyDemo 的适配器必须继续复用 `CSharpUIGenerator` 的 Canvas、Binder 和脚本流水线，独立包默认使用不依赖业务框架的通用 UGUI 适配器；
 - 压缩 Schema，并显示本次 Codex Token。
 
 高精度单轮模式的 Unity C# 额外负责：
@@ -51,7 +51,7 @@ description: 根据截图、本地图片、Figma Frame/Component 节点链接或
 - 注入参考图路径与哈希、执行通用层级/模板归一，然后在当前 Editor 中直接调用现有 `UIEffectPrefabBuilder`。Builder 内部保存与结构校验完成后立即结束，不启动 AI 复验。
 - 对“遮罩 + 独立 Popup/Dialog/Modal 前景”的强证据执行模态前景提取：把遮罩和弹窗按完整画布绝对坐标提升到 Schema 根，排除所有被覆盖的宿主页面节点；没有同时满足遮罩、前景、绘制顺序和几何包含关系时不触发。
 
-轻量模式不要让 Codex 枚举资源目录、猜 `Assets/...` 路径、输出默认字段、重复抄写相同节点或直接逐个创建 GameObject。高精度单轮模式同样不得枚举项目或仅凭文件名猜资源；它只从联系图 manifest 复制已视觉确认的精确路径，随后由现有 Builder 完成全量本地匹配，不得绕开项目 Canvas/Binder 流水线。
+轻量模式不要让 Codex 枚举资源目录、猜 `Assets/...` 路径、输出默认字段、重复抄写相同节点或直接逐个创建 GameObject。高精度单轮模式同样不得枚举项目或仅凭文件名猜资源；它只从联系图 manifest 复制已视觉确认的精确路径，随后由现有 Builder 完成全量本地匹配，不得绕开已注册的项目适配器。LxyDemo 中不得绕开其 Canvas/Binder 流水线。
 
 ## FigmaNodeUrl
 
@@ -137,7 +137,7 @@ Sprite 索引、视觉短名单和同分决胜必须确定化：搜索根、资�
 - Figma：窗口来源选择 `FigmaNodeUrl`，直接读取节点并生成 Prefab；
 - 选中 Schema：`Assets/UI工具/根据选中的UISchema生成Prefab`
 - 压缩旧 Schema：`Assets/UI工具/压缩选中的UISchema（低Token）`
-- Editor API：`UIEffectPrefabBuilder.GenerateFromSchemaPath(...)`
+- Editor API：`Lxy.UIEffectGenerator.Editor.UIEffectPrefabBuilder.GenerateFromSchemaPath(...)`
 
 只有 Unity 实际保存 Prefab 后才能声称生成完成。重新生成只拥有 Prefab 根节点下的 `Generated` 子树，并保留手工兄弟节点。
 

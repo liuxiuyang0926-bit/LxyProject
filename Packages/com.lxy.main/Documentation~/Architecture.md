@@ -43,7 +43,10 @@ hot-update assembly.
 - `com.lxy.lua`: project-specific XLua bindings and authoring tools.
 - `com.lxy.resource`: YooAsset initialization and update lifecycle.
 - `com.lxy.scene`: scene loading and transition lifecycle.
-- `com.lxy.ui`: reusable UI runtime, Lua UI integration, and editor tools.
+- `com.lxy.ui-effect-generator`: portable Editor-only screenshot/Figma/
+  UISchema to UGUI Prefab compiler with a generic project adapter.
+- `com.lxy.ui`: reusable UI runtime, Lua UI integration, ordinary editor
+  tools, and the Lxy-specific adapter for `com.lxy.ui-effect-generator`.
 - `com.lxy.battle`: one runtime DLL containing deterministic battle logic,
   local frame client, and Unity views; editor tools live in an Editor-only DLL.
 - `com.lxy.main`: the AOT bootstrap and HybridCLR loader.

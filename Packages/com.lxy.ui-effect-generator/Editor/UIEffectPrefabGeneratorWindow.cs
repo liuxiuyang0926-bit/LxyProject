@@ -10,26 +10,33 @@ using ProcessWindowStyle = System.Diagnostics.ProcessWindowStyle;
 using UnityEditor;
 using UnityEngine;
 
-namespace LxyDemo.UIFramework.Editor
+namespace Lxy.UIEffectGenerator.Editor
 {
     public sealed class UIEffectPrefabGeneratorWindow : EditorWindow
     {
         private const string CodexCommandEditorPrefsKey =
-            "LxyDemo.UIEffectPrefabGenerator.CodexCommand";
+            "Lxy.UIEffectGenerator.CodexCommand";
         private const string CodexAutoGenerateEditorPrefsKey =
-            "LxyDemo.UIEffectPrefabGenerator.CodexAutoGenerate";
+            "Lxy.UIEffectGenerator.CodexAutoGenerate";
         private const string StableSchemaReuseEditorPrefsKey =
-            "LxyDemo.UIEffectPrefabGenerator.StableSchemaReuse";
+            "Lxy.UIEffectGenerator.StableSchemaReuse";
         private const string ResourceRootGuidEditorPrefsKey =
-            "LxyDemo.UIEffectPrefabGenerator.ResourceRootGuid";
+            "Lxy.UIEffectGenerator.ResourceRootGuid";
         private const string ResourceMatchModeEditorPrefsKey =
-            "LxyDemo.UIEffectPrefabGenerator.ResourceMatchMode";
+            "Lxy.UIEffectGenerator.ResourceMatchMode";
         private const string LocalGenerationModeEditorPrefsKey =
-            "LxyDemo.UIEffectPrefabGenerator.LocalGenerationMode";
-        private const string ReferenceFolder =
-            "Assets/Editor/UIReferences";
-        private const string SchemaFolder =
-            "Assets/Editor/UISchemas";
+            "Lxy.UIEffectGenerator.LocalGenerationMode";
+        private const string LegacyEditorPrefsPrefix =
+            "LxyDemo.UIEffectPrefabGenerator.";
+        private static readonly string[] ScriptTypeNames =
+        {
+            "C Sharp",
+            "Lua",
+        };
+        private static string ReferenceFolder =>
+            GetProjectDefaults().referenceFolder;
+        private static string SchemaFolder =>
+            GetProjectDefaults().schemaFolder;
         private enum ReferenceSource
         {
             LocalImage,
@@ -55,14 +62,14 @@ namespace LxyDemo.UIFramework.Editor
         private string sourceUrl = string.Empty;
         private TextAsset schemaAsset;
         private string panelId = "UIExample";
-        private string prefabFolder =
-            "Assets/GameResources/Prefabs/UIRes";
-        private UIScriptType scriptType = UIScriptType.CSharp;
-        private string codeNamespace = "LxyDemo.GameUI";
+        private string prefabFolder = string.Empty;
+        private UIEffectScriptType scriptType =
+            UIEffectScriptType.ProjectDefault;
+        private string codeNamespace = string.Empty;
         private string logicClassName = "UIExample";
-        private string scriptFolder = "Assets/Scripts/GameUI";
-        private UILayer uiLayer = UILayer.Auto;
-        private string resourceSearchRoots = "Assets/GameResources/UIAtlas/AtlasScr";
+        private string scriptFolder = string.Empty;
+        private UIEffectLayer uiLayer = UIEffectLayer.Auto;
+        private string resourceSearchRoots = string.Empty;
         private UIEffectResourceMatchMode resourceMatchMode =
             UIEffectResourceMatchMode.VisualSimilarity;
         private DefaultAsset resourceRootFolder;
@@ -150,33 +157,94 @@ namespace LxyDemo.UIFramework.Editor
             window.Show();
         }
 
+        [MenuItem("Tools/UI Tools/Generate Prefab From Design")]
+        private static void OpenEnglish()
+        {
+            Open();
+        }
+
+        private static UIEffectProjectDefaults GetProjectDefaults()
+        {
+            return UIEffectProjectAdapterRegistry.Active.CreateDefaults() ??
+                   new UIEffectProjectDefaults();
+        }
+
+        private static string GetDefaultResourceSearchRoot()
+        {
+            string path = GetProjectDefaults().resourceSearchRoot;
+            return AssetDatabase.IsValidFolder(path)
+                ? path
+                : "Assets";
+        }
+
+        private void ApplyProjectDefaults()
+        {
+            UIEffectProjectDefaults defaults = GetProjectDefaults();
+            if (string.IsNullOrWhiteSpace(prefabFolder))
+            {
+                prefabFolder = defaults.prefabFolder;
+            }
+
+            if (scriptType == UIEffectScriptType.ProjectDefault)
+            {
+                scriptType = defaults.scriptType;
+            }
+
+            if (string.IsNullOrWhiteSpace(codeNamespace))
+            {
+                codeNamespace = defaults.codeNamespace;
+            }
+
+            if (string.IsNullOrWhiteSpace(scriptFolder))
+            {
+                scriptFolder = defaults.scriptFolder;
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceSearchRoots))
+            {
+                resourceSearchRoots = GetDefaultResourceSearchRoot();
+            }
+
+            if (uiLayer == UIEffectLayer.Auto)
+            {
+                uiLayer = defaults.uiLayer;
+            }
+        }
+
         private void OnEnable()
         {
-            codexCommand = EditorPrefs.GetString(
+            ApplyProjectDefaults();
+            codexCommand = GetStringPreference(
                 CodexCommandEditorPrefsKey,
+                LegacyEditorPrefsPrefix + "CodexCommand",
                 "codex");
-            int savedGenerationMode = EditorPrefs.GetInt(
+            int savedGenerationMode = GetIntPreference(
                 LocalGenerationModeEditorPrefsKey,
+                LegacyEditorPrefsPrefix + "LocalGenerationMode",
                 (int)LocalGenerationMode.HighFidelitySinglePass);
             localGenerationMode = savedGenerationMode ==
                                   (int)LocalGenerationMode.CompactSchema
                 ? LocalGenerationMode.CompactSchema
                 : LocalGenerationMode.HighFidelitySinglePass;
-            autoGenerateAfterCodex = EditorPrefs.GetBool(
+            autoGenerateAfterCodex = GetBoolPreference(
                 CodexAutoGenerateEditorPrefsKey,
+                LegacyEditorPrefsPrefix + "CodexAutoGenerate",
                 true);
-            reuseSchemaForUnchangedReference = EditorPrefs.GetBool(
+            reuseSchemaForUnchangedReference = GetBoolPreference(
                 StableSchemaReuseEditorPrefsKey,
+                LegacyEditorPrefsPrefix + "StableSchemaReuse",
                 true);
-            int savedResourceMode = EditorPrefs.GetInt(
+            int savedResourceMode = GetIntPreference(
                 ResourceMatchModeEditorPrefsKey,
+                LegacyEditorPrefsPrefix + "ResourceMatchMode",
                 (int)UIEffectResourceMatchMode.VisualSimilarity);
             resourceMatchMode = savedResourceMode ==
                                 (int)UIEffectResourceMatchMode.ColorBlocks
                 ? UIEffectResourceMatchMode.ColorBlocks
                 : UIEffectResourceMatchMode.VisualSimilarity;
-            string resourceRootGuid = EditorPrefs.GetString(
+            string resourceRootGuid = GetStringPreference(
                 ResourceRootGuidEditorPrefsKey,
+                LegacyEditorPrefsPrefix + "ResourceRootGuid",
                 string.Empty);
             string savedResourceRoot =
                 AssetDatabase.GUIDToAssetPath(resourceRootGuid);
@@ -195,6 +263,36 @@ namespace LxyDemo.UIFramework.Editor
             codexRunner = new UIEffectCodexRunner();
             EditorApplication.update += PollCodexRunner;
             ScheduleResourceRescan("打开效果图生成 UI 编辑器");
+        }
+
+        private static string GetStringPreference(
+            string key,
+            string legacyKey,
+            string fallback)
+        {
+            return EditorPrefs.HasKey(key)
+                ? EditorPrefs.GetString(key, fallback)
+                : EditorPrefs.GetString(legacyKey, fallback);
+        }
+
+        private static int GetIntPreference(
+            string key,
+            string legacyKey,
+            int fallback)
+        {
+            return EditorPrefs.HasKey(key)
+                ? EditorPrefs.GetInt(key, fallback)
+                : EditorPrefs.GetInt(legacyKey, fallback);
+        }
+
+        private static bool GetBoolPreference(
+            string key,
+            string legacyKey,
+            bool fallback)
+        {
+            return EditorPrefs.HasKey(key)
+                ? EditorPrefs.GetBool(key, fallback)
+                : EditorPrefs.GetBool(legacyKey, fallback);
         }
 
         private void OnDisable()
@@ -347,7 +445,7 @@ namespace LxyDemo.UIFramework.Editor
                 (string.IsNullOrWhiteSpace(logicClassName) ||
                  string.Equals(
                      logicClassName,
-                     CSharpUIGenerator.SanitizeTypeName(previousPanelId),
+                     UIEffectEditorUtility.SanitizeTypeName(previousPanelId),
                      StringComparison.Ordinal)))
             {
                 logicClassName = GetSafePanelId();
@@ -538,21 +636,49 @@ namespace LxyDemo.UIFramework.Editor
                 }
             }
 
-            scriptType = (UIScriptType)EditorGUILayout.EnumPopup(
-                "脚本类型",
-                scriptType);
-            using (new EditorGUI.DisabledScope(
-                       scriptType != UIScriptType.CSharp))
+            IUIEffectProjectAdapter adapter =
+                UIEffectProjectAdapterRegistry.Active;
+            EditorGUILayout.LabelField(
+                "Prefab 适配器",
+                adapter.DisplayName);
+            if (adapter.SupportsScriptGeneration)
             {
-                codeNamespace = EditorGUILayout.TextField(
-                    "C# 命名空间",
-                    codeNamespace);
-                logicClassName = EditorGUILayout.TextField(
-                    "逻辑类名",
-                    logicClassName);
-                scriptFolder = EditorGUILayout.TextField(
-                    "脚本目录",
-                    scriptFolder);
+                int scriptTypeIndex =
+                    scriptType == UIEffectScriptType.Lua ? 1 : 0;
+                scriptTypeIndex = EditorGUILayout.Popup(
+                    "脚本类型",
+                    scriptTypeIndex,
+                    ScriptTypeNames);
+                scriptType = scriptTypeIndex == 1
+                    ? UIEffectScriptType.Lua
+                    : UIEffectScriptType.CSharp;
+                using (new EditorGUI.DisabledScope(
+                           scriptType != UIEffectScriptType.CSharp))
+                {
+                    codeNamespace = EditorGUILayout.TextField(
+                        "C# 命名空间",
+                        codeNamespace);
+                    logicClassName = EditorGUILayout.TextField(
+                        "逻辑类名",
+                        logicClassName);
+                    scriptFolder = EditorGUILayout.TextField(
+                        "脚本目录",
+                        scriptFolder);
+                }
+
+                if (adapter.SupportsLayerSelection)
+                {
+                    uiLayer = (UIEffectLayer)EditorGUILayout.EnumPopup(
+                        "UI 层级",
+                        uiLayer);
+                }
+            }
+            else
+            {
+                EditorGUILayout.HelpBox(
+                    "当前使用通用 UGUI 适配器：生成标准 Canvas Prefab，" +
+                    "不依赖项目 Binder，也不生成业务脚本。",
+                    MessageType.None);
             }
         }
 
@@ -577,7 +703,7 @@ namespace LxyDemo.UIFramework.Editor
                 Application.dataPath,
                 ".."));
             string referenceAbsolutePath =
-                CSharpUIGenerator.ToAbsolutePath(referenceAssetPath);
+                UIEffectEditorUtility.ToAbsolutePath(referenceAssetPath);
             string schemaAssetPath =
                 $"{SchemaFolder}/{safePanelId}.json";
             string normalizedPrefabFolder = (prefabFolder ?? string.Empty)
@@ -615,7 +741,7 @@ namespace LxyDemo.UIFramework.Editor
 
             EnsureAssetFolder(SchemaFolder);
             string schemaAbsolutePath =
-                CSharpUIGenerator.ToAbsolutePath(schemaAssetPath);
+                UIEffectEditorUtility.ToAbsolutePath(schemaAssetPath);
             bool schemaExists = File.Exists(schemaAbsolutePath);
             if (schemaExists && TryReuseMatchingSchema(
                     schemaAssetPath,
@@ -632,7 +758,7 @@ namespace LxyDemo.UIFramework.Editor
             string temporaryFolder = Path.Combine(
                 projectRoot,
                 "Library",
-                "LxyDemo",
+                "LxyUIEffectGenerator",
                 "UIEffectCodex");
             string outputSchemaPath = Path.Combine(
                 temporaryFolder,
@@ -831,7 +957,10 @@ namespace LxyDemo.UIFramework.Editor
                 .ToArray();
             if (roots.Length == 0)
             {
-                roots = new[] { "Assets/GameResources" };
+                roots = new[]
+                {
+                    GetDefaultResourceSearchRoot(),
+                };
             }
 
             string normalizedReferencePath = (referenceAssetPath ?? string.Empty)
@@ -1250,7 +1379,7 @@ namespace LxyDemo.UIFramework.Editor
             string schemaAssetPath =
                 $"{SchemaFolder}/{safePanelId}.json";
             string schemaAbsolutePath =
-                CSharpUIGenerator.ToAbsolutePath(schemaAssetPath);
+                UIEffectEditorUtility.ToAbsolutePath(schemaAssetPath);
             bool schemaExists = File.Exists(schemaAbsolutePath);
             if (schemaExists && TryReuseMatchingSchema(
                     schemaAssetPath,
@@ -1280,11 +1409,11 @@ namespace LxyDemo.UIFramework.Editor
                 Application.dataPath,
                 ".."));
             string referenceAbsolutePath =
-                CSharpUIGenerator.ToAbsolutePath(referenceAssetPath);
+                UIEffectEditorUtility.ToAbsolutePath(referenceAssetPath);
             string temporaryFolder = Path.Combine(
                 projectRoot,
                 "Library",
-                "LxyDemo",
+                "LxyUIEffectGenerator",
                 "UIEffectCodex");
             string outputSchemaPath = Path.Combine(
                 temporaryFolder,
@@ -1373,7 +1502,7 @@ namespace LxyDemo.UIFramework.Editor
             try
             {
                 string absolutePath =
-                    CSharpUIGenerator.ToAbsolutePath(schemaAssetPath);
+                    UIEffectEditorUtility.ToAbsolutePath(schemaAssetPath);
                 UIEffectSchema schema = UIEffectSchemaUtility.Parse(
                     File.ReadAllText(absolutePath));
                 bool sameIdentity = string.Equals(
@@ -1585,7 +1714,7 @@ namespace LxyDemo.UIFramework.Editor
                 int collapsedNodes =
                     UIEffectSchemaUtility.OptimizeRepeatedNodes(schema);
                 string schemaAbsolutePath =
-                    CSharpUIGenerator.ToAbsolutePath(
+                    UIEffectEditorUtility.ToAbsolutePath(
                         pendingSchemaAssetPath);
                 if (!pendingSchemaExisted &&
                     File.Exists(schemaAbsolutePath) &&
@@ -1738,7 +1867,7 @@ namespace LxyDemo.UIFramework.Editor
                 int collapsedNodes =
                     UIEffectSchemaUtility.OptimizeRepeatedNodes(schema);
                 string schemaAbsolutePath =
-                    CSharpUIGenerator.ToAbsolutePath(
+                    UIEffectEditorUtility.ToAbsolutePath(
                         pendingSchemaAssetPath);
                 File.WriteAllText(
                     schemaAbsolutePath,
@@ -1809,7 +1938,8 @@ namespace LxyDemo.UIFramework.Editor
                 "children；name 和尺寸必须与上面完全一致。节点 type 只能是 " +
                 "Container/Image/Text/Button/Toggle/ToggleGroup/ScrollRect。节点可写 " +
                 "name,type,semantic,x,y,width,height,text,fontSize,characterSpacing," +
-                "alignment,bold,color,resource,intentionalColor,preserveAspect,sliced," +
+                "alignment,bold,color,resource,intentionalColor," +
+                "preserveAspect,sliced," +
                 "raycastTarget,mayMerge,mayLayer,mayUseFullCanvasSprite,textMode," +
                 "visualKind,binding,runtimeTemplateGroup,runtimeTemplateVariant,children，" +
                 "省略默认值和空字段。禁止 useReferenceImageAsVisual 和整张效果图底图。\n" +
@@ -1903,7 +2033,7 @@ namespace LxyDemo.UIFramework.Editor
                 $"Panel ID：{safePanelId}\n" +
                 $"效果图项目路径：{referenceAssetPath}\n" +
                 $"效果图绝对路径：" +
-                $"{CSharpUIGenerator.ToAbsolutePath(referenceAssetPath)}\n" +
+                $"{UIEffectEditorUtility.ToAbsolutePath(referenceAssetPath)}\n" +
                 $"目标 Schema 路径：{schemaAssetPath}\n" +
                 $"源文件原始尺寸：{sourceWidth}x{sourceHeight}\n" +
                 $"Unity 导入预览尺寸：{referenceImage.width}x" +
@@ -2017,7 +2147,7 @@ namespace LxyDemo.UIFramework.Editor
             string nodeId,
             string requestedPanelId)
         {
-            string safePanelId = CSharpUIGenerator.SanitizeTypeName(
+            string safePanelId = UIEffectEditorUtility.SanitizeTypeName(
                 requestedPanelId);
             return
                 "通过当前已授权的官方 Figma MCP 读取一个 Design 节点，" +
@@ -2440,7 +2570,7 @@ namespace LxyDemo.UIFramework.Editor
                 string temporaryRoot = Path.GetFullPath(Path.Combine(
                     projectRoot,
                     "Library",
-                    "LxyDemo",
+                    "LxyUIEffectGenerator",
                     "UIEffectCodex"));
                 string fullPath = Path.GetFullPath(path);
                 if (!fullPath.StartsWith(
@@ -2472,7 +2602,7 @@ namespace LxyDemo.UIFramework.Editor
             string temporaryRoot = Path.GetFullPath(Path.Combine(
                 projectRoot,
                 "Library",
-                "LxyDemo",
+                "LxyUIEffectGenerator",
                 "UIEffectCodex"));
             foreach (string path in pendingCodexImageInputs)
             {
@@ -2516,7 +2646,7 @@ namespace LxyDemo.UIFramework.Editor
             string temporaryFolder = Path.Combine(
                 projectRoot,
                 "Library",
-                "LxyDemo",
+                "LxyUIEffectGenerator",
                 "UIEffectCodex");
             string outputSchemaPath = Path.Combine(
                 temporaryFolder,
@@ -2706,7 +2836,7 @@ namespace LxyDemo.UIFramework.Editor
                 string schemaPath =
                     $"{SchemaFolder}/{resolvedPanelId}.json";
                 if (File.Exists(
-                        CSharpUIGenerator.ToAbsolutePath(schemaPath)) &&
+                        UIEffectEditorUtility.ToAbsolutePath(schemaPath)) &&
                     !EditorUtility.DisplayDialog(
                         "更新 UISchema",
                         schemaPath +
@@ -2724,7 +2854,7 @@ namespace LxyDemo.UIFramework.Editor
                 if (string.IsNullOrWhiteSpace(logicClassName) ||
                     string.Equals(
                         logicClassName,
-                        CSharpUIGenerator.SanitizeTypeName(previousPanelId),
+                        UIEffectEditorUtility.SanitizeTypeName(previousPanelId),
                         StringComparison.Ordinal))
                 {
                     logicClassName = resolvedPanelId;
@@ -2810,7 +2940,7 @@ namespace LxyDemo.UIFramework.Editor
                 int collapsedNodes =
                     UIEffectSchemaUtility.OptimizeRepeatedNodes(schema);
                 File.WriteAllText(
-                    CSharpUIGenerator.ToAbsolutePath(schemaPath),
+                    UIEffectEditorUtility.ToAbsolutePath(schemaPath),
                     UIEffectSchemaUtility.ToCompactJson(schema),
                     new System.Text.UTF8Encoding(false));
                 AssetDatabase.ImportAsset(
@@ -2854,7 +2984,7 @@ namespace LxyDemo.UIFramework.Editor
                 ?.Replace('\\', '/');
             EnsureAssetFolder(folder);
             WriteBytesIfChanged(
-                CSharpUIGenerator.ToAbsolutePath(assetPath),
+                UIEffectEditorUtility.ToAbsolutePath(assetPath),
                 bytes);
             AssetDatabase.ImportAsset(
                 assetPath,
@@ -2891,7 +3021,7 @@ namespace LxyDemo.UIFramework.Editor
             string assetPath)
         {
             string absolutePath =
-                CSharpUIGenerator.ToAbsolutePath(assetPath);
+                UIEffectEditorUtility.ToAbsolutePath(assetPath);
             if (!File.Exists(absolutePath))
             {
                 throw new FileNotFoundException(
@@ -2934,7 +3064,7 @@ namespace LxyDemo.UIFramework.Editor
             string folder = Path.Combine(
                 projectRoot,
                 "Library",
-                "LxyDemo",
+                "LxyUIEffectGenerator",
                 "UIEffectCodex");
             string outputPath = Path.Combine(
                 folder,
@@ -3198,7 +3328,7 @@ namespace LxyDemo.UIFramework.Editor
             EnsureAssetFolder(SchemaFolder);
             string assetPath =
                 $"{SchemaFolder}/{safePanelId}.json";
-            if (File.Exists(CSharpUIGenerator.ToAbsolutePath(assetPath)) &&
+            if (File.Exists(UIEffectEditorUtility.ToAbsolutePath(assetPath)) &&
                 !EditorUtility.DisplayDialog(
                     "UISchema 已存在",
                     assetPath + " 已存在，是否覆盖？",
@@ -3209,7 +3339,7 @@ namespace LxyDemo.UIFramework.Editor
             }
 
             File.WriteAllText(
-                CSharpUIGenerator.ToAbsolutePath(assetPath),
+                UIEffectEditorUtility.ToAbsolutePath(assetPath),
                 UIEffectSchemaUtility.ToCompactJson(schema),
                 new System.Text.UTF8Encoding(false));
             AssetDatabase.ImportAsset(
@@ -3375,7 +3505,7 @@ namespace LxyDemo.UIFramework.Editor
                 ImportAssetOptions.ForceSynchronousImport |
                 ImportAssetOptions.ForceUpdate);
             string schemaJson = File.ReadAllText(
-                CSharpUIGenerator.ToAbsolutePath(schemaPath),
+                UIEffectEditorUtility.ToAbsolutePath(schemaPath),
                 System.Text.Encoding.UTF8);
             UIEffectSchema schema =
                 UIEffectSchemaUtility.Parse(schemaJson);
@@ -3386,7 +3516,7 @@ namespace LxyDemo.UIFramework.Editor
                     {
                         panelId = schema.name,
                         logicClassName =
-                            CSharpUIGenerator.SanitizeTypeName(
+                            UIEffectEditorUtility.SanitizeTypeName(
                                 schema.name),
                     },
                     true);
@@ -3472,7 +3602,7 @@ namespace LxyDemo.UIFramework.Editor
             collapsedNodes =
                 UIEffectSchemaUtility.OptimizeRepeatedNodes(schema);
             File.WriteAllText(
-                CSharpUIGenerator.ToAbsolutePath(assetPath),
+                UIEffectEditorUtility.ToAbsolutePath(assetPath),
                 UIEffectSchemaUtility.ToCompactJson(schema),
                 new System.Text.UTF8Encoding(false));
             AssetDatabase.ImportAsset(
@@ -3550,7 +3680,10 @@ namespace LxyDemo.UIFramework.Editor
                     .ToArray();
                 if (roots.Length == 0)
                 {
-                    roots = new[] { "Assets/GameResources" };
+                    roots = new[]
+                    {
+                        GetDefaultResourceSearchRoot(),
+                    };
                 }
 
                 int spriteCount =
@@ -3579,7 +3712,7 @@ namespace LxyDemo.UIFramework.Editor
             string value = string.IsNullOrWhiteSpace(panelId)
                 ? "UIEffectPanel"
                 : panelId.Trim();
-            return CSharpUIGenerator.SanitizeTypeName(value);
+            return UIEffectEditorUtility.SanitizeTypeName(value);
         }
 
         private static string[] ParseSearchRoots(string value)

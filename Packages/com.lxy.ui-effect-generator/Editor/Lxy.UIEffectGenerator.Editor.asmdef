@@ -1,13 +1,7 @@
 {
-  "name": "Game.UI.Editor",
-  "rootNamespace": "LxyDemo.UIFramework.Editor",
+  "name": "Lxy.UIEffectGenerator.Editor",
+  "rootNamespace": "Lxy.UIEffectGenerator.Editor",
   "references": [
-    "Game.Common",
-    "Game.Lua",
-    "Game.Lua.Editor",
-    "Game.UI",
-    "Lxy.UIEffectGenerator.Editor",
-    "YooAsset.Editor",
     "Unity.UGUI",
     "Unity.TextMeshPro"
   ],

@@ -18,7 +18,8 @@
 | `com.lxy.lua` | `Game.Lua` | 项目 XLua 运行时、绑定和编辑工具 |
 | `com.lxy.resource` | `Game.Resource` | YooAsset 初始化、加载、引用计数和更新生命周期 |
 | `com.lxy.scene` | `Game.Scene` | 场景加载和切换生命周期 |
-| `com.lxy.ui` | `Game.UI` | C#/Lua UI 运行时和 UI 编辑器工具 |
+| `com.lxy.ui-effect-generator` | `Lxy.UIEffectGenerator.Editor` | 可移植的效果图/Figma/UISchema 转 UGUI Prefab 编辑器核心与通用适配器 |
+| `com.lxy.ui` | `Game.UI` | C#/Lua UI 运行时、常规 UI 编辑器工具及 Lxy 效果图生成适配器 |
 | `com.lxy.battle` | `Game.Battle` | 确定性战斗逻辑、帧客户端、Unity 表现和战斗编辑器工具 |
 | `com.lxy.main` | `Game.Main` | 稳定的 AOT 启动层和 HybridCLR 加载 |
 
@@ -42,4 +43,4 @@
 
 - 涉及确定性模拟、帧命令、定点数数学、战斗碰撞或战斗状态哈希时，同时使用 `unity-frame-sync`。
 - 涉及资源句柄、YooAsset 收集器/构建、启动下载、AOT 元数据、热更新 DLL 或发布时，同时使用 `unity-yooasset-hybridclr`。
-- 涉及 UI 时，先检查 `Packages/com.lxy.ui` 下已有的 C#/Lua UI 文档和生成器，不要另起一套平行方案。
+- 涉及 UI 运行时或 Binder 时，先检查 `Packages/com.lxy.ui`；涉及效果图、Figma、UISchema、Sprite 视觉匹配或 Prefab 编译器时，先检查 `Packages/com.lxy.ui-effect-generator`，不要另起平行方案。

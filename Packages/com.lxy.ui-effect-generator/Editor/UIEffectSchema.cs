@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace LxyDemo.UIFramework.Editor
+namespace Lxy.UIEffectGenerator.Editor
 {
     [Serializable]
     public sealed class UIEffectSchema
@@ -451,7 +451,7 @@ namespace LxyDemo.UIFramework.Editor
             HashSet<string> siblingNames,
             HashSet<string> usedBindingNames)
         {
-            string cleanNodeName = CSharpUIGenerator.SanitizeTypeName(
+            string cleanNodeName = UIEffectEditorUtility.SanitizeTypeName(
                 node.name);
             string accumulatedPrefix = string.Empty;
             for (int index = ancestorNames.Count - 1;
@@ -459,7 +459,7 @@ namespace LxyDemo.UIFramework.Editor
                  index--)
             {
                 accumulatedPrefix =
-                    CSharpUIGenerator.SanitizeTypeName(
+                    UIEffectEditorUtility.SanitizeTypeName(
                         ancestorNames[index]) + accumulatedPrefix;
                 string candidate = accumulatedPrefix + cleanNodeName;
                 if (IsAvailableBoundNodeName(
@@ -512,7 +512,7 @@ namespace LxyDemo.UIFramework.Editor
             string nodeType,
             string nodeName)
         {
-            string cleanName = CSharpUIGenerator.SanitizeTypeName(nodeName);
+            string cleanName = UIEffectEditorUtility.SanitizeTypeName(nodeName);
             string prefix;
             switch ((nodeType ?? string.Empty).ToLowerInvariant())
             {

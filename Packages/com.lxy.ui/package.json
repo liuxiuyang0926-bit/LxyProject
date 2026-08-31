@@ -5,6 +5,7 @@
   "description": "Reusable C# and Lua UI management runtime plus authoring and validation tools.",
   "unity": "2022.3",
   "dependencies": {
+    "com.lxy.ui-effect-generator": "1.0.0",
     "com.lxy.contracts": "1.0.0",
     "com.lxy.lua": "1.0.0",
     "com.lxy.resource": "1.0.0",

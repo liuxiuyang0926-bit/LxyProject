@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Linq;
 using UnityEngine;
 
-namespace LxyDemo.UIFramework.Editor
+namespace Lxy.UIEffectGenerator.Editor
 {
     internal sealed class UIEffectFigmaCropAsset
     {
@@ -21,8 +21,16 @@ namespace LxyDemo.UIFramework.Editor
     /// </summary>
     internal static class UIEffectFigmaImporter
     {
-        public const string RuntimeAssetRoot =
-            "Assets/GameResources/UIAtlas/FigmaGenerated";
+        public static string RuntimeAssetRoot
+        {
+            get
+            {
+                UIEffectProjectDefaults defaults =
+                    UIEffectProjectAdapterRegistry.Active.CreateDefaults() ??
+                    new UIEffectProjectDefaults();
+                return defaults.figmaSpriteFolder;
+            }
+        }
 
         public const string CropResourceMarker = "figma://crop";
 
@@ -124,12 +132,16 @@ namespace LxyDemo.UIFramework.Editor
                 value = frameName;
             }
 
-            return CSharpUIGenerator.SanitizeTypeName(value);
+            return UIEffectEditorUtility.SanitizeTypeName(value);
         }
 
         public static string GetReferenceAssetPath(string panelId)
         {
-            return "Assets/Editor/UIReferences/" +
+            UIEffectProjectDefaults defaults =
+                UIEffectProjectAdapterRegistry.Active.CreateDefaults() ??
+                new UIEffectProjectDefaults();
+            string folder = defaults.referenceFolder.TrimEnd('/');
+            return folder + "/" +
                    GetSafeAssetSegment(panelId) + "_Figma.png";
         }
 
@@ -281,7 +293,7 @@ namespace LxyDemo.UIFramework.Editor
                 UIEffectSchema schema,
                 Texture2D screenshot,
                 string panelId,
-                string runtimeAssetRoot = RuntimeAssetRoot)
+                string runtimeAssetRoot = null)
         {
             if (schema == null)
             {
@@ -297,6 +309,10 @@ namespace LxyDemo.UIFramework.Editor
             }
 
             UIEffectSchemaUtility.Validate(schema);
+            if (string.IsNullOrWhiteSpace(runtimeAssetRoot))
+            {
+                runtimeAssetRoot = RuntimeAssetRoot;
+            }
             bool axesSwapped = Mathf.Abs(
                     screenshot.width / schema.designHeight -
                     screenshot.height / schema.designWidth) <=
@@ -511,7 +527,7 @@ namespace LxyDemo.UIFramework.Editor
 
         private static string GetSafeAssetSegment(string value)
         {
-            string safe = CSharpUIGenerator.SanitizeTypeName(value);
+            string safe = UIEffectEditorUtility.SanitizeTypeName(value);
             return safe.Length == 0 ? "UIFigma" : safe;
         }
 

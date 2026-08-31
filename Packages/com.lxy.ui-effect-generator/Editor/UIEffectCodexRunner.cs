@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 
-namespace LxyDemo.UIFramework.Editor
+namespace Lxy.UIEffectGenerator.Editor
 {
     internal sealed class UIEffectCodexRequest
     {

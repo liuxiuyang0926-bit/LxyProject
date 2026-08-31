@@ -10,13 +10,17 @@
 
 `工具/UI工具/创建Prefab`
 
-效果图编译器由以下文件实现：
+可移植效果图编译器位于：
+
+`Packages/com.lxy.ui-effect-generator/Editor`
+
+核心文件包括：
 
 - `UIEffectSchema.cs`
 - `UIEffectPrefabBuilder.cs`
 - `UIEffectPrefabGeneratorWindow.cs`
 
-它必须调用 `CSharpUIGenerator.Generate(...)`，以确保生成的 Prefab 保留项目的 Canvas、GraphicRaycaster、CanvasGroup、ObjectBinder、UICodeBinder、UI 层级配置以及 C#/Lua 生成行为。
+核心 Builder 必须通过 `UIEffectProjectAdapterRegistry.Active` 创建或更新 Prefab 外壳，不得直接依赖业务 UI 框架。LxyDemo 在 `Packages/com.lxy.ui/Editor/UI/UIEffectLxyProjectAdapter.cs` 注册高优先级适配器；该适配器必须调用 `CSharpUIGenerator.Generate(...)`，确保当前项目继续保留 Canvas、GraphicRaycaster、CanvasGroup、ObjectBinder、UICodeBinder、UI 层级配置以及 C#/Lua 生成行为。其他 Unity 项目只安装独立包时使用内置 Generic UGUI 适配器。
 
 ## AI 与 C# 分流
 
@@ -26,7 +30,7 @@
 
 高精度单轮模式下，Unity C# 先稳定扫描用户指定资源根，为有限数量 Sprite 生成视觉联系图，并输出页/行/列到精确资源路径、源尺寸与 Border 的 manifest。后台 Codex 保持项目只读且显式禁用 Unity/Figma MCP，只使用高清效果图、联系图和内嵌规则，在一次响应中输出完整 UISchema。只有联系图视觉证据成立时才显式写 `resource`；其余节点留空资源并提供通用 `semantic`，由 Builder 对完整资源根继续执行本地视觉匹配。
 
-高精度 Schema 返回后，Unity C# 注入参考图路径与内容哈希，执行通用视觉层级和运行时模板归一，再由当前 Editor 直接调用现有 `UIEffectPrefabBuilder.Generate(...)`。Builder 继续负责全量资源匹配、Canvas/Binder、保存和确定性结构校验；首次调用结束后不启动 AI 复验或第二次 Builder。UnityMCP 仅保留给用户明确要求的手工终端直建流程，不进入默认效果图分析会话。
+高精度 Schema 返回后，Unity C# 注入参考图路径与内容哈希，执行通用视觉层级和运行时模板归一，再由当前 Editor 直接调用 `UIEffectPrefabBuilder.Generate(...)`。Builder 继续负责全量资源匹配、保存和确定性结构校验，项目适配器负责 Prefab 外壳、Binder 与可选脚本元数据；首次调用结束后不启动 AI 复验或第二次 Builder。UnityMCP 仅保留给用户明确要求的手工终端直建流程，不进入默认效果图分析会话。
 
 C# 使用 Schema 矩形原值设置 RectTransform；节点宽或高小于等于 0 时先归一为 1 像素。效果图尺寸必须通过 TextureImporter 的源文件尺寸取得，不能使用受 `maxTextureSize` 影响的 `Texture2D.width/height`。Prefab 的 `Generated` 使用固定设计尺寸，并整体等比居中适配项目 1920×1080 参考分辨率，不能直接 Stretch 到尚未挂载运行时 Canvas 的零尺寸 Prefab 根节点。`Auto` 锚点只选择响应式附着点，不会识别效果图或修正其他错误坐标。因此后台 Codex 必须使用原图像素坐标量取边界，先记录绝对矩形，再转成父节点局部坐标并递归复核。
 
@@ -48,7 +52,7 @@ Builder 在首次生成的内存 Schema 中执行严格模板推断与裁剪。�
 
 效果图生成窗口每次启用时必须同步刷新 AssetDatabase 并立即重建当前资源根的 Sprite 索引，不得只清空缓存等待下次生成。Sprite 源图片导入、删除或移动时，AssetPostprocessor 必须自动使资源索引和视觉描述缓存失效，避免窗口长时间打开时继续使用旧资源列表。
 
-Prefab 生成时继续复用 `CSharpUIGenerator` 的基础组件与脚本流水线。运行时列表模板在 Prefab 中只生成一个 GameObject，交给业务循环克隆；固定设计重复才展开为多个 GameObject。不要额外建立一套 Canvas 或 Binder。
+Prefab 生成时必须走当前已注册项目适配器。LxyDemo 适配器继续复用 `CSharpUIGenerator` 的基础组件与脚本流水线；Generic UGUI 适配器只创建标准 Canvas、GraphicRaycaster 和 CanvasGroup，不引入 ObjectBinder、XLua、YooAsset 或业务运行时。运行时列表模板在 Prefab 中只生成一个 GameObject，交给业务循环克隆；固定设计重复才展开为多个 GameObject。核心 Builder 不得额外建立第二套 Canvas 或 Binder。
 
 保存后必须重新加载 Prefab，校验 `Generated` 顶层数量、递归对象数量和 UI 组件数量与展开后的 Schema 一致；校验失败不得报告成功。普通空 Schema 应停止生成，Figma 空 Schema 则从根节点导出图创建一个覆盖设计尺寸的 `FrameVisual` crop 兜底，避免遗留只有 Canvas/Binder 的空壳 Prefab。
 

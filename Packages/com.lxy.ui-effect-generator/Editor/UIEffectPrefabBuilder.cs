@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using LuaObjectBind;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace LxyDemo.UIFramework.Editor
+namespace Lxy.UIEffectGenerator.Editor
 {
     public enum UIEffectResourceMatchMode
     {
@@ -23,19 +22,16 @@ namespace LxyDemo.UIFramework.Editor
     public sealed class UIEffectPrefabGenerationOptions
     {
         public string panelId = string.Empty;
-        public string prefabFolder =
-            "Assets/GameResources/Prefabs/UIRes";
-        public UIScriptType scriptType = UIScriptType.CSharp;
-        public string codeNamespace = "LxyDemo.GameUI";
+        public string prefabFolder = string.Empty;
+        public UIEffectScriptType scriptType =
+            UIEffectScriptType.ProjectDefault;
+        public string codeNamespace = string.Empty;
         public string logicClassName = string.Empty;
-        public string scriptFolder = "Assets/Scripts/GameUI";
-        public UILayer uiLayer = UILayer.Auto;
+        public string scriptFolder = string.Empty;
+        public UIEffectLayer uiLayer = UIEffectLayer.Auto;
         public UIEffectResourceMatchMode resourceMatchMode =
             UIEffectResourceMatchMode.NameAndSemantic;
-        public string[] resourceSearchRoots =
-        {
-            "Assets/GameResources",
-        };
+        public string[] resourceSearchRoots = Array.Empty<string>();
     }
 
     public sealed class UIEffectPrefabGenerationResult
@@ -64,7 +60,7 @@ namespace LxyDemo.UIFramework.Editor
         {
             schemaAssetPath = NormalizeAssetPath(schemaAssetPath);
             string absolutePath =
-                CSharpUIGenerator.ToAbsolutePath(schemaAssetPath);
+                UIEffectEditorUtility.ToAbsolutePath(schemaAssetPath);
             if (!File.Exists(absolutePath))
             {
                 throw new InvalidOperationException(
@@ -88,6 +84,7 @@ namespace LxyDemo.UIFramework.Editor
         {
             UIEffectSchema compactSchema =
                 UIEffectSchemaUtility.Parse(schemaJson);
+            options ??= new UIEffectPrefabGenerationOptions();
             var modalExtractionNotes = new List<string>();
             int excludedUnderlyingNodes =
                 UIEffectSchemaUtility.ExtractModalForeground(
@@ -114,7 +111,6 @@ namespace LxyDemo.UIFramework.Editor
             }
             UIEffectSchema schema =
                 UIEffectSchemaUtility.ExpandRepeats(compactSchema);
-            options ??= new UIEffectPrefabGenerationOptions();
             if (options.resourceMatchMode ==
                 UIEffectResourceMatchMode.ColorBlocks)
             {
@@ -142,13 +138,13 @@ namespace LxyDemo.UIFramework.Editor
                     "UISchema 没有任何 UI 节点，已停止生成空 Prefab。");
             }
 
-            NormalizeOptions(options, schema);
+            IUIEffectProjectAdapter projectAdapter =
+                UIEffectProjectAdapterRegistry.Active;
+            NormalizeOptions(options, schema, projectAdapter);
 
-            CSharpUIGenerationOptions projectOptions =
-                CreateProjectOptions(options);
-            CSharpUIGenerationResult initialResult =
-                CSharpUIGenerator.Generate(
-                    projectOptions,
+            UIEffectPrefabHostResult initialResult =
+                projectAdapter.CreateOrUpdatePrefab(
+                    options,
                     promptForExistingPrefab);
 
             GameObject prefabAsset =
@@ -157,7 +153,7 @@ namespace LxyDemo.UIFramework.Editor
             if (prefabAsset == null)
             {
                 throw new InvalidOperationException(
-                    $"项目 UI 工具未生成 Prefab：{initialResult.PrefabPath}");
+                    $"项目适配器未生成 Prefab：{initialResult.PrefabPath}");
             }
 
             var resolver = new UIEffectResourceResolver(
@@ -181,13 +177,13 @@ namespace LxyDemo.UIFramework.Editor
                 initialResult.PrefabPath,
                 schema,
                 resolver,
-                options.scriptType == UIScriptType.CSharp);
+                projectAdapter,
+                options);
 
-            // The project generator already configured the Prefab root before
-            // the Generated subtree was rebuilt. Refresh bindings on that same
-            // loaded Prefab content instead of reopening the asset through a
-            // stale AssetDatabase object, which can write the previous
-            // hierarchy back over the newly generated UI.
+            // The active adapter configured the Prefab root before the
+            // Generated subtree was rebuilt. Save and import that exact asset
+            // once so a stale AssetDatabase object cannot overwrite the new
+            // hierarchy.
             AssetDatabase.SaveAssets();
             AssetDatabase.ImportAsset(
                 initialResult.PrefabPath,
@@ -213,7 +209,8 @@ namespace LxyDemo.UIFramework.Editor
             string prefabPath,
             UIEffectSchema schema,
             UIEffectResourceResolver resolver,
-            bool autoCollectBindings)
+            IUIEffectProjectAdapter projectAdapter,
+            UIEffectPrefabGenerationOptions options)
         {
             GameObject root =
                 PrefabUtility.LoadPrefabContents(prefabPath);
@@ -228,7 +225,9 @@ namespace LxyDemo.UIFramework.Editor
                 Transform previous = root.transform.Find(GeneratedRootName);
                 if (previous != null)
                 {
-                    RemoveGeneratedBindings(root, previous);
+                    projectAdapter.BeforeReplaceGeneratedTree(
+                        root,
+                        previous);
                     UnityEngine.Object.DestroyImmediate(
                         previous.gameObject);
                 }
@@ -254,13 +253,7 @@ namespace LxyDemo.UIFramework.Editor
                         schema.name);
                 }
 
-                if (autoCollectBindings)
-                {
-                    ObjectBinder objectBinder =
-                        root.GetComponent<ObjectBinder>();
-                    CSharpUIGenerator.AutoCollectObjectBindings(
-                        objectBinder);
-                }
+                projectAdapter.AfterBuildGeneratedTree(root, options);
 
                 GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(
                     root,
@@ -413,13 +406,14 @@ namespace LxyDemo.UIFramework.Editor
         {
             string referencePath = NormalizeAssetPath(
                 schema.referenceImage);
-            if (!referencePath.StartsWith(
-                    "Assets/GameResources/",
-                    StringComparison.OrdinalIgnoreCase))
+            if (!(referencePath == "Assets" ||
+                  referencePath.StartsWith(
+                      "Assets/",
+                      StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException(
                     "useReferenceImageAsVisual 只能引用 " +
-                    "Assets/GameResources 下的运行时 Sprite，当前路径：" +
+                    "Assets 下的运行时 Sprite，当前路径：" +
                     referencePath);
             }
 
@@ -1313,48 +1307,9 @@ namespace LxyDemo.UIFramework.Editor
             content.sizeDelta = new Vector2(0f, contentHeight);
         }
 
-        private static void RemoveGeneratedBindings(
-            GameObject prefabRoot,
-            Transform generatedRoot)
-        {
-            ObjectBinder objectBinder =
-                prefabRoot.GetComponent<ObjectBinder>();
-            if (objectBinder?.bindValues == null)
-            {
-                return;
-            }
-
-            List<BindValue> bindings = objectBinder.bindValues;
-            bindings.RemoveAll(binding =>
-                binding != null &&
-                IsInsideGeneratedRoot(
-                    binding.GetObjectValue,
-                    generatedRoot));
-            EditorUtility.SetDirty(objectBinder);
-        }
-
-        private static bool IsInsideGeneratedRoot(
-            UnityEngine.Object target,
-            Transform generatedRoot)
-        {
-            Transform transform = null;
-            if (target is GameObject gameObject)
-            {
-                transform = gameObject.transform;
-            }
-            else if (target is Component component)
-            {
-                transform = component.transform;
-            }
-
-            return transform != null &&
-                   (transform == generatedRoot ||
-                    transform.IsChildOf(generatedRoot));
-        }
-
         private static string GetBindingName(UIEffectNode node)
         {
-            string cleanName = CSharpUIGenerator.SanitizeTypeName(
+            string cleanName = UIEffectEditorUtility.SanitizeTypeName(
                 node.name);
             if (!ShouldBind(node))
             {
@@ -1501,39 +1456,39 @@ namespace LxyDemo.UIFramework.Editor
                 : node.semantic;
         }
 
-        private static CSharpUIGenerationOptions CreateProjectOptions(
-            UIEffectPrefabGenerationOptions options)
-        {
-            return new CSharpUIGenerationOptions
-            {
-                panelId = options.panelId,
-                scriptType = options.scriptType,
-                codeNamespace = options.codeNamespace,
-                logicClassName = options.logicClassName,
-                prefabFolder = options.prefabFolder,
-                scriptFolder = options.scriptFolder,
-                autoCollectBindings = true,
-                uiLayer = options.uiLayer,
-            };
-        }
-
         private static void NormalizeOptions(
             UIEffectPrefabGenerationOptions options,
-            UIEffectSchema schema)
+            UIEffectSchema schema,
+            IUIEffectProjectAdapter projectAdapter)
         {
+            UIEffectProjectDefaults defaults =
+                projectAdapter.CreateDefaults() ??
+                new UIEffectProjectDefaults();
             options.panelId = string.IsNullOrWhiteSpace(options.panelId)
                 ? schema.name
                 : options.panelId.Trim();
             options.logicClassName =
                 string.IsNullOrWhiteSpace(options.logicClassName)
-                    ? CSharpUIGenerator.SanitizeTypeName(options.panelId)
+                    ? UIEffectEditorUtility.SanitizeTypeName(options.panelId)
                     : options.logicClassName.Trim();
             options.prefabFolder =
-                NormalizeAssetPath(options.prefabFolder);
+                NormalizeAssetPath(
+                    string.IsNullOrWhiteSpace(options.prefabFolder)
+                        ? defaults.prefabFolder
+                        : options.prefabFolder);
             options.scriptFolder =
-                NormalizeAssetPath(options.scriptFolder);
+                NormalizeAssetPath(
+                    string.IsNullOrWhiteSpace(options.scriptFolder)
+                        ? defaults.scriptFolder
+                        : options.scriptFolder);
             options.codeNamespace =
-                options.codeNamespace?.Trim() ?? string.Empty;
+                string.IsNullOrWhiteSpace(options.codeNamespace)
+                    ? defaults.codeNamespace
+                    : options.codeNamespace.Trim();
+            if (options.scriptType == UIEffectScriptType.ProjectDefault)
+            {
+                options.scriptType = defaults.scriptType;
+            }
             options.resourceSearchRoots =
                 (options.resourceSearchRoots ?? Array.Empty<string>())
                 .Select(NormalizeAssetPath)
@@ -1546,9 +1501,16 @@ namespace LxyDemo.UIFramework.Editor
                 .ToArray();
             if (options.resourceSearchRoots.Length == 0)
             {
+                string defaultResourceRoot = NormalizeAssetPath(
+                    defaults.resourceSearchRoot);
+                if (!AssetDatabase.IsValidFolder(defaultResourceRoot))
+                {
+                    defaultResourceRoot = "Assets";
+                }
+
                 options.resourceSearchRoots = new[]
                 {
-                    "Assets/GameResources",
+                    defaultResourceRoot,
                 };
             }
         }
@@ -1708,7 +1670,7 @@ namespace LxyDemo.UIFramework.Editor
             }
 
             string absolutePath =
-                CSharpUIGenerator.ToAbsolutePath(referencePath);
+                UIEffectEditorUtility.ToAbsolutePath(referencePath);
             if (!File.Exists(absolutePath))
             {
                 throw new FileNotFoundException(
@@ -6500,7 +6462,8 @@ namespace LxyDemo.UIFramework.Editor
                     continue;
                 }
 
-                if (IsVisualNode(node) && HasExplicitAssetResource(node))
+                if (IsVisualNode(node) &&
+                    HasExplicitAssetResource(node))
                 {
                     explicitVisualResources.Add(node);
                 }
