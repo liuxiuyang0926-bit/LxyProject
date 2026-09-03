@@ -64,7 +64,7 @@ uiDefine.PanelConfig = {
         ResPath = "Assets/GameResources/Prefabs/UIRes/Main/UIMainView.prefab",
         ClassName = require("UI.Main.UIMainView"),
         ScreenFitType = ScreenFitType.InSafeArea,
-        CloseType = CloseType.Destroy,
+        CloseType = CloseType.Hide,
         IgnoreStack = false,
         OrderLayer = OrderLayer.StackLayer,
     }),

@@ -1,5 +1,6 @@
 {
   "aotMetadataDlls": [
+    "Game.Resource.dll",
     "System.Core.dll",
     "UnityEngine.CoreModule.dll",
     "XLua.Runtime.dll",
@@ -10,6 +11,7 @@
     "Game.Common.dll",
     "Game.Lua.dll",
     "Game.UI.dll",
+    "Game.Battle.dll",
     "Assembly-CSharp.dll"
   ]
 }
