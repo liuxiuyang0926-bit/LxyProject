@@ -33,8 +33,9 @@
 | `alignment` | string | TMP 对齐方式，通常为 `Left`、`Center` 或 `Right`。 |
 | `bold` | bool | 是否应用 TMP 粗体样式。 |
 | `color` | string | `#FFFFFFFF` 等 HTML 颜色；为空时使用类型默认值。 |
-| `resource` | string | 精确 Sprite 资源路径，可选 `#subSpriteName`。 |
-| `resourceCandidates` | string[] | 有证据支持的候选文件名。 |
+| `resource` | string | 精确 Sprite 资源路径，可选 `#subSpriteName`。生成式高精度流程中 `Verified` 只是 AI 的锁定请求；只有 Unity 对同一节点独立得到相同的高分、高领先、无结构风险赢家时才锁定，否则自动转入候选精排。 |
+| `resourceCandidates` | string[] | 有证据支持的精确候选路径，按视觉可信度降序排列；视觉模式只把它们作为精排证据。 |
+| `resourcePolicy` | string | `Auto`、`Candidate`、`Verified` 或 `ColorFallback`，默认 `Auto`。 |
 | `intentionalColor` | bool | 只有纯色本身就是最终视觉时才设为 true。 |
 | `preserveAspect` | bool | 设置 `Image.preserveAspect`。 |
 | `sliced` | bool | 请求 Sliced 模式；仅在匹配 Sprite 存在 Border 时生效。 |
@@ -89,6 +90,8 @@
 ```
 
 ## 资源和占位行为
+
+高精度生成结果必须显式区分资源结论。`Verified` 要求 `resource` 是项目中真实存在、并已同时对照效果图和 Sprite 外观确认的精确 `Assets/...` 路径，Builder 将其锁定；`Candidate` 使用有序 `resourceCandidates`，这些路径必须进入该节点的完整像素精排，但不会绕过阈值，第一项仅有有限决胜加权，后续项依次降低；`ColorFallback` 会清空资源字段、强制 `intentionalColor=true` 并跳过 Sprite 匹配，只适用于已经证明无纹理、无边框和无透明转角的纯色；`Auto` 不声明资源结论，继续在完整索引中检索。视觉模式若拒绝全部候选，Prefab 必须保留色块并报告审计风险，禁止在组件创建阶段直接取候选第一项。
 
 候选 Sprite 的尺寸和长宽比必须用 `TextureImporter` 源文件尺寸校正 `Sprite.rect`；源图被 `maxTextureSize` 缩小时，按源纹理宽高与导入纹理宽高的比例还原每个 Sprite Rect，不能把导入后的 2048 像素误当作美术原始宽度。
 

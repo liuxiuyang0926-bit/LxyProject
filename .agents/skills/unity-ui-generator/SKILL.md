@@ -5,12 +5,15 @@ description: 根据截图、本地图片、Figma Frame/Component 节点链接或
 
 # Unity UI 生成器
 
-支持两条明确分离的流水线：轻量模式由 Codex 只输出结构、Unity C# 确定性构建；高精度单轮模式由 Unity C# 提供高清效果图和项目 Sprite 联系图，Codex 在不加载 UnityMCP、不搜索文件的单次响应中输出完整 UISchema，再由当前 Unity Editor 直接调用项目 Builder。高精度来自视觉证据和完整层级规则，不依赖 MCP 传输层。
+支持两条明确分离的流水线：轻量模式由 Codex 只输出结构、Unity C# 确定性构建；高精度模式先用现有单轮分析和 Builder 快速创建 Prefab，再让 Codex 通过用户已经配置的 UnityMCP 只审查当前 Prefab、实际 Image/Sprite、层级和渲染结果。UnityMCP 会话不直接写 Prefab，而是返回完整修正版 UISchema；Unity 校验身份、尺寸和效果图哈希后写回，再由同一 Builder 重建。发生修改时最多追加一次重建后验证，总计最多两轮，完整工作流 Token 上限为 300,000。
 
 ## 按任务读取参考
 
 - Unity Editor 对本地效果图的后台提示包含“低 Token 模式”时：只读 [compact-blueprint.md](references/compact-blueprint.md)。不要搜索项目资源、读取其他参考、修改文件或调用 Unity。
-- Unity Editor 后台提示包含“单轮高精度视觉分析器”时：提示本身已包含完整输出契约，只使用附件中的效果图、Sprite 联系图和 manifest，一次返回 `schemaJson`；不要读取 Skill/参考、搜索文件、写项目或调用任何 MCP/工具。
+- Unity Editor 后台提示包含“第一阶段结构分析器”时：提示本身已包含完整输出契约，只使用附件效果图返回无资源路径的结构草案 `schemaJson`；不要读取 Skill/参考、搜索文件、写项目或调用任何 MCP/工具。
+- Unity Editor 后台提示包含“第二阶段资源与结构校正器”时：只使用附件效果图、节点专属 Sprite 联系图、原始分辨率节点裁片、manifest 和内嵌草案返回最终 `schemaJson`；候选是证据而不是锁定项，可据其源尺寸、Border 和透明轮廓合并/拆分视觉层、修正 Image/Container 与父子层级。`global-layer-geometry/global-outline-geometry` 是从全库按独立层几何补召回的证据，节点裁片不是资源。不要读取 Skill/参考、搜索项目、调用 MCP 或写项目。
+- Unity Editor 后台提示包含“定向差异修复器”时：只修本地审计列出的资源风险及 Prefab Image-only 预览中明确可见的最小差异，只返回提示白名单中的 `targetPath + replacementNodeJson` 节点补丁，不返回完整 UISchema，不重做正确区域，不调用 UnityMCP；不得因预览故意不渲染 Text 而删除或改动文字。补丁替换的是完整子树，除非证据明确要求合并，必须保留现有正确 children；Unity 最多接受两轮且每轮只保留量化改善的版本。
+- Unity Editor 后台提示包含“Unity UGUI Prefab 的定向视觉修复器”时：必须使用已连接的 UnityMCP 选择提示指定的项目，只检查指定 Prefab，并至少查看其真实层级、Image Sprite 与渲染/预览结果后再判断。不得枚举完整项目或完整 Sprite 库；每个问题节点只深入检查少量候选。不直接写项目文件，最终返回完整修正版 `schemaJson`，交给 Unity 校验和重建；当前结果已经一致时返回 `changed=false`。
 - 只有用户明确要求在 Codex 终端中通过 UnityMCP 手工直建 Prefab 时，才读 [direct-unity-mcp.md](references/direct-unity-mcp.md)、[ui-schema.md](references/ui-schema.md) 与 [project-ui-rules.md](references/project-ui-rules.md)。
 - 在 Codex 终端手工创建或审查 Schema 时：读 [ui-schema.md](references/ui-schema.md)。需要生成 Prefab 时再读 [project-ui-rules.md](references/project-ui-rules.md)。
 - 修改生成器 C#、资源解析或 Prefab 流水线时：同时读上述两个完整参考，并使用 `unity-project-development`。
@@ -24,10 +27,10 @@ description: 根据截图、本地图片、Figma Frame/Component 节点链接或
 - 先基于完整效果图识别全部可见实例并确定几何、资源边界与父子层级，再判断重复内容是运行时数据列表还是设计期固定重复；普通运行时列表在 Schema 中只输出一个无编号模板；若同构颜色/阵营/状态候选的正确保留项依赖项目 Sprite，则用 `runtimeTemplateGroup/runtimeTemplateVariant` 暂存所有候选，交给 C# 匹配后裁成一个；
 - 标记纯色块和无法确认的交互。
 
-高精度单轮模式的 Codex 还负责：
+高精度模式的 Codex 还负责：
 
-- 对照效果图和 C# 生成的 Sprite 联系图，结合源尺寸、九宫格 Border、透明轮廓、颜色及上下文逐节点确认资源；只有视觉证据成立时才从 manifest 复制精确路径，未确认时留空交给本地完整视觉解析器；
-- 在一次响应中输出完整、可解析的 UISchema，不调用终端、文件工具或 MCP，也不负责生成或复验 Prefab。
+- 第一阶段完整量取几何、独立视觉边界与父子所有权，不猜资源路径；第二阶段对照效果图和 C# 逐节点检索的 Sprite 联系图，结合源尺寸、九宫格 Border、透明轮廓、颜色及上下文确认资源并反向校正结构；
+- 用 `resourcePolicy` 明确资源结论：效果图与项目 Sprite 均已目视确认时可请求 `Verified + resource`，但 Unity 仅在同一路径也是本地独立高分、高领先、无结构风险赢家时锁定，否则自动降级为 `Candidate`；仍有歧义时使用 `Candidate + resourceCandidates` 有序 Top-N；已确认无纹理纯色且候选均不匹配时才使用 `ColorFallback`；其余使用 `Auto`。第二阶段不写项目；定向修复最多两次且只读。
 
 轻量模式的 Unity C# 负责：
 
@@ -44,14 +47,17 @@ description: 根据截图、本地图片、Figma Frame/Component 节点链接或
 - 通过 `UIEffectProjectAdapterRegistry.Active` 创建 Prefab 外壳并刷新项目集成；LxyDemo 的适配器必须继续复用 `CSharpUIGenerator` 的 Canvas、Binder 和脚本流水线，独立包默认使用不依赖业务框架的通用 UGUI 适配器；
 - 压缩 Schema，并显示本次 Codex Token。
 
-高精度单轮模式的 Unity C# 额外负责：
+高精度模式的 Unity C# 额外负责：
 
-- 从完整资源根稳定枚举 Sprite，生成带固定页/行/列映射的视觉联系图以及精确路径、源尺寸和 Border manifest；联系图只作候选证据，未展示的资源仍由本地解析器完整扫描；
-- 以只读、禁用 Unity/Figma MCP 的后台会话发送高清效果图和联系图，接收单次 `schemaJson`；
-- 注入参考图路径与哈希、执行通用层级/模板归一，然后在当前 Editor 中直接调用现有 `UIEffectPrefabBuilder`。Builder 内部保存与结构校验完成后立即结束，不启动 AI 复验。
+- 第一阶段只发送高清效果图并取得结构草案；随后用真实节点矩形调用与最终 Builder 相同的全库像素评分，组合精排、快速外观、源尺寸几何、遗漏整图 Container 探测、已命中目录、稳定文件族变体，以及不依赖草案整块裁剪的全库独立层几何召回，生成节点专属联系图、原始分辨率节点裁片以及精确路径、源尺寸和 Border manifest。候选不得按文件顺序或固定目录前 N 截取；高置信节点仍在 manifest 中但只展示当前最优图，低领先、轮廓敏感、大背景、Container Probe、合并、多层和整图风险节点展示更多局部候选；
+- 把本地初步命中的资源与候选交给第二阶段反向校正：候选完整轮廓跨越多个草案 Image 时允许合并；Container 探测命中完整底图时补建/转换 Image；草案 Image 没有独立边界且已烘焙在父图时转为 Container。所有结构改写保持后代累计绝对坐标；
+- 保存每个草案节点经完整资源库检索得到的有序 Top-N，并合并回第二阶段结果；`Candidate` 只参与完整像素精排，第一候选获得有限加权，后续候选递减且全库未展示项仍可凭更强视觉证据胜出。视觉评分拒绝候选后不得在构建阶段直接取第一项伪装成成功；
+- `Verified` 只有同时满足 AI 请求和 Unity 本地独立高置信证据才作为精确锁定；不一致时保留路径为 `Candidate` 并继续全库验证。`ColorFallback` 明确跳过资源检索，`Auto/Candidate` 继续由 Builder 全库验证；
+- 注入参考图路径与哈希、执行通用层级/模板归一并调用项目 Builder。生成后本地汇总未命中、低绝对分、低领先幅度和逐节点 Image-only（含边缘带）差异风险；无风险立即结束，有风险时生成真实 RectTransform/Image/九宫格的 Image-only 预览、原始分辨率风险参考裁切联系图与风险候选联系图，最多启动两次白名单节点补丁。每轮由同一 Builder 重建并重新量化，改善才接受，恶化自动恢复最佳 Schema/Prefab；
+- Prefab 生成后的定向修复必须加载 UnityMCP，但只允许访问当前项目实例和目标 Prefab；禁止全项目枚举、无关场景读取和全库资源转储。会话返回完整 UISchema，不直接保存 Prefab；Unity 必须复核 Panel ID、设计尺寸、参考图哈希及 Schema 合法性后才能写回并重建。第一轮发生修改时允许再启动一次验证，最多两轮；使用 `high`，累计达到 235,000 Token 后不得启动新轮次，完整流程不超过 300,000。
 - 对“遮罩 + 独立 Popup/Dialog/Modal 前景”的强证据执行模态前景提取：把遮罩和弹窗按完整画布绝对坐标提升到 Schema 根，排除所有被覆盖的宿主页面节点；没有同时满足遮罩、前景、绘制顺序和几何包含关系时不触发。
 
-轻量模式不要让 Codex 枚举资源目录、猜 `Assets/...` 路径、输出默认字段、重复抄写相同节点或直接逐个创建 GameObject。高精度单轮模式同样不得枚举项目或仅凭文件名猜资源；它只从联系图 manifest 复制已视觉确认的精确路径，随后由现有 Builder 完成全量本地匹配，不得绕开已注册的项目适配器。LxyDemo 中不得绕开其 Canvas/Binder 流水线。
+轻量模式不要让 Codex 枚举资源目录、猜 `Assets/...` 路径、输出默认字段、重复抄写相同节点或直接逐个创建 GameObject。高精度模式不得仅凭文件名猜资源；第二阶段和定向修复只使用 Unity 导出的附件、manifest、草案和审计证据，按照 `Verified/Candidate/ColorFallback/Auto` 提交结论，随后由现有 Builder 完成最终全量本地验证，不得绕开已注册的项目适配器。LxyDemo 中不得绕开其 Canvas/Binder 流水线。
 
 ## FigmaNodeUrl
 
@@ -91,7 +97,7 @@ description: 根据截图、本地图片、Figma Frame/Component 节点链接或
 
 运行时模板不一定带数字。相邻业务面板仅由颜色、阵营、队伍或状态前缀区分，且类型、尺寸、子树层级和局部矩形同构时，最终 Prefab 只保留一个节点，不使用 `repeatCount` 或 `variants`。如果各实例的独立视觉资源完全一致，Schema 可直接只写第一个；如果正确保留项依赖项目 Sprite，Codex 不搜索资源，而是完整输出候选，在各候选根节点写相同 `runtimeTemplateGroup` 和各自简短稳定的 `runtimeTemplateVariant`（例如 `red/green/blue`）。C# 必须先匹配所有候选，再按变体与已命中资源 token 的一致性、命中资源完整度、视觉分和原始绘制顺序确定性地保留一个。保留项维持自己的原名、原始绝对矩形、绘制顺序和内部视觉，不得把另一实例的颜色或资源套到它的位置。例如红色候选的旗帜与徽标资源证据最完整时保留原位置的 `RedFactionPanel`。不确定是否真正同构时不要标候选组。简单颜色按钮、Toggle、左右固定面板、结构不同的面板以及明确要求全部常驻的节点不适用此规则。
 
-同构 Card/Item/Row/Cell/业务 Panel 必须在第一次 Builder 调用前完成识别与标记。若 Codex 漏写显式组，Builder 内的 C# 严格兜底按上一段条件在内存中补写候选标记，并在首次资源匹配后裁剪；自动兜底不得扩大父背景、重测坐标或改变保留模板的资源与 children。Unity 窗口可在后台任务返回后做快速数量断言，但不得因此再次调用 Builder。
+同构 Card/Item/Row/Cell/业务 Panel 必须在第一次 Builder 调用前完成识别与标记。若 Codex 漏写显式组，Builder 内的 C# 严格兜底按上一段条件在内存中补写候选标记，并在首次资源匹配后裁剪；自动兜底不得扩大父背景、重测坐标或改变保留模板的资源与 children。Unity 窗口可在后台任务返回后做快速数量断言；只有本地资源或预览审计产生风险时，最多两次定向修复才可替换白名单中的最小 Schema 节点或必要父子树。每次重建后必须量化验收，未改善时回滚，达到轮次或 Token 上限后停止并明确报告是否通过严格验收。
 
 先判断一个可见区域是独立资源、父资源的一部分，还是多层资源合成。父级 Sprite 已经包含页签底、关闭图标、边框或装饰时，只在其上叠加真正独立的文字/交互，不得再创建同区域的 `RoundTab`、`CloseIcon` 等视觉子节点。旗帜、底章、徽标等边界明确且互相叠放的复合图形应拆成有 sibling 顺序的多个 Image；旗面与中央徽标轮廓可分辨时必须拆成两个 Image，不能把独立徽标当成旗面纹理省略。不要用一个大 Image 同时包住多层外观。
 
@@ -104,6 +110,8 @@ description: 根据截图、本地图片、Figma Frame/Component 节点链接或
 连续状态文字必须按效果图准确填写内容、颜色、字号、对齐和矩形。只有同一行确实存在不同颜色或运行时字段时才拆成多个 Text；拆分后的矩形不得互相覆盖，并要按字面顺序贴合。例如“布局期 剩余09:40:22 积分目标：20000”中的白色标签与黄色值可分段，但每段必须保持正确颜色和间距。
 
 资源字段通常留空，让 C# 做本地视觉匹配。只有用户或仓库已明确给出真实路径时才填写 `resource`。对角色可辨认的 Image/Button/Toggle 填写简短稳定的通用 `semantic`，例如 `background/panel/header/bar/field/icon/emblem/badge/crest/flag/banner/avatar/portrait/overlay`；它只描述视觉类别，不得猜项目路径、资源文件名或业务数据。`intentionalColor` 只表示最终视觉确实是无纹理、无透明转角、无边框变化的纯色；本地视觉模式仍应先尝试匹配已有 Sprite，只有没有可信候选时才保留该色块。候选的原始尺寸、长宽比和整幅背景覆盖判断必须把 `Sprite.rect` 按 `TextureImporter` 源文件宽高与实际导入纹理宽高的比例还原到源像素；不得直接使用受 `maxTextureSize` 缩小的导入 Rect，否则完整大图会被尺寸过滤误杀。带 Sprite Border 的资源是九宫格候选：必须按节点目标矩形模拟 Sliced 后的外观比较；背景、面板、条和字段等可拉伸表面不能因源图片宽高、面积或长宽比不同而淘汰，但图标、徽标、徽章、旗帜、头像等轮廓敏感图形即使带 Border 也必须保留原始长宽比约束，禁止细长九宫格条竞争近方形徽标。命中后设置 `Image.Type.Sliced`。后绘制的 Image、Button、Toggle 和子控件使用实际矩形作硬遮挡；`Text` 的 RectTransform 只是排版范围，不能把整块背景判为不可见，必须保留背景采样并把字形像素作为软遮挡/离群点鲁棒排除。半透明候选从离屏预览读取后先反预乘 Alpha，再用节点周边采样的底色模拟最终合成；近中性灰白 Sprite 还要评估 `Image.color` 染色并在命中后写回颜色。只有原色候选同时具有高视觉分且与效果图平均颜色接近时，才可在染色蒙版领先不足时优先；若没有颜色接近的强原色候选，仍保留结构更吻合的染色九宫格，不能全局压制着色复用。视觉分接近时可以用节点 `semantic/name` 与资源类别同义词（如 icon/emblem/badge、flag/banner）作小幅决胜加分，但不能用名称覆盖明显相反的像素证据。如果 AI 把一个连续背景误拆成相邻、同宽或同高的 Image，除联合矩形匹配外，C# 还可在两个片段连续、联合区域覆盖父级主要宽度、候选原始尺寸接近父级全宽且整幅参考区域高置信时，将它们还原为一个普通 Sprite 背景并保持所有子节点绝对坐标。明确写了 `mayMerge:true` 时也可考虑其他普通 Sprite 联合，但必须同时满足原始尺寸、长宽比、更高绝对分和正向领先幅度。非视觉 Container 下若遗漏了截图中真实存在的文字承载条，C# 只在九宫格候选对包围文字组的区域达到高绝对分和正向领先时补建 Image，并把同组文字归入其 children。资源缺失只记录日志并显示色块，日志要包含最佳候选、视觉分数和领先幅度，不得向 Prefab 添加 `PlaceholderLabel` 或 `[MISSING]` 文字。可编辑文字继续使用可见的 TMP `Text`，交互节点的 Graphic 不得因存在参考底图而被设成透明。
+
+高精度后台从有限联系图选择的路径仍是候选证据，由导入层转为 `resourceCandidates` 后针对节点进行全库验证，不能因为进入联系图就绕过像素精排。非视觉 Container 下准备补建文字承载背景时，如果同一父级中较早绘制的现有视觉节点已经完整包含该文字组，不得再生成重复背景。
 
 半透明 Sprite 不能把整个目标区域的背景压缩成一个平均色。优先把最近一个已高置信命中的视觉祖先按其目标尺寸渲染，并将该祖先的 Sprite、Image.color、Alpha 与更外层背景逐采样点合成为当前节点的底色；跨过无 Graphic 的 Container 时仍沿用这个最近视觉祖先。没有可用祖先时才从节点四周逐点取样，同级 Image、Text 和交互区域必须从环形样本中排除，不能把相邻字段、按钮或文字颜色当成底色。对带 Alpha 变化且具有原始颜色的候选，最终排序使用逐点合成误差、边缘和去背景后的前景颜色方向/强度，不能再让未经合成的原图平均色覆盖该结论；文字覆盖短名单也要保留一小部分去背景证据。
 
@@ -132,7 +140,7 @@ Sprite 索引、视觉短名单和同分决胜必须确定化：搜索根、资�
 ## 生成入口
 
 - Unity 窗口：`工具/UI工具/根据效果图生成Prefab`
-  - 本地效果图默认选择“高精度单轮还原（低 Token）”：C# 提供效果图与 Sprite 联系图，Codex 一次输出 Schema，当前 Editor 直接创建 Prefab；
+  - 本地效果图默认选择“快速生成 + UnityMCP 定向修复”：先按现有单轮流程和 Builder 生成 Prefab，再由 UnityMCP 审查真实生成结果；有修改时写回 Schema、重建并最多再验证一次；
   - “轻量 UISchema（旧流程）”保留低 Token 的纯结构分析与 C# 视觉匹配；
 - Figma：窗口来源选择 `FigmaNodeUrl`，直接读取节点并生成 Prefab；
 - 选中 Schema：`Assets/UI工具/根据选中的UISchema生成Prefab`

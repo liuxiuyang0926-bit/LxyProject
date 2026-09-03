@@ -28,9 +28,13 @@
 
 轻量 UISchema 模式下，后台 Codex 只输出视觉结构；不得搜索 Sprite 或执行 Prefab 操作。固定 C# 流程负责图片路径/尺寸、`Auto` 锚点、重复节点展开、资源索引、缺失占位、ScrollRect Content、Prefab 保存与 Binder 刷新。该模式只读取效果图并输出受 JSON Schema 约束的精简结构，保持项目只读。
 
-高精度单轮模式下，Unity C# 先稳定扫描用户指定资源根，为有限数量 Sprite 生成视觉联系图，并输出页/行/列到精确资源路径、源尺寸与 Border 的 manifest。后台 Codex 保持项目只读且显式禁用 Unity/Figma MCP，只使用高清效果图、联系图和内嵌规则，在一次响应中输出完整 UISchema。只有联系图视觉证据成立时才显式写 `resource`；其余节点留空资源并提供通用 `semantic`，由 Builder 对完整资源根继续执行本地视觉匹配。
+高精度两阶段模式下，第一阶段后台 Codex 只使用高清效果图量取无资源路径的结构草案。Unity C# 随后以草案的真实节点矩形在用户指定资源根中执行完整 Sprite 索引和本地像素检索，按节点组合精排、快速外观、源尺寸几何、Container 整图探测、已命中目录与稳定文件族变体，生成节点专属联系图和页/行/列到精确路径、源尺寸、Border 的 manifest。候选不得按资源目录顺序或固定全局前 N 截取。
 
-高精度 Schema 返回后，Unity C# 注入参考图路径与内容哈希，执行通用视觉层级和运行时模板归一，再由当前 Editor 直接调用 `UIEffectPrefabBuilder.Generate(...)`。Builder 继续负责全量资源匹配、保存和确定性结构校验，项目适配器负责 Prefab 外壳、Binder 与可选脚本元数据；首次调用结束后不启动 AI 复验或第二次 Builder。UnityMCP 仅保留给用户明确要求的手工终端直建流程，不进入默认效果图分析会话。
+第二阶段后台 Codex 不加载 Unity/Figma MCP，也不搜索项目文件，只使用高清效果图、节点候选联系图、manifest 和本地初步匹配草案，依据真实资源边界反向校正 Image/Container、矩形、父子层级、合并/拆层与资源选择。资源结论必须写成 `Verified + resource`、`Candidate + 有序 resourceCandidates`、`ColorFallback` 或 `Auto`；不得把一个文件名猜测伪装为锁定资源。
+
+高精度首轮 Schema 返回后，Unity C# 注入参考图路径与内容哈希，执行通用视觉层级和运行时模板归一，再调用 `UIEffectPrefabBuilder.Generate(...)`。Prefab 保存后启动受限 UnityMCP 定向修复：Codex 只查看指定项目实例、目标 Prefab 的真实层级、Image/Sprite 和渲染结果，并按问题节点查询少量候选；禁止枚举完整项目或完整 Sprite 库。会话不直接写 Prefab，而是返回完整修正版 UISchema；Unity 复核 Panel ID、设计尺寸、效果图哈希及 Schema 合法性后写回，再由同一 Builder 重建。第一轮发生修改时最多追加一次重建后验证；累计 Token 达到 235,000 后不再启动新轮次，完整工作流不超过 300,000。
+
+节点候选联系图不是资源正确性的边界。C# 必须保留完整检索得到的每节点有序 Top-N 并合并回第二阶段结果，并额外按独立视觉层尺寸、透明轮廓、九宫格非拉伸轴和边缘厚度从全库补召回整块裁剪难以发现的背景、边框、徽章和装饰层。第二阶段同时获得原始分辨率节点裁片用于判断多层边界。高置信节点仍进入 manifest，但只展示当前最优缩略图；低领先、轮廓敏感、大背景、Container Probe、合并、多层和整图风险节点展示更多候选。该分流只减少 AI 附件，不把本地结果设为 `Verified`。`Candidate` 中的候选进入对应节点最终精排集，第一项只获得有限加权、后续项递减；Builder 仍从完整资源索引稳定检索，允许未展示在联系图中的 Sprite 以更强像素、颜色、透明轮廓、Border 和原始尺寸证据胜出。AI 的 `Verified` 只有和 Unity 本地独立高置信、无结构风险赢家完全一致时才精确锁定，否则降级为 `Candidate`；`ColorFallback` 明确跳过资源匹配。评分拒绝全部候选后不得在 `Resolve` 阶段直接加载第一项。已有视觉节点完整包含一组文字时，不得再为该文字组补建重复字段底。
 
 C# 使用 Schema 矩形原值设置 RectTransform；节点宽或高小于等于 0 时先归一为 1 像素。效果图尺寸必须通过 TextureImporter 的源文件尺寸取得，不能使用受 `maxTextureSize` 影响的 `Texture2D.width/height`。Prefab 的 `Generated` 使用固定设计尺寸，并整体等比居中适配项目 1920×1080 参考分辨率，不能直接 Stretch 到尚未挂载运行时 Canvas 的零尺寸 Prefab 根节点。`Auto` 锚点只选择响应式附着点，不会识别效果图或修正其他错误坐标。因此后台 Codex 必须使用原图像素坐标量取边界，先记录绝对矩形，再转成父节点局部坐标并递归复核。
 
@@ -46,7 +50,7 @@ Schema 使用 2.0 精简格式：省略默认字段并以单行 JSON 保存。�
 
 C# 不得在资源匹配前根据颜色/阵营前缀或子树相似度自动删除、合并或重排业务节点。后台漏标的唯一兜底是“只标注、不删除”的严格候选推断：候选必须位于同一父级，根类型为 Container/Image，根名属于 Card/Item/Row/Cell/Entry 或带明确 Faction/Team/Guild/Player 等业务身份的 Panel，至少有三个节点，名称仅一个颜色/阵营 token 不同，并且整棵子树类型、顺序、局部矩形与非视觉属性一致。左右/上下布局、Button、Toggle、简单样式状态、结构不同和固定常驻面板必须排除。只有资源匹配完成后，Prefab Builder 才可在同一 `runtimeTemplateGroup` 内裁剪候选；显式标组或通过上述严格规则标组之外的节点永不参与。旧 Schema 中带连续数字后缀的固定设计期重复压缩仍是独立能力，不能用于猜测无编号业务模板。
 
-Builder 在首次生成的内存 Schema 中执行严格模板推断与裁剪。完整模式完成回调可在内存中重建同一候选分组并快速验证 Prefab 中至多存在一个根节点，但不得写回 Schema、不得再次调用 Builder，也不要求后台 Codex输出模板审计清单。
+Builder 在首次生成的内存 Schema 中执行严格模板推断与裁剪。完整模式完成回调可在内存中重建同一候选分组并验证 Prefab 中至多存在一个模板根；只有本地资源或节点级预览审计产生风险时，才允许把审计清单和 Image-only 预览交给最多两次定向修复。修复只返回本地白名单中的最小节点替换 JSON，replacement 必须保留未被证据否定的现有 children；Unity 拒绝白名单外、改名、父子重叠或校验失败的补丁。合并后由同一 Builder 重建并比较修复前后差异，只接受改善，否则回滚到最佳版本；达到两轮或 Token 门槛后停止，并在未通过时明确报告，禁止无界递归复验。
 
 本地效果图使用稳定导入路径，不用 `GenerateUniqueAssetPath` 为同一 Panel 重复创建新参考图。C# 为参考图计算 SHA-256 并写入 `referenceImageHash`；当 Panel ID、规范化 `referenceImage`、源尺寸和哈希与现有 Schema 一致时，生成窗口默认直接复用该 Schema。只有图片内容或身份变化，或用户显式关闭“同图复用现有 Schema”时才启动新的后台分析；分析期间图片哈希改变时拒绝写入过期结果。
 
