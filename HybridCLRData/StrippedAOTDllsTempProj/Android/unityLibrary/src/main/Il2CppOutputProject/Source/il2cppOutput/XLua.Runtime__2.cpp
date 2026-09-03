@@ -1987,6 +1987,7 @@ struct MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71  : public Behavio
 struct GameSceneManager_tFBFAF1EFF355B5F0768A39005984B8A534724221  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
 {
 	float ___minimumLoadingSeconds;
+	bool ___unloadUnusedAssetsAfterSceneChanged;
 	Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B* ___activeLoadCoroutine;
 	Action_1_t310F18CB4338A2740CA701F160C62E2C3198E66A* ___activeProgressCallback;
 	Action_2_t8EADE87044ADE97906736D729EA2E3EF97F34F3D* ___activeCompletedCallback;

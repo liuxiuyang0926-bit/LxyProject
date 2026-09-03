@@ -162,6 +162,7 @@ IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_AbsolutePath_mABB93DD30D4C0F11948DE
 IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_AbsoluteUri_m080934F4F2E2160EBEABDF00F8B6D59888EA63AE_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_DnsSafeHost_mE5001E7AE7F1879A2059024EA06C9031F6320A2B_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_Fragment_m3CB7AD14DA9618ADE406039D4713F67D6951D835_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_Host_m2C0E258C7DFF7A340049BE9BC08FF45E90988D8C_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_IsFile_m760E384ED177DC9197D5010B763F64196552DF5F_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_IsLoopback_m0E865DCC324F483C0C60E7D8E6FEF7AD0F46059A_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* Uri_get_IsUnc_mB190B452D6A7B09FC8BDD967A5C38F32E87E0FCA_RuntimeMethod_var;
@@ -2637,6 +2638,31 @@ IL_0018:
 	{
 		bool L_3;
 		L_3 = Uri_get_IsUncPath_m2D9E7E2DB4EA57EF268B9BA167A1389E18AE9835(__this, NULL);
+		return L_3;
+	}
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* Uri_get_Host_m2C0E258C7DFF7A340049BE9BC08FF45E90988D8C (Uri_t1500A52B5F71A04F5D05C0852D0F2A0941842A0E* __this, const RuntimeMethod* method) 
+{
+	{
+		bool L_0;
+		L_0 = Uri_get_IsNotAbsoluteUri_m374185EB37A209B6102F955427913168C5543028(__this, NULL);
+		if (!L_0)
+		{
+			goto IL_0018;
+		}
+	}
+	{
+		String_t* L_1;
+		L_1 = SR_GetString_m2F0EFCFA5FE3DB6DE89C5823284302D691355AA6(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteralE657126EBF76C06687ED6EAD2C714E37315C927F)), NULL);
+		InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB* L_2 = (InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB_il2cpp_TypeInfo_var)));
+		InvalidOperationException__ctor_mE4CB6F4712AB6D99A2358FBAE2E052B3EE976162(L_2, L_1, NULL);
+		IL2CPP_RAISE_MANAGED_EXCEPTION(L_2, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&Uri_get_Host_m2C0E258C7DFF7A340049BE9BC08FF45E90988D8C_RuntimeMethod_var)));
+	}
+
+IL_0018:
+	{
+		String_t* L_3;
+		L_3 = Uri_GetParts_m432C93EAC8684C7410585D36DA00B04F6DC34357(__this, 4, 1, NULL);
 		return L_3;
 	}
 }

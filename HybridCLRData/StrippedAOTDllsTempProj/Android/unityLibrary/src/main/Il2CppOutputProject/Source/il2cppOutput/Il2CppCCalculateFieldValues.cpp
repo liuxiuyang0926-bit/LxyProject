@@ -23445,9 +23445,9 @@ IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable196[3] =
 IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable201[1] = 
 {
 	static_cast<int32_t>(offsetof(Marvin_t0342A28B10725C354B3E96D240FF68C4D7A0D242_StaticFields, ___U3CDefaultSeedU3Ek__BackingField)),};
-IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable202[2] = 
+IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable202[5] = 
 {
-	static_cast<int32_t>(offsetof(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_StaticFields, ___doubleRoundLimit)),static_cast<int32_t>(offsetof(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_StaticFields, ___roundPower10Double)),};
+	0,0,0,static_cast<int32_t>(offsetof(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_StaticFields, ___doubleRoundLimit)),static_cast<int32_t>(offsetof(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_StaticFields, ___roundPower10Double)),};
 IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable204[3] = 
 {
 	0,0,0,};

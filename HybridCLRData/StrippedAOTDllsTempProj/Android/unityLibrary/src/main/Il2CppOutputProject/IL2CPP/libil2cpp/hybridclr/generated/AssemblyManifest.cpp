@@ -8,6 +8,7 @@ namespace hybridclr
 		"Game.Common",
 		"Game.Lua",
 		"Game.UI",
+		"Game.Battle",
 		"Assembly-CSharp",
 
 		//!!!}}PLACE_HOLDER

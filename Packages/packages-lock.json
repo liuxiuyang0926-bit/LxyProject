@@ -34,6 +34,12 @@
         "com.unity.ugui": "1.0.0"
       }
     },
+    "com.lxy.launcher-icon": {
+      "version": "file:com.lxy.launcher-icon",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.lxy.lua": {
       "version": "file:com.lxy.lua",
       "depth": 0,

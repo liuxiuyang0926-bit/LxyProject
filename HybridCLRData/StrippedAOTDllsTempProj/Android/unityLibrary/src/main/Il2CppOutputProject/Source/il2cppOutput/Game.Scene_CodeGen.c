@@ -46,12 +46,12 @@ extern void GameSceneManager_SafeInvokeCompleted_mAD28A7A2C3C6116E9D0C8BF532F327
 extern void GameSceneManager_FinishWithFailure_mCCD42FBC230C16F76EAAB36D4D99A831A4C3BA0B (void);
 extern void GameSceneManager_OnDestroy_m7BFD4E0CCA7636FEF6CD0832048E09870490F330 (void);
 extern void GameSceneManager__ctor_m17114908B756D1DFB073826786290C89DF057BCB (void);
-extern void U3CLoadSceneRoutineU3Ed__43__ctor_m9E1ECC596C2F76E02DBC3EF1EC506D84237799E4 (void);
-extern void U3CLoadSceneRoutineU3Ed__43_System_IDisposable_Dispose_m2D428D7B86384E0EF17498F0A2CF7FD9C8B4B405 (void);
-extern void U3CLoadSceneRoutineU3Ed__43_MoveNext_m507F4A3541061FF89E926CCE8CA004EE398A176C (void);
-extern void U3CLoadSceneRoutineU3Ed__43_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m15F7E9787261460BADDA3F60F931E8619ACF6C5E (void);
-extern void U3CLoadSceneRoutineU3Ed__43_System_Collections_IEnumerator_Reset_m35C5FFF95BC19234A77176B4265708219C78F20D (void);
-extern void U3CLoadSceneRoutineU3Ed__43_System_Collections_IEnumerator_get_Current_m5AA3BF119A566AA7A0EEFE45672867CA638BECFF (void);
+extern void U3CLoadSceneRoutineU3Ed__44__ctor_m6025061D58D4E0184B3BD5C4A63F35D6C21E7888 (void);
+extern void U3CLoadSceneRoutineU3Ed__44_System_IDisposable_Dispose_mACD639D3212179B80900391535A3950D4DC4DDCA (void);
+extern void U3CLoadSceneRoutineU3Ed__44_MoveNext_m73344F5BF4F297C0C0DB7AC9007FAEBA8D380301 (void);
+extern void U3CLoadSceneRoutineU3Ed__44_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m5054DDF8E82D925986C9D67E877A138A03728420 (void);
+extern void U3CLoadSceneRoutineU3Ed__44_System_Collections_IEnumerator_Reset_mB4D66605FA55F07D7E983DBF5E693ECC3C905ABC (void);
+extern void U3CLoadSceneRoutineU3Ed__44_System_Collections_IEnumerator_get_Current_mD89E08151053684702B6937B683B14B71FF162D2 (void);
 static Il2CppMethodPointer s_methodPointers[40] = 
 {
 	UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m443EB1EFAFB7327F386DF385A27FEBD50EC8527A,
@@ -88,55 +88,55 @@ static Il2CppMethodPointer s_methodPointers[40] =
 	GameSceneManager_FinishWithFailure_mCCD42FBC230C16F76EAAB36D4D99A831A4C3BA0B,
 	GameSceneManager_OnDestroy_m7BFD4E0CCA7636FEF6CD0832048E09870490F330,
 	GameSceneManager__ctor_m17114908B756D1DFB073826786290C89DF057BCB,
-	U3CLoadSceneRoutineU3Ed__43__ctor_m9E1ECC596C2F76E02DBC3EF1EC506D84237799E4,
-	U3CLoadSceneRoutineU3Ed__43_System_IDisposable_Dispose_m2D428D7B86384E0EF17498F0A2CF7FD9C8B4B405,
-	U3CLoadSceneRoutineU3Ed__43_MoveNext_m507F4A3541061FF89E926CCE8CA004EE398A176C,
-	U3CLoadSceneRoutineU3Ed__43_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m15F7E9787261460BADDA3F60F931E8619ACF6C5E,
-	U3CLoadSceneRoutineU3Ed__43_System_Collections_IEnumerator_Reset_m35C5FFF95BC19234A77176B4265708219C78F20D,
-	U3CLoadSceneRoutineU3Ed__43_System_Collections_IEnumerator_get_Current_m5AA3BF119A566AA7A0EEFE45672867CA638BECFF,
+	U3CLoadSceneRoutineU3Ed__44__ctor_m6025061D58D4E0184B3BD5C4A63F35D6C21E7888,
+	U3CLoadSceneRoutineU3Ed__44_System_IDisposable_Dispose_mACD639D3212179B80900391535A3950D4DC4DDCA,
+	U3CLoadSceneRoutineU3Ed__44_MoveNext_m73344F5BF4F297C0C0DB7AC9007FAEBA8D380301,
+	U3CLoadSceneRoutineU3Ed__44_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m5054DDF8E82D925986C9D67E877A138A03728420,
+	U3CLoadSceneRoutineU3Ed__44_System_Collections_IEnumerator_Reset_mB4D66605FA55F07D7E983DBF5E693ECC3C905ABC,
+	U3CLoadSceneRoutineU3Ed__44_System_Collections_IEnumerator_get_Current_mD89E08151053684702B6937B683B14B71FF162D2,
 };
 static const int32_t s_InvokerIndices[40] = 
 {
-	9089,
-	6180,
-	9045,
-	6117,
-	5158,
-	5975,
-	5010,
-	6117,
-	5158,
-	6068,
-	5113,
-	6068,
-	5113,
-	6068,
-	5113,
-	5113,
-	5113,
-	5113,
-	5113,
-	5113,
-	5113,
-	5113,
-	6180,
-	4581,
-	1170,
-	4581,
-	3080,
-	3071,
-	2575,
-	3080,
-	1700,
-	3071,
-	6180,
-	6180,
-	5074,
-	6180,
-	5975,
-	6068,
-	6180,
-	6068,
+	9288,
+	6256,
+	9244,
+	6192,
+	5226,
+	6048,
+	5077,
+	6192,
+	5226,
+	6142,
+	5181,
+	6142,
+	5181,
+	6142,
+	5181,
+	5181,
+	5181,
+	5181,
+	5181,
+	5181,
+	5181,
+	5181,
+	6256,
+	4642,
+	1194,
+	4642,
+	3124,
+	3115,
+	2615,
+	3124,
+	1729,
+	3115,
+	6256,
+	6256,
+	5142,
+	6256,
+	6048,
+	6142,
+	6256,
+	6142,
 };
 IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Game_Scene_CodeGenModule;
 const Il2CppCodeGenModule g_Game_Scene_CodeGenModule = 
