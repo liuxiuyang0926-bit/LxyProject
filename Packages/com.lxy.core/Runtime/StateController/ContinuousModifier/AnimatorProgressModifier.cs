@@ -10,15 +10,33 @@ namespace StateControl.Runtime.ContinuousModifier
     [Serializable]
     public class AnimatorProgressModifier : IContinuousModifier
     {
+        /// <summary>
+        /// 公开的目标数据。
+        /// </summary>
         public Animation Target;
+        /// <summary>
+        /// 公开的Clip数据。
+        /// </summary>
         public AnimationClip Clip;
         [Range(0f, 1f)]
+        /// <summary>
+        /// 公开的From数据。
+        /// </summary>
         public float From;
         [Range(0f, 1f)]
+        /// <summary>
+        /// 公开的To数据。
+        /// </summary>
         public float To;
 
+        /// <summary>
+        /// 向调用方提供Modifier类型。
+        /// </summary>
         public ContinuousModifierTypeEnum ModifierType => ContinuousModifierTypeEnum.AnimatorProgress;
 
+        /// <summary>
+        /// 执行应用相关逻辑。
+        /// </summary>
         public void Apply(float progress)
         {
             if (Target == null || Clip == null)
@@ -43,6 +61,9 @@ namespace StateControl.Runtime.ContinuousModifier
             state.enabled = true;
         }
 
+        /// <summary>
+        /// 添加Field。
+        /// </summary>
         public void AddField(VisualElement root)
         {
 #if UNITY_EDITOR

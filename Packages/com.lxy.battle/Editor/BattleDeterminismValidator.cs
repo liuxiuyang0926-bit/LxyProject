@@ -10,6 +10,9 @@ namespace Game.Battle.Editor
 {
     public static class BattleDeterminismValidator
     {
+        /// <summary>
+        /// 执行校验相关逻辑。
+        /// </summary>
         [MenuItem("工具/战斗/运行确定性自检", false, 30)]
         public static void Validate()
         {
@@ -40,6 +43,9 @@ namespace Game.Battle.Editor
                 $"Hash={first.CalculateStateHash():X16}");
         }
 
+        /// <summary>
+        /// 校验确定性数学。
+        /// </summary>
         private static void ValidateDeterministicMath()
         {
             AssertNear(FP.Sin(FP.Zero), FP.Zero, 2L, "Sin(0)");
@@ -95,6 +101,9 @@ namespace Game.Battle.Editor
                 "Abs");
         }
 
+        /// <summary>
+        /// 校验碰撞。
+        /// </summary>
         private static void ValidateCollision()
         {
             var aabb = new BattleBox2(
@@ -148,6 +157,9 @@ namespace Game.Battle.Editor
             }
         }
 
+        /// <summary>
+        /// 校验定点点Boundaries。
+        /// </summary>
         private static void ValidateFixedPointBoundaries()
         {
             FP largeProduct =
@@ -205,6 +217,9 @@ namespace Game.Battle.Editor
                 "绝对值");
         }
 
+        /// <summary>
+        /// 断言原始值。
+        /// </summary>
         private static void AssertRaw(
             FP actual,
             long expectedRaw,
@@ -218,6 +233,9 @@ namespace Game.Battle.Editor
             }
         }
 
+        /// <summary>
+        /// 断言Near。
+        /// </summary>
         private static void AssertNear(
             FP actual,
             FP expected,
@@ -238,6 +256,9 @@ namespace Game.Battle.Editor
             }
         }
 
+        /// <summary>
+        /// 验证预期溢出。
+        /// </summary>
         private static void ExpectOverflow(
             Action operation,
             string operationName)
@@ -255,6 +276,9 @@ namespace Game.Battle.Editor
                 $"FP {operationName}没有抛出预期的溢出异常。");
         }
 
+        /// <summary>
+        /// 创建世界。
+        /// </summary>
         private static BattleWorld CreateWorld()
         {
             var world = new BattleWorld(
@@ -278,6 +302,9 @@ namespace Game.Battle.Editor
             return world;
         }
 
+        /// <summary>
+        /// 创建帧。
+        /// </summary>
         private static FrameData CreateFrame(int frame)
         {
             var data = new FrameData(frame);

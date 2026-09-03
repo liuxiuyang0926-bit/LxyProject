@@ -13,6 +13,9 @@ namespace StateControl.Editor
         private const float DRAG_AREA_HEIGHT = 50f;
         private const float SPACING = 2f;
 
+        /// <summary>
+        /// 获取属性高度。
+        /// </summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             float height = EditorGUI.GetPropertyHeight(property, label);
@@ -20,6 +23,9 @@ namespace StateControl.Editor
             return height;
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             // 绘制默认属性
@@ -53,6 +59,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 处理DragAndDrop。
+        /// </summary>
         private void HandleDragAndDrop(SerializedProperty property)
         {
             GameObject draggedObject = DragAndDrop.objectReferences[0] as GameObject;
@@ -85,6 +94,9 @@ namespace StateControl.Editor
             menu.ShowAsContext();
         }
 
+        /// <summary>
+        /// 获取SupportedComponents。
+        /// </summary>
         private List<Component> GetSupportedComponents(GameObject gameObject)
         {
             var allComponents = gameObject.GetComponents<Component>();
@@ -106,6 +118,9 @@ namespace StateControl.Editor
             return supportedComponents;
         }
 
+        /// <summary>
+        /// 获取SupportedModifier类型。
+        /// </summary>
         private List<ModifierTypeEnum> GetSupportedModifierTypes(Type componentType)
         {
             var supportedTypes = new List<ModifierTypeEnum>();
@@ -123,6 +138,9 @@ namespace StateControl.Editor
             return supportedTypes.Distinct().ToList();
         }
 
+        /// <summary>
+        /// 添加Modifier目标。
+        /// </summary>
         private void AddModifierTarget(SerializedProperty property, Component component, ModifierTypeEnum modifierType)
         {
             // 记录Undo操作

@@ -35,7 +35,13 @@ namespace LxyDemo.UIFramework
 
         private sealed class LuaPanelAssetRecord
         {
+            /// <summary>
+            /// 公开的实例数据。
+            /// </summary>
             public GameObject Instance;
+            /// <summary>
+            /// 公开的句柄数据。
+            /// </summary>
             public GameResourceInstanceHandle Handle;
         }
 
@@ -91,13 +97,25 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 指示当前对象是否已初始化。
+        /// </summary>
         public bool IsInitialized =>
             luaEnv != null && bootstrap != null;
 
+        /// <summary>
+        /// 指示MainStarted是否成立。
+        /// </summary>
         public bool IsMainStarted => mainStarted;
+        /// <summary>
+        /// 向调用方提供资源资源包名称。
+        /// </summary>
         public string ResourcePackageName =>
             resourcePackageName;
 
+        /// <summary>
+        /// 初始化组件的运行时状态。
+        /// </summary>
         private void Awake()
         {
             if (instance != null && instance != this)
@@ -110,6 +128,9 @@ namespace LxyDemo.UIFramework
             DontDestroyOnLoad(gameObject);
         }
 
+        /// <summary>
+        /// 更新组件的运行时状态。
+        /// </summary>
         private void Update()
         {
             if (luaEnv == null || Time.unscaledTime < nextTickTime)
@@ -121,18 +142,27 @@ namespace LxyDemo.UIFramework
             luaEnv.Tick();
         }
 
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         private void OnEnable()
         {
             SceneManager.activeSceneChanged +=
                 HandleActiveSceneChanged;
         }
 
+        /// <summary>
+        /// 在组件停用时解除运行时关联。
+        /// </summary>
         private void OnDisable()
         {
             SceneManager.activeSceneChanged -=
                 HandleActiveSceneChanged;
         }
 
+        /// <summary>
+        /// 初始化当前实例。
+        /// </summary>
         public void Initialize(UILayerRoot layerRoot)
         {
             if (layerRoot == null)
@@ -144,6 +174,9 @@ namespace LxyDemo.UIFramework
             initializeFunction.Call(layerRoot);
         }
 
+        /// <summary>
+        /// 执行配置资源资源包相关逻辑。
+        /// </summary>
         public void ConfigureResourcePackage(string packageName)
         {
             string normalized =
@@ -189,6 +222,9 @@ namespace LxyDemo.UIFramework
                 this);
         }
 
+        /// <summary>
+        /// 注册预制体。
+        /// </summary>
         public string RegisterPrefab(
             GameObject prefab,
             string panelId = null)
@@ -206,6 +242,9 @@ namespace LxyDemo.UIFramework
                 : prefab.name;
         }
 
+        /// <summary>
+        /// 打开面板。
+        /// </summary>
         public void OpenPanel(
             string panelId,
             object userData = null)
@@ -221,6 +260,9 @@ namespace LxyDemo.UIFramework
             openPanelFunction.Call(panelId, userData);
         }
 
+        /// <summary>
+        /// 关闭面板。
+        /// </summary>
         public void ClosePanel(
             string panelId,
             bool forceDestroy = false)
@@ -229,12 +271,18 @@ namespace LxyDemo.UIFramework
             closePanelFunction.Call(panelId, forceDestroy);
         }
 
+        /// <summary>
+        /// 执行预加载面板相关逻辑。
+        /// </summary>
         public void PreloadPanel(string panelId)
         {
             EnsureReady();
             preloadPanelFunction.Call(panelId);
         }
 
+        /// <summary>
+        /// 执行判断是否面板打开相关逻辑。
+        /// </summary>
         public bool IsPanelOpen(string panelId)
         {
             EnsureReady();
@@ -286,6 +334,9 @@ namespace LxyDemo.UIFramework
             instance.ReleasePanelInternal(panelObject);
         }
 
+        /// <summary>
+        /// 通知场景Changed。
+        /// </summary>
         public void NotifySceneChanged()
         {
             if (IsInitialized)
@@ -294,6 +345,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 创建Backdrop。
+        /// </summary>
         public static GameObject CreateBackdrop(
             RectTransform parent,
             string panelId,
@@ -331,6 +385,9 @@ namespace LxyDemo.UIFramework
             return backdrop;
         }
 
+        /// <summary>
+        /// 尝试关闭FromBackdrop，并返回是否成功。
+        /// </summary>
         internal static void TryCloseFromBackdrop(
             string panelId)
         {
@@ -342,6 +399,9 @@ namespace LxyDemo.UIFramework
             instance.ClosePanel(panelId);
         }
 
+        /// <summary>
+        /// 处理激活项场景Changed。
+        /// </summary>
         private void HandleActiveSceneChanged(
             Scene previous,
             Scene current)
@@ -349,6 +409,9 @@ namespace LxyDemo.UIFramework
             NotifySceneChanged();
         }
 
+        /// <summary>
+        /// 加载面板Routine。
+        /// </summary>
         private IEnumerator LoadPanelRoutine(
             string location,
             Transform parent,
@@ -439,6 +502,9 @@ namespace LxyDemo.UIFramework
             yield break;
         }
 
+        /// <summary>
+        /// 执行Complete面板加载相关逻辑。
+        /// </summary>
         private void CompletePanelLoad(
             LuaFunction completed,
             GameObject panelObject,
@@ -463,6 +529,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 释放面板Internal。
+        /// </summary>
         private void ReleasePanelInternal(GameObject panelObject)
         {
             int instanceId = panelObject.GetInstanceID();
@@ -485,6 +554,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 确保就绪状态。
+        /// </summary>
         private void EnsureReady()
         {
             if (!IsInitialized)
@@ -495,6 +567,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 确保LuaEnvironment。
+        /// </summary>
         private void EnsureLuaEnvironment()
         {
             if (IsInitialized)
@@ -550,6 +625,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 获取必需项Function。
+        /// </summary>
         private LuaFunction GetRequiredFunction(string name)
         {
             LuaFunction function =
@@ -564,6 +642,9 @@ namespace LxyDemo.UIFramework
             return function;
         }
 
+        /// <summary>
+        /// 加载Lua模块。
+        /// </summary>
         private byte[] LoadLuaModule(ref string modulePath)
         {
             string relativePath =
@@ -659,6 +740,9 @@ namespace LxyDemo.UIFramework
 #endif
         }
 
+        /// <summary>
+        /// 尝试获取资源资源包，并返回是否成功。
+        /// </summary>
         private bool TryGetResourcePackage(
             out ResourcePackage package,
             out string errorMessage)
@@ -695,6 +779,9 @@ namespace LxyDemo.UIFramework
             return true;
         }
 
+        /// <summary>
+        /// 执行规范化资源Location相关逻辑。
+        /// </summary>
         private static string NormalizeAssetLocation(
             string location)
         {
@@ -708,6 +795,9 @@ namespace LxyDemo.UIFramework
             return location.Trim().Replace('\\', '/');
         }
 
+        /// <summary>
+        /// 执行规范化Module名称相关逻辑。
+        /// </summary>
         private static string NormalizeModuleName(
             string moduleName)
         {
@@ -742,6 +832,9 @@ namespace LxyDemo.UIFramework
             return normalized;
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             if (instance != this)
@@ -753,6 +846,9 @@ namespace LxyDemo.UIFramework
             instance = null;
         }
 
+        /// <summary>
+        /// 执行DisposeLuaEnvironment相关逻辑。
+        /// </summary>
         private void DisposeLuaEnvironment(bool invokeShutdown)
         {
             if (invokeShutdown && shutdownFunction != null)
@@ -785,6 +881,9 @@ namespace LxyDemo.UIFramework
             mainStarted = false;
         }
 
+        /// <summary>
+        /// 释放全部面板资源。
+        /// </summary>
         private void ReleaseAllPanelAssets()
         {
             foreach (LuaPanelAssetRecord record in
@@ -804,6 +903,9 @@ namespace LxyDemo.UIFramework
             panelAssetRecords.Clear();
         }
 
+        /// <summary>
+        /// 释放全部Lua模块Handles。
+        /// </summary>
         private void ReleaseAllLuaModuleHandles()
         {
             foreach (GameResourceHandle<TextAsset> handle in
@@ -818,6 +920,9 @@ namespace LxyDemo.UIFramework
             luaModuleHandles.Clear();
         }
 
+        /// <summary>
+        /// 执行DisposeFunction相关逻辑。
+        /// </summary>
         private static void DisposeFunction(
             ref LuaFunction function)
         {
@@ -834,6 +939,9 @@ namespace LxyDemo.UIFramework
         private string panelId;
         private bool closeOnClick;
 
+        /// <summary>
+        /// 配置当前对象。
+        /// </summary>
         public void Configure(
             string configuredPanelId,
             bool configuredCloseOnClick)
@@ -842,6 +950,9 @@ namespace LxyDemo.UIFramework
             closeOnClick = configuredCloseOnClick;
         }
 
+        /// <summary>
+        /// 响应Pointer点击事件。
+        /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
             if (closeOnClick)

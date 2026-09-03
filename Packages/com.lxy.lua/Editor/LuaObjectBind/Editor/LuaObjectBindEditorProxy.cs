@@ -65,6 +65,9 @@ namespace LuaObjectBind.Editor
             //{"AnimController", typeof(AnimationController)}
         };
         
+        /// <summary>
+        /// 获取ComponentAbbr。
+        /// </summary>
         public static Object GetComponentAbbr(GameObject gameObject, string compName)
         {
             if (!comp2Types.TryGetValue(compName, out var type))
@@ -76,6 +79,9 @@ namespace LuaObjectBind.Editor
             return gameObject.GetComponent(type);
         }
 
+        /// <summary>
+        /// 获取Field绑定EnumAbbr。
+        /// </summary>
         public static FieldBindEnum GetFieldBindEnumAbbr(string name)
         {
             switch (name)

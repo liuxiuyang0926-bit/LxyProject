@@ -16,6 +16,9 @@ namespace Game.Battle.View
         private readonly Dictionary<int, EntityView> views =
             new Dictionary<int, EntityView>();
 
+        /// <summary>
+        /// 创建战斗视图世界实例。
+        /// </summary>
         public BattleViewWorld(
             BattleWorld world,
             EntityView entityPrefab,
@@ -27,6 +30,9 @@ namespace Game.Battle.View
             this.root = root;
         }
 
+        /// <summary>
+        /// 创建实体视图。
+        /// </summary>
         public void CreateEntityView(int entityId, Color color)
         {
             if (views.ContainsKey(entityId))
@@ -52,6 +58,9 @@ namespace Game.Battle.View
             views.Add(entityId, view);
         }
 
+        /// <summary>
+        /// 执行流程事件相关逻辑。
+        /// </summary>
         public void ProcessEvents(
             IReadOnlyList<BattleEvent> battleEvents)
         {
@@ -91,6 +100,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 执行帧推进视觉相关逻辑。
+        /// </summary>
         public void TickVisual(float deltaTime)
         {
             foreach (EntityView view in views.Values)
@@ -102,6 +114,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 释放当前实例持有的资源。
+        /// </summary>
         public void Dispose()
         {
             foreach (EntityView view in views.Values)

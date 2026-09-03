@@ -11,18 +11,51 @@ namespace StateControl.Runtime
     [Serializable]
     public class RectModifier : BaseModifier
     {
+        /// <summary>
+        /// 公开的Anchor最小X数据。
+        /// </summary>
         public float AnchorMinX;
+        /// <summary>
+        /// 公开的Anchor最小Y数据。
+        /// </summary>
         public float AnchorMinY;
+        /// <summary>
+        /// 公开的Anchor最大X数据。
+        /// </summary>
         public float AnchorMaxX;
+        /// <summary>
+        /// 公开的Anchor最大Y数据。
+        /// </summary>
         public float AnchorMaxY;
+        /// <summary>
+        /// 公开的PivotX数据。
+        /// </summary>
         public float PivotX;
+        /// <summary>
+        /// 公开的PivotY数据。
+        /// </summary>
         public float PivotY;
 
+        /// <summary>
+        /// 公开的偏移最小X数据。
+        /// </summary>
         public float OffsetMinX;
+        /// <summary>
+        /// 公开的偏移最小Y数据。
+        /// </summary>
         public float OffsetMinY;
+        /// <summary>
+        /// 公开的偏移最大X数据。
+        /// </summary>
         public float OffsetMaxX;
+        /// <summary>
+        /// 公开的偏移最大Y数据。
+        /// </summary>
         public float OffsetMaxY;
 
+        /// <summary>
+        /// 修改目标状态。
+        /// </summary>
         public override void Modify(ModifierTarget target)
         {
             if (target.TargetObject is RectTransform rectTransform)
@@ -40,6 +73,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 执行记录原始值值相关逻辑。
+        /// </summary>
         public override void RecordOriginValue(ModifierTarget target)
         {
             if (target.TargetObject is RectTransform rectTransform)
@@ -62,6 +98,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 添加Field。
+        /// </summary>
         public override void AddField(VisualElement root, Action onValueChanged, ModifierTarget target)
         {
             #if UNITY_EDITOR
@@ -468,6 +507,9 @@ namespace StateControl.Runtime
         }
 
 // 获取锚点预设选项列表
+        /// <summary>
+        /// 获取锚点Preset选项。
+        /// </summary>
         private List<string> GetAnchorPresetOptions()
         {
             return new List<string>
@@ -492,6 +534,9 @@ namespace StateControl.Runtime
         }
 
 // 根据当前锚点值获取对应的预设名称
+        /// <summary>
+        /// 获取当前项锚点Preset。
+        /// </summary>
         private string GetCurrentAnchorPreset()
         {
             // 使用 Mathf.Approximately 来比较浮点数，避免精度问题
@@ -550,6 +595,9 @@ namespace StateControl.Runtime
         }
 
 // 应用锚点预设
+        /// <summary>
+        /// 应用锚点Preset。
+        /// </summary>
         private void ApplyAnchorPreset(string presetName, ModifierTarget target, Vector2Field offsetMinField,
             Vector2Field offsetMaxField)
         {
@@ -690,6 +738,9 @@ namespace StateControl.Runtime
             UpdateRelateFields(target, oldAnchorMin,  oldAnchorMax, oldOffsetMin, oldOffsetMax);
         }
 #endif
+        /// <summary>
+        /// 创建当前实例的副本。
+        /// </summary>
         public override BaseModifier Clone()
         {
             return new RectModifier

@@ -97,9 +97,18 @@ namespace LuaObjectBind
     
     public class FieldBindTypeAttribute: Attribute
     {
+        /// <summary>
+        /// 向调用方提供FieldBind类型。
+        /// </summary>
         public FieldBindTypeEnum FieldBindType { get; private set; }
+        /// <summary>
+        /// 指示是否可以BindObject类型。
+        /// </summary>
         public Type CanBindObjectType { get; private set; }
 
+        /// <summary>
+        /// 创建Field绑定TypeAttribute实例。
+        /// </summary>
         public FieldBindTypeAttribute(FieldBindTypeEnum fieldBindType, Type canBindObjectType)
         {
             FieldBindType = fieldBindType;

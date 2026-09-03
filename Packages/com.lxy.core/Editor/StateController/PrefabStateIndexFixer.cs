@@ -14,6 +14,9 @@ namespace StateControl.Editor
         private int fixedCount = 0;
         private bool isProcessing = false;
 
+        /// <summary>
+        /// 执行显示窗口相关逻辑。
+        /// </summary>
         [MenuItem("Tools/StateController/修复Prefab状态索引")]
         public static void ShowWindow()
         {
@@ -21,6 +24,9 @@ namespace StateControl.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             EditorGUILayout.LabelField("Prefab StateController 索引修复工具", EditorStyles.boldLabel);
@@ -57,6 +63,9 @@ namespace StateControl.Editor
 
         }
 
+        /// <summary>
+        /// 执行FixAllPrefabs相关逻辑。
+        /// </summary>
         private void FixAllPrefabs()
         {
             processedCount = 0;
@@ -112,6 +121,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 执行流程预制体相关逻辑。
+        /// </summary>
         private bool ProcessPrefab(string prefabPath)
         {
             // 检查是否是Prefab变体，变体不需要修改

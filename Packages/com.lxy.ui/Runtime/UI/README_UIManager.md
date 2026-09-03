@@ -114,10 +114,9 @@ Auto Destroy When Scene Changed: true
 
 ## 3. 启动场景
 
-启动场景只需要一个 `[UIStartup]`，同一对象挂载：
+`UIStartup` 位于 `Game.UI` 热更新程序集，不能直接挂到 APK 内置的首场景。`GameMain` 会在 HybridCLR 加载完 `Game.UI.dll` 并进入首场景后，动态创建名为 `[UIStartup]` 的对象。
 
-- `UIStartup`：启动流程配置。
-- `YooAssetLauncher`：Package、Host 地址、下载并发和 Offline 降级配置。
+`YooAssetLauncher` 仍由常驻的 `GameMain` 对象提供，动态创建的 `UIStartup` 会自动复用它。请从项目的启动场景运行；不要直接运行 Login 场景来绕过资源与 HybridCLR 初始化。
 
 编辑器不会初始化 YooAsset，而是直接使用 AssetDatabase；Android/iOS 等
 Player 不会引用 AssetDatabase，统一使用 YooAsset。若没有已有

@@ -8,6 +8,9 @@ namespace LxyDemo.UIFramework.Editor
     [CustomEditor(typeof(UICodeBinder))]
     public sealed class UICodeBinderEditor : UnityEditor.Editor
     {
+        /// <summary>
+        /// 绘制 UICodeBinder 的 Inspector 界面。
+        /// </summary>
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -90,6 +93,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 获取预制体资源路径。
+        /// </summary>
         private static string GetPrefabAssetPath(
             UICodeBinder binder)
         {
@@ -114,6 +120,9 @@ namespace LxyDemo.UIFramework.Editor
             return path;
         }
 
+        /// <summary>
+        /// 保存预制体IfNeeded。
+        /// </summary>
         private static void SavePrefabIfNeeded(
             UICodeBinder binder)
         {

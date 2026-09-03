@@ -39,6 +39,9 @@ namespace LuaObjectBind
             get { return binds[index]; }
         }
 
+        /// <summary>
+        /// 执行获取相关逻辑。
+        /// </summary>
         public ObjectBinder Get(string name)
         {
             if (this.binds == null || this.binds.Count <= 0)

@@ -19,6 +19,9 @@ namespace Game.Battle.View
         private const int PlayerId = 1001;
         private const int EnemyPlayerId = 1002;
 
+        /// <summary>
+        /// 战斗演示启动时使用的技能、增益和实体配置数据库。
+        /// </summary>
         [Header("战斗配置")]
         [SerializeField]
         private BattleConfigDatabase database;
@@ -29,6 +32,9 @@ namespace Game.Battle.View
         [SerializeField]
         private Transform viewRoot;
 
+        /// <summary>
+        /// 本地输入在写入帧缓存前延迟的逻辑帧数，用于模拟网络输入延迟。
+        /// </summary>
         [Header("本地帧源")]
         [SerializeField]
         [Min(0)]
@@ -53,10 +59,22 @@ namespace Game.Battle.View
         private float accumulator;
         private int nextEnemyCastFrame = 30;
 
+        /// <summary>
+        /// 向调用方提供世界。
+        /// </summary>
         public BattleWorld World => world;
+        /// <summary>
+        /// 向调用方提供Client。
+        /// </summary>
         public BattleClient Client => battleClient;
+        /// <summary>
+        /// 指示当前对象是否正在运行。
+        /// </summary>
         public bool IsRunning => world != null;
 
+        /// <summary>
+        /// 启动组件的运行流程。
+        /// </summary>
         private void Start()
         {
             if (initializeOnStart)
@@ -65,6 +83,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 执行Start战斗相关逻辑。
+        /// </summary>
         public void StartBattle()
         {
             StopBattle();
@@ -118,6 +139,9 @@ namespace Game.Battle.View
             nextEnemyCastFrame = 30;
         }
 
+        /// <summary>
+        /// 执行Stop战斗相关逻辑。
+        /// </summary>
         public void StopBattle()
         {
             viewWorld?.Dispose();
@@ -129,6 +153,9 @@ namespace Game.Battle.View
             accumulator = 0f;
         }
 
+        /// <summary>
+        /// 更新组件的运行时状态。
+        /// </summary>
         private void Update()
         {
             if (world == null)
@@ -153,6 +180,9 @@ namespace Game.Battle.View
             viewWorld.TickVisual(Time.unscaledDeltaTime);
         }
 
+        /// <summary>
+        /// 执行捕获Local输入相关逻辑。
+        /// </summary>
         private void CaptureLocalInput()
         {
             int horizontal = 0;
@@ -213,6 +243,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 排队提交Enemy输入。
+        /// </summary>
         private void QueueEnemyInput()
         {
             if (!enableEnemyAutoCast ||
@@ -232,11 +265,17 @@ namespace Game.Battle.View
             nextEnemyCastFrame = checked(nextEnemyCastFrame + 40);
         }
 
+        /// <summary>
+        /// 执行帧数据转换为缓冲区相关逻辑。
+        /// </summary>
         private void FrameDataToBuffer(int frame)
         {
             frameBuffer.AddFrame(localSession.BuildFrame(frame));
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             if (world == null)
@@ -264,6 +303,9 @@ namespace Game.Battle.View
                 "逻辑 20 FPS，表现按渲染帧插值");
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             StopBattle();

@@ -6,6 +6,9 @@ namespace Game.Battle.Core
     {
         private uint state;
 
+        /// <summary>
+        /// 创建战斗随机数实例。
+        /// </summary>
         public BattleRandom(int seed)
         {
             state = unchecked((uint)seed);
@@ -15,8 +18,14 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 向调用方提供状态。
+        /// </summary>
         public uint State => state;
 
+        /// <summary>
+        /// 执行Next相关逻辑。
+        /// </summary>
         public uint Next()
         {
             uint value = state;
@@ -27,6 +36,9 @@ namespace Game.Battle.Core
             return value;
         }
 
+        /// <summary>
+        /// 执行Range相关逻辑。
+        /// </summary>
         public int Range(int minInclusive, int maxExclusive)
         {
             if (maxExclusive <= minInclusive)

@@ -4,6 +4,9 @@ namespace LuaObjectBind.Handlers
 {
     public class TextMeshProUGUIHandler : AFieldBindHandler<TextMeshProUGUI>
     {
+        /// <summary>
+        /// 处理字符串。
+        /// </summary>
         protected override void HandleString(TextMeshProUGUI comp, FieldBindEnum type, string value)
         {
             switch (type)
@@ -14,6 +17,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取字符串。
+        /// </summary>
         protected override string GetString(TextMeshProUGUI comp, FieldBindEnum type)
         {
             switch (type)
@@ -25,6 +31,9 @@ namespace LuaObjectBind.Handlers
             return string.Empty;
         }
 
+        /// <summary>
+        /// 处理浮点数。
+        /// </summary>
         protected override void HandleFloat(TextMeshProUGUI obj, FieldBindEnum type, float value)
         {
             switch (type)
@@ -35,6 +44,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取浮点数。
+        /// </summary>
         protected override float GetFloat(TextMeshProUGUI obj, FieldBindEnum type)
         {
             switch (type)

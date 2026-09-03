@@ -5,6 +5,9 @@ namespace LuaObjectBind.Handlers
     [FieldBindHandler]
     public class AudioSourceHandler : AFieldBindHandler<AudioSource>
     {
+        /// <summary>
+        /// 将浮点值写入音频组件。
+        /// </summary>
         protected override void HandleFloat(AudioSource comp, FieldBindEnum type, float value)
         {
             switch (type)
@@ -15,6 +18,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取浮点数。
+        /// </summary>
         protected override float GetFloat(AudioSource comp, FieldBindEnum type)
         {
             switch (type)
@@ -26,6 +32,9 @@ namespace LuaObjectBind.Handlers
             return 0;
         }
 
+        /// <summary>
+        /// 处理布尔值。
+        /// </summary>
         protected override void HandleBool(AudioSource comp, FieldBindEnum type, bool value)
         {
             switch (type)
@@ -42,6 +51,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取布尔值。
+        /// </summary>
         protected override bool GetBool(AudioSource comp, FieldBindEnum type)
         {
             switch (type)

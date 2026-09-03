@@ -8,6 +8,9 @@ namespace LuaObjectBind
     {
         // 实际存储的是UI/XX/YY.lua
         [SerializeField]
+        /// <summary>
+        /// 公开的文件路径数据。
+        /// </summary>
         protected string filePath;
 
         public string FilePath

@@ -48,6 +48,9 @@ namespace LuaObjectBind
             return (T)GetValue();
         }
 
+        /// <summary>
+        /// 设置值。
+        /// </summary>
         public void SetValue(object value)
         {
             switch (this.bindValueType)
@@ -60,6 +63,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 获取值。
+        /// </summary>
         public object GetValue()
         {
             switch (this.bindValueType)

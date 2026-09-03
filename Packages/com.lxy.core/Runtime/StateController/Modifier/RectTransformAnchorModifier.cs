@@ -10,13 +10,28 @@ namespace StateControl.Runtime
     [Serializable]
     public class RectTransformAnchorModifier : BaseModifier
     {
+        /// <summary>
+        /// 公开的Anchor最小X数据。
+        /// </summary>
         public float AnchorMinX;
+        /// <summary>
+        /// 公开的Anchor最小Y数据。
+        /// </summary>
         public float AnchorMinY;
+        /// <summary>
+        /// 公开的Anchor最大X数据。
+        /// </summary>
         public float AnchorMaxX;
+        /// <summary>
+        /// 公开的Anchor最大Y数据。
+        /// </summary>
         public float AnchorMaxY;
         private Vector2 _originAnchorMin;
         private Vector2 _originAnchorMax;
 
+        /// <summary>
+        /// 修改目标状态。
+        /// </summary>
         public override void Modify(ModifierTarget target)
         {
             if (target.TargetObject is RectTransform rectTransform)
@@ -31,6 +46,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 执行记录原始值值相关逻辑。
+        /// </summary>
         public override void RecordOriginValue(ModifierTarget target)
         {
             if (target.TargetObject is RectTransform rectTransform)
@@ -49,6 +67,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 添加Field。
+        /// </summary>
         public override void AddField(VisualElement root, Action onValueChanged, ModifierTarget target)
         {
 #if UNITY_EDITOR
@@ -85,6 +106,9 @@ namespace StateControl.Runtime
 #endif
         }
 
+        /// <summary>
+        /// 创建当前实例的副本。
+        /// </summary>
         public override BaseModifier Clone()
         {
             return new RectTransformAnchorModifier

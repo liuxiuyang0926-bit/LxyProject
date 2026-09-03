@@ -14,12 +14,18 @@ namespace LxyDemo.UIFramework
             RectTransform parent,
             Action closeRequested);
 
+        /// <summary>
+        /// 释放Backdrop。
+        /// </summary>
         void ReleaseBackdrop(GameObject backdrop);
     }
 
     public sealed class DefaultUIBackdropService :
         IUIBackdropService
     {
+        /// <summary>
+        /// 创建Backdrop。
+        /// </summary>
         public GameObject CreateBackdrop(
             UIPanelConfig config,
             RectTransform parent,
@@ -56,6 +62,9 @@ namespace LxyDemo.UIFramework
             return backdropObject;
         }
 
+        /// <summary>
+        /// 释放Backdrop。
+        /// </summary>
         public void ReleaseBackdrop(GameObject backdrop)
         {
             if (backdrop != null)

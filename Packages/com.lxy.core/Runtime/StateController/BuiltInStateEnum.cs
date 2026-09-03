@@ -14,9 +14,18 @@ namespace StateControl.Runtime
     
     public class BuiltInStateEnumAttribute : Attribute
     {
+        /// <summary>
+        /// 向调用方提供名称。
+        /// </summary>
         public string Name { get; private set; }
+        /// <summary>
+        /// 向调用方提供States。
+        /// </summary>
         public string[] States { get; private set; }
 
+        /// <summary>
+        /// 创建BuiltIn状态EnumAttribute实例。
+        /// </summary>
         public BuiltInStateEnumAttribute(string name, string[] states)
         {
             Name = name;

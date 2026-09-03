@@ -9,10 +9,19 @@ namespace Game.Contracts
     [Serializable]
     public sealed class HybridCLRAssemblyManifest
     {
+        /// <summary>
+        /// 公开的清单位置数据。
+        /// </summary>
         public const string ManifestLocation =
             "HybridCLRAssemblyManifest";
 
+        /// <summary>
+        /// 公开的aotMetadataDlls数据。
+        /// </summary>
         public string[] aotMetadataDlls = Array.Empty<string>();
+        /// <summary>
+        /// 公开的热更新UpdateDlls数据。
+        /// </summary>
         public string[] hotUpdateDlls = Array.Empty<string>();
     }
 }

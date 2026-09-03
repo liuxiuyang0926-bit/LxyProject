@@ -54,14 +54,29 @@ namespace LxyDemo.SceneManagement
             set => minimumLoadingSeconds = Mathf.Max(0f, value);
         }
 
+        /// <summary>
+        /// 指示当前对象是否正在加载。
+        /// </summary>
         public bool IsLoading { get; private set; }
 
+        /// <summary>
+        /// 当前操作的归一化进度，取值范围为 0 到 1。
+        /// </summary>
         public float Progress { get; private set; }
 
+        /// <summary>
+        /// 向调用方提供Target场景名称。
+        /// </summary>
         public string TargetSceneName { get; private set; }
 
+        /// <summary>
+        /// 最近一次操作失败的错误信息；未发生错误时为 null。
+        /// </summary>
         public string LastError { get; private set; }
 
+        /// <summary>
+        /// 向调用方提供Active场景名称。
+        /// </summary>
         public string ActiveSceneName =>
             UnitySceneManager.GetActiveScene().name;
 
@@ -73,6 +88,9 @@ namespace LxyDemo.SceneManagement
 
         public event Action<string, string> SceneLoadFailed;
 
+        /// <summary>
+        /// 初始化组件的运行时状态。
+        /// </summary>
         private void Awake()
         {
             if (instance != null && instance != this)
@@ -190,6 +208,9 @@ namespace LxyDemo.SceneManagement
             return operation != null;
         }
 
+        /// <summary>
+        /// 加载场景Routine。
+        /// </summary>
         private IEnumerator LoadSceneRoutine(string sceneName)
         {
             IsLoading = true;
@@ -252,6 +273,9 @@ namespace LxyDemo.SceneManagement
                 this);
         }
 
+        /// <summary>
+        /// 通知进度。
+        /// </summary>
         private void NotifyProgress(
             string sceneName,
             float progress)
@@ -265,6 +289,9 @@ namespace LxyDemo.SceneManagement
                 Progress);
         }
 
+        /// <summary>
+        /// 报告Failure。
+        /// </summary>
         private void ReportFailure(
             string sceneName,
             string message)
@@ -278,6 +305,9 @@ namespace LxyDemo.SceneManagement
             FinishCallbacks(false, message);
         }
 
+        /// <summary>
+        /// 执行FinishCallbacks相关逻辑。
+        /// </summary>
         private void FinishCallbacks(
             bool succeeded,
             string errorMessage)
@@ -292,6 +322,9 @@ namespace LxyDemo.SceneManagement
                 errorMessage);
         }
 
+        /// <summary>
+        /// 执行安全调用进度相关逻辑。
+        /// </summary>
         private void SafeInvokeProgress(
             Action<float> callback,
             float progress)
@@ -311,6 +344,9 @@ namespace LxyDemo.SceneManagement
             }
         }
 
+        /// <summary>
+        /// 执行安全调用Completed相关逻辑。
+        /// </summary>
         private void SafeInvokeCompleted(
             Action<bool, string> callback,
             bool succeeded,
@@ -331,6 +367,9 @@ namespace LxyDemo.SceneManagement
             }
         }
 
+        /// <summary>
+        /// 执行FinishWithFailure相关逻辑。
+        /// </summary>
         private void FinishWithFailure(
             string sceneName,
             string message)
@@ -341,6 +380,9 @@ namespace LxyDemo.SceneManagement
             ReportFailure(sceneName, message);
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             if (instance == this)

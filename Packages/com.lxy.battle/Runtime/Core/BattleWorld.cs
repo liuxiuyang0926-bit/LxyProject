@@ -21,6 +21,9 @@ namespace Game.Battle.Core
         private readonly BattleBuffSystem buffSystem;
         private readonly BattleDeathSystem deathSystem;
 
+        /// <summary>
+        /// 创建战斗世界实例。
+        /// </summary>
         public BattleWorld(IBattleConfigProvider config, int randomSeed)
         {
             Config = config ??
@@ -35,31 +38,70 @@ namespace Game.Battle.Core
             deathSystem = new BattleDeathSystem();
         }
 
+        /// <summary>
+        /// 向调用方提供当前帧。
+        /// </summary>
         public int CurrentFrame { get; private set; }
+        /// <summary>
+        /// 向调用方提供配置。
+        /// </summary>
         public IBattleConfigProvider Config { get; }
+        /// <summary>
+        /// 向调用方提供Random。
+        /// </summary>
         public BattleRandom Random { get; }
+        /// <summary>
+        /// 向调用方提供事件。
+        /// </summary>
         public BattleEventCollector Events { get; }
+        /// <summary>
+        /// 向调用方提供实体Ids。
+        /// </summary>
         public IReadOnlyList<int> EntityIds => entityIds;
 
+        /// <summary>
+        /// 向调用方提供Transforms。
+        /// </summary>
         public ComponentStore<TransformComponent> Transforms { get; } =
             new ComponentStore<TransformComponent>();
+        /// <summary>
+        /// 向调用方提供Movements。
+        /// </summary>
         public ComponentStore<MovementComponent> Movements { get; } =
             new ComponentStore<MovementComponent>();
+        /// <summary>
+        /// 向调用方提供Health。
+        /// </summary>
         public ComponentStore<HealthComponent> Health { get; } =
             new ComponentStore<HealthComponent>();
+        /// <summary>
+        /// 向调用方提供Collisions。
+        /// </summary>
         public ComponentStore<CollisionComponent> Collisions { get; } =
             new ComponentStore<CollisionComponent>();
+        /// <summary>
+        /// 向调用方提供Skills。
+        /// </summary>
         public ComponentStore<SkillComponent> Skills { get; } =
             new ComponentStore<SkillComponent>();
+        /// <summary>
+        /// 向调用方提供Buffs。
+        /// </summary>
         public ComponentStore<BuffComponent> Buffs { get; } =
             new ComponentStore<BuffComponent>();
 
+        /// <summary>
+        /// 初始化当前实例。
+        /// </summary>
         public void Initialize()
         {
             CurrentFrame = 0;
             Events.BeginFrame(0);
         }
 
+        /// <summary>
+        /// 添加实体。
+        /// </summary>
         public BattleEntity AddEntity(
             int entityId,
             int playerId,
@@ -133,9 +175,15 @@ namespace Game.Battle.Core
             return entity;
         }
 
+        /// <summary>
+        /// 尝试获取实体，并返回是否成功。
+        /// </summary>
         public bool TryGetEntity(int entityId, out BattleEntity entity) =>
             entities.TryGetValue(entityId, out entity);
 
+        /// <summary>
+        /// 尝试查找玩家实体，并返回是否成功。
+        /// </summary>
         public bool TryFindPlayerEntity(
             int playerId,
             out BattleEntity entity)
@@ -154,12 +202,18 @@ namespace Game.Battle.Core
             return false;
         }
 
+        /// <summary>
+        /// 执行判断是否Alive相关逻辑。
+        /// </summary>
         public bool IsAlive(int entityId)
         {
             return Health.TryGet(entityId, out HealthComponent health) &&
                    !health.IsDead;
         }
 
+        /// <summary>
+        /// 推进当前帧的运行逻辑。
+        /// </summary>
         public void Tick(FrameData frameData)
         {
             if (frameData == null)
@@ -184,6 +238,9 @@ namespace Game.Battle.Core
             CurrentFrame++;
         }
 
+        /// <summary>
+        /// 应用Damage。
+        /// </summary>
         internal void ApplyDamage(
             int sourceEntityId,
             int targetEntityId,
@@ -210,6 +267,9 @@ namespace Game.Battle.Core
                 });
         }
 
+        /// <summary>
+        /// 应用Heal。
+        /// </summary>
         internal void ApplyHeal(
             int sourceEntityId,
             int targetEntityId,
@@ -238,6 +298,9 @@ namespace Game.Battle.Core
                 });
         }
 
+        /// <summary>
+        /// 应用增益。
+        /// </summary>
         internal void ApplyBuff(
             int sourceEntityId,
             int targetEntityId,
@@ -250,6 +313,9 @@ namespace Game.Battle.Core
                 buffId);
         }
 
+        /// <summary>
+        /// 获取移动SpeedMultiplier。
+        /// </summary>
         internal FP GetMoveSpeedMultiplier(int entityId)
         {
             FP multiplier = FP.One;
@@ -276,6 +342,9 @@ namespace Game.Battle.Core
             return FP.Max(FP.Zero, multiplier);
         }
 
+        /// <summary>
+        /// 计算状态哈希。
+        /// </summary>
         public ulong CalculateStateHash()
         {
             var hash = new BattleHash();

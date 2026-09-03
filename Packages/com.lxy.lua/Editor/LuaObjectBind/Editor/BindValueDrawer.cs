@@ -9,6 +9,9 @@ namespace LuaObjectBind.Editor
     {
         private const float HORIZONTAL_GAP = 5;
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -110,6 +113,9 @@ namespace LuaObjectBind.Editor
         }
 
 
+        /// <summary>
+        /// 执行规范化名称相关逻辑。
+        /// </summary>
         protected virtual string NormalizeName(string name)
         {
             if (string.IsNullOrEmpty(name))

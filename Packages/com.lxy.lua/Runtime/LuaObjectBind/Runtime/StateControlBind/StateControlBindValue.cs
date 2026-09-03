@@ -37,16 +37,25 @@ namespace LuaObjectBind
             return (T)GetValue();
         }
 
+        /// <summary>
+        /// 设置值。
+        /// </summary>
         public void SetValue(object value)
         {
             stateController = (StateController)value;
         }
 
+        /// <summary>
+        /// 获取值。
+        /// </summary>
         public object GetValue()
         {
             return this.stateController;
         }
 
+        /// <summary>
+        /// 获取状态Controller。
+        /// </summary>
         public StateController GetStateController()
         {
             return this.stateController;

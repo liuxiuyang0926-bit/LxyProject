@@ -102,6 +102,9 @@ namespace LxyDemo.UIFramework
         [SerializeField]
         private bool blurMode;
 
+        /// <summary>
+        /// 是否允许点击背景遮罩时关闭当前面板。
+        /// </summary>
         [Tooltip("点击背景遮罩时关闭当前面板。")]
         [SerializeField]
         private bool blurCloseOnClick;
@@ -182,11 +185,17 @@ namespace LxyDemo.UIFramework
             set => backdropColor = value;
         }
 
+        /// <summary>
+        /// 向调用方提供Effective层级。
+        /// </summary>
         public UILayer EffectiveLayer =>
             layer == UILayer.Auto
                 ? (ignoreStack ? UILayer.Popup : UILayer.Stack)
                 : layer;
 
+        /// <summary>
+        /// 执行校验相关逻辑。
+        /// </summary>
         public void Validate()
         {
             id = Normalize(id);
@@ -220,6 +229,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 规范化当前数据。
+        /// </summary>
         private static string Normalize(string value)
         {
             return string.IsNullOrWhiteSpace(value)
@@ -231,9 +243,18 @@ namespace LxyDemo.UIFramework
     [Serializable]
     public sealed class UIFrameworkException : Exception
     {
+        /// <summary>
+        /// 向调用方提供错误Code。
+        /// </summary>
         public UIFrameworkErrorCode ErrorCode { get; }
+        /// <summary>
+        /// 向调用方提供面板标识。
+        /// </summary>
         public string PanelId { get; }
 
+        /// <summary>
+        /// 创建UIFrameworkException实例。
+        /// </summary>
         public UIFrameworkException(
             UIFrameworkErrorCode errorCode,
             string message,
@@ -248,6 +269,9 @@ namespace LxyDemo.UIFramework
 
     public readonly struct UIPanelRuntimeSnapshot
     {
+        /// <summary>
+        /// 创建UI面板运行时快照实例。
+        /// </summary>
         public UIPanelRuntimeSnapshot(
             string panelId,
             UIPanelState state,
@@ -266,24 +290,54 @@ namespace LxyDemo.UIFramework
             RequestId = requestId;
         }
 
+        /// <summary>
+        /// 向调用方提供面板标识。
+        /// </summary>
         public string PanelId { get; }
+        /// <summary>
+        /// 向调用方提供状态。
+        /// </summary>
         public UIPanelState State { get; }
+        /// <summary>
+        /// 指示当前对象是否已加载。
+        /// </summary>
         public bool IsLoaded { get; }
+        /// <summary>
+        /// 指示Visible是否成立。
+        /// </summary>
         public bool IsVisible { get; }
+        /// <summary>
+        /// 指示In栈是否成立。
+        /// </summary>
         public bool IsInStack { get; }
+        /// <summary>
+        /// 向调用方提供PendingCloseTarget。
+        /// </summary>
         public string PendingCloseTarget { get; }
+        /// <summary>
+        /// 向调用方提供Request标识。
+        /// </summary>
         public long RequestId { get; }
     }
 
     public readonly struct UIStackSnapshot
     {
+        /// <summary>
+        /// 创建UI栈快照实例。
+        /// </summary>
         public UIStackSnapshot(string panelId, object userData)
         {
             PanelId = panelId;
             UserData = userData;
         }
 
+        /// <summary>
+        /// 向调用方提供面板标识。
+        /// </summary>
         public string PanelId { get; }
+        /// <summary>
+        /// 向调用方提供User数据。
+        /// </summary>
         public object UserData { get; }
     }
 }

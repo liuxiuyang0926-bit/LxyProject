@@ -20,14 +20,23 @@ namespace LxyDemo.UIFramework.Editor
         private const string TargetAssetRoot =
             "Assets/GameResources/Lua";
 
+        /// <summary>
+        /// 向调用方提供callbackOrder。
+        /// </summary>
         public int callbackOrder => -1000;
 
+        /// <summary>
+        /// 响应Preprocess构建事件。
+        /// </summary>
         public void OnPreprocessBuild(
             UnityEditor.Build.Reporting.BuildReport report)
         {
             StageLuaFiles();
         }
 
+        /// <summary>
+        /// 执行阶段Lua文件相关逻辑。
+        /// </summary>
         [MenuItem(
             "工具/UI工具/同步Lua构建资源",
             priority = 30)]
@@ -80,6 +89,9 @@ namespace LxyDemo.UIFramework.Editor
                 TargetAssetRoot + "。");
         }
 
+        /// <summary>
+        /// 执行清理StagedLua文件相关逻辑。
+        /// </summary>
         [MenuItem(
             "工具/UI工具/清理Lua构建资源",
             priority = 31)]
@@ -116,12 +128,18 @@ namespace LxyDemo.UIFramework.Editor
         private static readonly HashSet<Button> HookedButtons =
             new HashSet<Button>();
 
+        /// <summary>
+        /// 创建YooAssetBundleBuilderClickHook实例。
+        /// </summary>
         static YooAssetBundleBuilderClickHook()
         {
             RestoreRemovedPipeline();
             EditorApplication.update += BindBuildButtons;
         }
 
+        /// <summary>
+        /// 执行RestoreRemovedPipeline相关逻辑。
+        /// </summary>
         private static void RestoreRemovedPipeline()
         {
             if (!BundleCollectorSettingData.HasSettingAsset())
@@ -146,6 +164,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 执行绑定构建Buttons相关逻辑。
+        /// </summary>
         private static void BindBuildButtons()
         {
             BundleBuilderWindow[] windows =
@@ -169,6 +190,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 响应构建按钮PointerUp事件。
+        /// </summary>
         private static void OnBuildButtonPointerUp(
             PointerUpEvent evt)
         {
@@ -178,12 +202,18 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 响应构建按钮Submit事件。
+        /// </summary>
         private static void OnBuildButtonSubmit(
             NavigationSubmitEvent evt)
         {
             SynchronizeLuaBeforeBuild(evt);
         }
 
+        /// <summary>
+        /// 执行同步LuaBefore构建相关逻辑。
+        /// </summary>
         private static void SynchronizeLuaBeforeBuild(EventBase evt)
         {
             try

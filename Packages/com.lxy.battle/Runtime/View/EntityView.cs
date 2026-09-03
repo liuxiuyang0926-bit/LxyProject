@@ -17,8 +17,14 @@ namespace Game.Battle.View
         private int entityId;
         private Material runtimeMaterial;
 
+        /// <summary>
+        /// 向调用方提供实体标识。
+        /// </summary>
         public int EntityId => entityId;
 
+        /// <summary>
+        /// 执行绑定相关逻辑。
+        /// </summary>
         public void Bind(
             BattleWorld battleWorld,
             int battleEntityId,
@@ -35,6 +41,9 @@ namespace Game.Battle.View
             SnapToLogicPosition();
         }
 
+        /// <summary>
+        /// 执行帧推进视觉相关逻辑。
+        /// </summary>
         public void TickVisual(float deltaTime)
         {
             if (world == null ||
@@ -62,6 +71,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 执行播放Skill相关逻辑。
+        /// </summary>
         public void PlaySkill(int skillId)
         {
             if (animator != null)
@@ -70,6 +82,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 执行播放Hit相关逻辑。
+        /// </summary>
         public void PlayHit()
         {
             if (animator != null)
@@ -78,6 +93,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 执行播放Dead相关逻辑。
+        /// </summary>
         public void PlayDead()
         {
             if (animator != null)
@@ -91,6 +109,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 执行Snap转换为Logic位置相关逻辑。
+        /// </summary>
         private void SnapToLogicPosition()
         {
             if (world != null &&
@@ -102,6 +123,9 @@ namespace Game.Battle.View
             }
         }
 
+        /// <summary>
+        /// 执行转换为Unity相关逻辑。
+        /// </summary>
         private static Vector3 ToUnity(
             FPVector2 position)
         {
@@ -111,6 +135,9 @@ namespace Game.Battle.View
                 ToFloat(position.Y));
         }
 
+        /// <summary>
+        /// 执行转换为UnityDirection相关逻辑。
+        /// </summary>
         private static Vector3 ToUnityDirection(
             FPVector2 direction)
         {
@@ -120,9 +147,15 @@ namespace Game.Battle.View
                 ToFloat(direction.Y));
         }
 
+        /// <summary>
+        /// 执行转换为浮点数相关逻辑。
+        /// </summary>
         private static float ToFloat(FP value) =>
             value.RawValue / (float)FP.Precision;
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             if (runtimeMaterial != null)

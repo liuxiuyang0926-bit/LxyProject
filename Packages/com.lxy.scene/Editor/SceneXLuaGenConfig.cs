@@ -11,6 +11,9 @@ namespace LxyDemo.SceneManagement
     public static class SceneXLuaGenConfig
     {
         [LuaCallCSharp]
+        /// <summary>
+        /// 公开的LuaCallCSharp数据。
+        /// </summary>
         public static readonly List<Type> LuaCallCSharp =
             new List<Type>
             {
@@ -18,6 +21,9 @@ namespace LxyDemo.SceneManagement
             };
 
         [CSharpCallLua]
+        /// <summary>
+        /// 公开的CSharpCallLua数据。
+        /// </summary>
         public static readonly List<Type> CSharpCallLua =
             new List<Type>
             {

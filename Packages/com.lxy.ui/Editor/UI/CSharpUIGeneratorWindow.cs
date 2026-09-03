@@ -14,20 +14,50 @@ namespace LxyDemo.UIFramework.Editor
     [Serializable]
     public sealed class CSharpUIGenerationOptions
     {
+        /// <summary>
+        /// 公开的面板标识数据。
+        /// </summary>
         public string panelId = "UIExample";
+        /// <summary>
+        /// 公开的脚本类型数据。
+        /// </summary>
         public UIScriptType scriptType = UIScriptType.CSharp;
+        /// <summary>
+        /// 公开的codeNamespace数据。
+        /// </summary>
         public string codeNamespace = "LxyDemo.GameUI";
+        /// <summary>
+        /// 公开的logic类型名称数据。
+        /// </summary>
         public string logicClassName = "UIExample";
+        /// <summary>
+        /// 公开的prefabFolder数据。
+        /// </summary>
         public string prefabFolder =
             "Assets/GameResources/Prefabs/UIRes";
+        /// <summary>
+        /// 公开的脚本Folder数据。
+        /// </summary>
         public string scriptFolder = "Assets/Scripts/GameUI";
+        /// <summary>
+        /// 公开的existingPrefab数据。
+        /// </summary>
         public GameObject existingPrefab;
+        /// <summary>
+        /// 公开的autoCollect绑定数据。
+        /// </summary>
         public bool autoCollectBindings = true;
+        /// <summary>
+        /// 公开的ui层级数据。
+        /// </summary>
         public UILayer uiLayer = UILayer.Auto;
     }
 
     public readonly struct CSharpUIGenerationResult
     {
+        /// <summary>
+        /// 创建CSharpUIGenerationResult实例。
+        /// </summary>
         public CSharpUIGenerationResult(
             string prefabPath,
             string mainScriptPath,
@@ -40,14 +70,29 @@ namespace LxyDemo.UIFramework.Editor
             MainScriptCreated = mainScriptCreated;
         }
 
+        /// <summary>
+        /// 向调用方提供Prefab路径。
+        /// </summary>
         public string PrefabPath { get; }
+        /// <summary>
+        /// 向调用方提供MainScript路径。
+        /// </summary>
         public string MainScriptPath { get; }
+        /// <summary>
+        /// 向调用方提供AutoScript路径。
+        /// </summary>
         public string AutoScriptPath { get; }
+        /// <summary>
+        /// 向调用方提供MainScriptCreated。
+        /// </summary>
         public bool MainScriptCreated { get; }
     }
 
     public sealed class CSharpUIGeneratorWindow : EditorWindow
     {
+            /// <summary>
+            /// 执行CSharpUIGeneration选项相关逻辑。
+            /// </summary>
         [SerializeField]
         private CSharpUIGenerationOptions options =
             new CSharpUIGenerationOptions();
@@ -55,6 +100,9 @@ namespace LxyDemo.UIFramework.Editor
         [SerializeField]
         private Vector2 scrollPosition;
 
+        /// <summary>
+        /// 执行显示窗口相关逻辑。
+        /// </summary>
         [MenuItem(
             "工具/UI工具/创建Prefab",
             priority = 10)]
@@ -68,6 +116,9 @@ namespace LxyDemo.UIFramework.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// 执行显示窗口从预制体相关逻辑。
+        /// </summary>
         [MenuItem(
             "Assets/UI Manager/Generate UI From Prefab",
             false,
@@ -83,6 +134,9 @@ namespace LxyDemo.UIFramework.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// 校验Show窗口From预制体。
+        /// </summary>
         [MenuItem(
             "Assets/UI Manager/Generate UI From Prefab",
             true)]
@@ -95,6 +149,9 @@ namespace LxyDemo.UIFramework.Editor
                            StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         private void OnEnable()
         {
             if (options == null)
@@ -103,6 +160,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             scrollPosition = EditorGUILayout.BeginScrollView(
@@ -127,6 +187,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        /// <summary>
+        /// 绘制源数据Section。
+        /// </summary>
         private void DrawSourceSection()
         {
             EditorGUILayout.LabelField(
@@ -195,6 +258,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorGUILayout.Space();
         }
 
+        /// <summary>
+        /// 绘制代码Section。
+        /// </summary>
         private void DrawCodeSection()
         {
             EditorGUILayout.LabelField(
@@ -225,6 +291,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorGUILayout.Space();
         }
 
+        /// <summary>
+        /// 执行切换脚本类型相关逻辑。
+        /// </summary>
         private void SwitchScriptType(UIScriptType scriptType)
         {
             if (options.scriptType == scriptType)
@@ -245,6 +314,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制目录Field。
+        /// </summary>
         private static string DrawFolderField(
             string label,
             string currentPath)
@@ -295,6 +367,9 @@ namespace LxyDemo.UIFramework.Editor
             return result;
         }
 
+        /// <summary>
+        /// 绘制输出预览。
+        /// </summary>
         private void DrawOutputPreview()
         {
             EditorGUILayout.LabelField(
@@ -343,6 +418,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制生成按钮。
+        /// </summary>
         private void DrawGenerateButton()
         {
             EditorGUILayout.Space();
@@ -390,6 +468,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 尝试Use选中项预制体，并返回是否成功。
+        /// </summary>
         private void TryUseSelectedPrefab()
         {
             if (Selection.activeObject is GameObject selected)
@@ -404,6 +485,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 设置Existing预制体。
+        /// </summary>
         private void SetExistingPrefab(GameObject prefab)
         {
             options.existingPrefab = prefab;
@@ -502,13 +586,37 @@ namespace LxyDemo.UIFramework.Editor
 
         private sealed class BindingCode
         {
+            /// <summary>
+            /// 公开的字段名称数据。
+            /// </summary>
             public string FieldName;
+            /// <summary>
+            /// 公开的字段类型数据。
+            /// </summary>
             public string FieldType;
+            /// <summary>
+            /// 公开的绑定名称数据。
+            /// </summary>
             public string BindingName;
+            /// <summary>
+            /// 公开的Required数据。
+            /// </summary>
             public bool Required;
+            /// <summary>
+            /// 公开的源数据数据。
+            /// </summary>
             public BindingSource Source;
+            /// <summary>
+            /// 公开的事件Kind数据。
+            /// </summary>
             public GeneratedEventKind EventKind;
+            /// <summary>
+            /// 公开的Handler名称数据。
+            /// </summary>
             public string HandlerName;
+            /// <summary>
+            /// 公开的Callback名称数据。
+            /// </summary>
             public string CallbackName;
         }
 
@@ -534,6 +642,9 @@ namespace LxyDemo.UIFramework.Editor
                 "volatile", "while"
             };
 
+        /// <summary>
+        /// 执行Generate相关逻辑。
+        /// </summary>
         public static CSharpUIGenerationResult Generate(
             CSharpUIGenerationOptions options,
             bool promptForOverwrite)
@@ -706,6 +817,9 @@ namespace LxyDemo.UIFramework.Editor
                 !mainExists);
         }
 
+        /// <summary>
+        /// 执行RegenerateAuto代码相关逻辑。
+        /// </summary>
         public static void RegenerateAutoCode(
             string prefabPath,
             bool autoCollectBindings)
@@ -792,6 +906,9 @@ namespace LxyDemo.UIFramework.Editor
                 autoPath);
         }
 
+        /// <summary>
+        /// 执行Auto收集Bindings相关逻辑。
+        /// </summary>
         public static int AutoCollectBindings(
             UICodeBinder binder)
         {
@@ -871,6 +988,9 @@ namespace LxyDemo.UIFramework.Editor
             return addedCount;
         }
 
+        /// <summary>
+        /// 获取预制体路径。
+        /// </summary>
         public static string GetPrefabPath(
             CSharpUIGenerationOptions options)
         {
@@ -886,6 +1006,9 @@ namespace LxyDemo.UIFramework.Editor
                 (options?.panelId ?? string.Empty) + ".prefab");
         }
 
+        /// <summary>
+        /// 获取主入口Script路径。
+        /// </summary>
         public static string GetMainScriptPath(
             CSharpUIGenerationOptions options)
         {
@@ -899,6 +1022,9 @@ namespace LxyDemo.UIFramework.Editor
                 (options?.logicClassName ?? string.Empty) + ".cs");
         }
 
+        /// <summary>
+        /// 获取AutoScript路径。
+        /// </summary>
         public static string GetAutoScriptPath(
             CSharpUIGenerationOptions options)
         {
@@ -913,6 +1039,9 @@ namespace LxyDemo.UIFramework.Editor
                 "Base.cs");
         }
 
+        /// <summary>
+        /// 执行转换为Absolute路径相关逻辑。
+        /// </summary>
         public static string ToAbsolutePath(string assetPath)
         {
             if (string.IsNullOrWhiteSpace(assetPath))
@@ -926,6 +1055,9 @@ namespace LxyDemo.UIFramework.Editor
                 NormalizeAssetPath(assetPath)));
         }
 
+        /// <summary>
+        /// 执行Sanitize类型名称相关逻辑。
+        /// </summary>
         public static string SanitizeTypeName(string value)
         {
             string identifier = SanitizeIdentifier(value, true);
@@ -934,6 +1066,9 @@ namespace LxyDemo.UIFramework.Editor
                 : identifier;
         }
 
+        /// <summary>
+        /// 创建New预制体。
+        /// </summary>
         private static void CreateNewPrefab(
             string prefabPath,
             CSharpUIGenerationOptions options)
@@ -967,6 +1102,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 准备Existing预制体。
+        /// </summary>
         private static void PrepareExistingPrefab(
             string prefabPath,
             CSharpUIGenerationOptions options)
@@ -1015,6 +1153,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 执行配置绑定器相关逻辑。
+        /// </summary>
         private static void ConfigureBinder(
             UICodeBinder binder,
             CSharpUIGenerationOptions options)
@@ -1031,6 +1172,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorUtility.SetDirty(binder);
         }
 
+        /// <summary>
+        /// 确保对象Binder。
+        /// </summary>
         private static ObjectBinder EnsureObjectBinder(
             GameObject root)
         {
@@ -1046,6 +1190,9 @@ namespace LxyDemo.UIFramework.Editor
             return objectBinder;
         }
 
+        /// <summary>
+        /// 执行配置对象绑定器相关逻辑。
+        /// </summary>
         private static void ConfigureObjectBinder(
             ObjectBinder objectBinder,
             CSharpUIGenerationOptions options)
@@ -1084,6 +1231,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorUtility.SetDirty(objectBinder);
         }
 
+        /// <summary>
+        /// 确保根节点对象绑定。
+        /// </summary>
         private static void EnsureRootObjectBinding(
             ObjectBinder objectBinder)
         {
@@ -1114,6 +1264,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorUtility.SetDirty(objectBinder);
         }
 
+        /// <summary>
+        /// 执行Auto收集对象Bindings相关逻辑。
+        /// </summary>
         public static int AutoCollectObjectBindings(
             ObjectBinder objectBinder)
         {
@@ -1180,6 +1333,9 @@ namespace LxyDemo.UIFramework.Editor
             return addedCount;
         }
 
+        /// <summary>
+        /// 执行同步对象绑定器Bindings相关逻辑。
+        /// </summary>
         private static void SynchronizeObjectBinderBindings(
             UICodeBinder codeBinder,
             ObjectBinder objectBinder)
@@ -1232,6 +1388,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorUtility.SetDirty(objectBinder);
         }
 
+        /// <summary>
+        /// 确保根节点绑定。
+        /// </summary>
         private static void EnsureRootBinding(UICodeBinder binder)
         {
             bool hasRoot = binder.Bindings.Any(
@@ -1258,6 +1417,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Generate脚本从预制体相关逻辑。
+        /// </summary>
         private static bool GenerateScriptsFromPrefab(
             string prefabPath,
             string mainScriptPath,
@@ -1288,6 +1450,9 @@ namespace LxyDemo.UIFramework.Editor
             return !mainExists && createMainWhenMissing;
         }
 
+        /// <summary>
+        /// 执行收集绑定代码相关逻辑。
+        /// </summary>
         private static List<BindingCode> CollectBindingCode(
             string prefabPath)
         {
@@ -1471,6 +1636,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 获取CSharpLogic类型名称。
+        /// </summary>
         private static string GetCSharpLogicTypeName(
             BinderElement logicBinding)
         {
@@ -1519,6 +1687,9 @@ namespace LxyDemo.UIFramework.Editor
             return "global::" + fullName;
         }
 
+        /// <summary>
+        /// 构建视图主入口内容。
+        /// </summary>
         private static string BuildViewMainContent(
             CSharpUIGenerationOptions options,
             string prefabPath,
@@ -1544,6 +1715,9 @@ namespace LxyDemo.UIFramework.Editor
                     BuildViewEventHandlerStubs(bindings));
         }
 
+        /// <summary>
+        /// 构建视图Base内容。
+        /// </summary>
         private static string BuildViewBaseContent(
             CSharpUIGenerationOptions options,
             string prefabPath,
@@ -1649,6 +1823,9 @@ namespace LxyDemo.UIFramework.Editor
                         : callbacks.ToString().TrimEnd());
         }
 
+        /// <summary>
+        /// 执行追加视图绑定Assignment相关逻辑。
+        /// </summary>
         private static void AppendViewBindingAssignment(
             BindingCode binding,
             string viewFieldName,
@@ -1678,6 +1855,9 @@ namespace LxyDemo.UIFramework.Editor
                 $"{ToBoolean(binding.Required)});");
         }
 
+        /// <summary>
+        /// 执行追加视图事件代码相关逻辑。
+        /// </summary>
         private static void AppendViewEventCode(
             BindingCode binding,
             string viewFieldName,
@@ -1735,6 +1915,9 @@ namespace LxyDemo.UIFramework.Editor
             callbacks.AppendLine();
         }
 
+        /// <summary>
+        /// 构建视图事件处理器Stubs。
+        /// </summary>
         private static string BuildViewEventHandlerStubs(
             List<BindingCode> bindings)
         {
@@ -1772,6 +1955,9 @@ namespace LxyDemo.UIFramework.Editor
                 : builder.ToString().TrimEnd();
         }
 
+        /// <summary>
+        /// 获取视图Field名称。
+        /// </summary>
         private static string GetViewFieldName(
             string fieldName)
         {
@@ -1779,6 +1965,9 @@ namespace LxyDemo.UIFramework.Editor
                    SanitizeIdentifier(fieldName, true);
         }
 
+        /// <summary>
+        /// 获取事件值类型。
+        /// </summary>
         private static string GetEventValueType(
             GeneratedEventKind eventKind)
         {
@@ -1797,6 +1986,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 构建主入口内容。
+        /// </summary>
         private static string BuildMainContent(
             CSharpUIGenerationOptions options,
             string prefabPath,
@@ -1819,6 +2011,9 @@ namespace LxyDemo.UIFramework.Editor
                     BuildEventHandlerStubs(bindings));
         }
 
+        /// <summary>
+        /// 构建Auto内容。
+        /// </summary>
         private static string BuildAutoContent(
             CSharpUIGenerationOptions options,
             string prefabPath,
@@ -1935,6 +2130,9 @@ namespace LxyDemo.UIFramework.Editor
                         : wrappers.ToString().TrimEnd());
         }
 
+        /// <summary>
+        /// 执行追加事件代码相关逻辑。
+        /// </summary>
         private static void AppendEventCode(
             BindingCode binding,
             StringBuilder subscriptions,
@@ -1996,6 +2194,9 @@ namespace LxyDemo.UIFramework.Editor
             wrappers.AppendLine();
         }
 
+        /// <summary>
+        /// 执行追加值Wrapper相关逻辑。
+        /// </summary>
         private static void AppendValueWrapper(
             BindingCode binding,
             string valueType,
@@ -2011,6 +2212,9 @@ namespace LxyDemo.UIFramework.Editor
             wrappers.AppendLine("        }");
         }
 
+        /// <summary>
+        /// 构建事件处理器Stubs。
+        /// </summary>
         private static string BuildEventHandlerStubs(
             List<BindingCode> bindings)
         {
@@ -2088,6 +2292,9 @@ namespace LxyDemo.UIFramework.Editor
             return builder.ToString().TrimEnd();
         }
 
+        /// <summary>
+        /// 解析事件Kind。
+        /// </summary>
         private static GeneratedEventKind ResolveEventKind(
             Type fieldType)
         {
@@ -2131,6 +2338,9 @@ namespace LxyDemo.UIFramework.Editor
             return GeneratedEventKind.None;
         }
 
+        /// <summary>
+        /// 获取事件属性。
+        /// </summary>
         private static string GetEventProperty(
             GeneratedEventKind eventKind)
         {
@@ -2139,6 +2349,9 @@ namespace LxyDemo.UIFramework.Editor
                 : "onValueChanged";
         }
 
+        /// <summary>
+        /// 获取事件MethodSuffix。
+        /// </summary>
         private static string GetEventMethodSuffix(
             GeneratedEventKind eventKind)
         {
@@ -2156,6 +2369,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 尝试解析Convention目标，并返回是否成功。
+        /// </summary>
         private static bool TryResolveConventionTarget(
             GameObject gameObject,
             out UnityEngine.Object target,
@@ -2271,6 +2487,9 @@ namespace LxyDemo.UIFramework.Editor
             return true;
         }
 
+        /// <summary>
+        /// 查找FallbackUIComponent。
+        /// </summary>
         private static UnityEngine.Object FindFallbackUIComponent(
             GameObject gameObject)
         {
@@ -2284,6 +2503,9 @@ namespace LxyDemo.UIFramework.Editor
                            component.GetType().Namespace == "TMPro");
         }
 
+        /// <summary>
+        /// 查找类型。
+        /// </summary>
         private static Type FindType(string fullName)
         {
             foreach (System.Reflection.Assembly assembly in
@@ -2299,6 +2521,9 @@ namespace LxyDemo.UIFramework.Editor
             return null;
         }
 
+        /// <summary>
+        /// 校验AndNormalize选项。
+        /// </summary>
         private static void ValidateAndNormalizeOptions(
             CSharpUIGenerationOptions options)
         {
@@ -2381,6 +2606,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 校验资源目录。
+        /// </summary>
         private static void ValidateAssetFolder(
             string path,
             string label)
@@ -2396,12 +2624,18 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 执行判断是否ValidNamespace相关逻辑。
+        /// </summary>
         private static bool IsValidNamespace(string value)
         {
             return !string.IsNullOrWhiteSpace(value) &&
                    value.Split('.').All(IsValidIdentifier);
         }
 
+        /// <summary>
+        /// 执行判断是否Valid标识符相关逻辑。
+        /// </summary>
         private static bool IsValidIdentifier(string value)
         {
             if (string.IsNullOrEmpty(value) ||
@@ -2417,6 +2651,9 @@ namespace LxyDemo.UIFramework.Editor
                 character == '_');
         }
 
+        /// <summary>
+        /// 执行Sanitize字段名称相关逻辑。
+        /// </summary>
         private static string SanitizeFieldName(string nodeName)
         {
             string[] parts = nodeName.Split(
@@ -2444,6 +2681,9 @@ namespace LxyDemo.UIFramework.Editor
                 false);
         }
 
+        /// <summary>
+        /// 执行Sanitize标识符相关逻辑。
+        /// </summary>
         private static string SanitizeIdentifier(
             string value,
             bool pascalCase)
@@ -2492,6 +2732,9 @@ namespace LxyDemo.UIFramework.Editor
             return result;
         }
 
+        /// <summary>
+        /// 执行MakeUnique字段名称相关逻辑。
+        /// </summary>
         private static string MakeUniqueFieldName(
             string fieldName,
             HashSet<string> usedFields)
@@ -2513,6 +2756,9 @@ namespace LxyDemo.UIFramework.Editor
             return candidate;
         }
 
+        /// <summary>
+        /// 获取CSharp类型名称。
+        /// </summary>
         private static string GetCSharpTypeName(Type type)
         {
             return "global::" +
@@ -2520,6 +2766,9 @@ namespace LxyDemo.UIFramework.Editor
                    .Replace('+', '.');
         }
 
+        /// <summary>
+        /// 执行转义字符串Literal相关逻辑。
+        /// </summary>
         private static string EscapeStringLiteral(string value)
         {
             return (value ?? string.Empty)
@@ -2527,11 +2776,17 @@ namespace LxyDemo.UIFramework.Editor
                 .Replace("\"", "\\\"");
         }
 
+        /// <summary>
+        /// 执行转换为Boolean相关逻辑。
+        /// </summary>
         private static string ToBoolean(bool value)
         {
             return value ? "true" : "false";
         }
 
+        /// <summary>
+        /// 执行读取模板相关逻辑。
+        /// </summary>
         private static string ReadTemplate(string assetPath)
         {
             TextAsset template =
@@ -2552,6 +2807,9 @@ namespace LxyDemo.UIFramework.Editor
             return File.ReadAllText(absolutePath);
         }
 
+        /// <summary>
+        /// 执行写入文本资源相关逻辑。
+        /// </summary>
         private static void WriteTextAsset(
             string assetPath,
             string content)
@@ -2566,6 +2824,9 @@ namespace LxyDemo.UIFramework.Editor
                 new UTF8Encoding(false));
         }
 
+        /// <summary>
+        /// 确保资源目录。
+        /// </summary>
         private static void EnsureAssetFolder(string assetFolder)
         {
             assetFolder = NormalizeAssetPath(assetFolder);
@@ -2591,6 +2852,9 @@ namespace LxyDemo.UIFramework.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Combine资源路径相关逻辑。
+        /// </summary>
         private static string CombineAssetPath(
             string folder,
             string fileName)
@@ -2601,6 +2865,9 @@ namespace LxyDemo.UIFramework.Editor
                 (fileName ?? string.Empty).TrimStart('/'));
         }
 
+        /// <summary>
+        /// 执行规范化资源路径相关逻辑。
+        /// </summary>
         private static string NormalizeAssetPath(string path)
         {
             return string.IsNullOrWhiteSpace(path)

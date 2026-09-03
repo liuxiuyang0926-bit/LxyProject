@@ -12,7 +12,13 @@ namespace LxyDemo.UIFramework
         [Serializable]
         private sealed class LayerReference
         {
+            /// <summary>
+            /// 公开的层级数据。
+            /// </summary>
             public UILayer layer;
+            /// <summary>
+            /// 公开的根节点数据。
+            /// </summary>
             public RectTransform root;
         }
 
@@ -29,8 +35,14 @@ namespace LxyDemo.UIFramework
         private readonly Dictionary<UILayer, RectTransform> layerMap =
             new Dictionary<UILayer, RectTransform>();
 
+        /// <summary>
+        /// 向调用方提供RootCanvas。
+        /// </summary>
         public Canvas RootCanvas => rootCanvas;
 
+        /// <summary>
+        /// 确保Initialized。
+        /// </summary>
         public void EnsureInitialized(bool createEventSystem = true)
         {
             ResolveOrCreateCanvas();
@@ -56,6 +68,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 获取层级。
+        /// </summary>
         public RectTransform GetLayer(UILayer layer)
         {
             EnsureInitialized();
@@ -74,6 +89,9 @@ namespace LxyDemo.UIFramework
             return root;
         }
 
+        /// <summary>
+        /// 创建运行时。
+        /// </summary>
         public static UILayerRoot CreateRuntime(
             string objectName = "[UIRoot]")
         {
@@ -91,6 +109,9 @@ namespace LxyDemo.UIFramework
             return result;
         }
 
+        /// <summary>
+        /// 解析Or创建画布。
+        /// </summary>
         private void ResolveOrCreateCanvas()
         {
             bool createdCanvas = false;
@@ -148,6 +169,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行重建层级映射相关逻辑。
+        /// </summary>
         private void RebuildLayerMap()
         {
             layerMap.Clear();
@@ -188,6 +212,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 创建层级。
+        /// </summary>
         private RectTransform CreateLayer(UILayer layer)
         {
             RectTransform layerContainer = GetLayerContainer();
@@ -214,6 +241,9 @@ namespace LxyDemo.UIFramework
             return rect;
         }
 
+        /// <summary>
+        /// 获取层级Container。
+        /// </summary>
         private RectTransform GetLayerContainer()
         {
             Transform namedRoot =
@@ -222,6 +252,9 @@ namespace LxyDemo.UIFramework
                    rootCanvas.transform as RectTransform;
         }
 
+        /// <summary>
+        /// 添加OrUpdate层级引用。
+        /// </summary>
         private void AddOrUpdateLayerReference(
             UILayer layer,
             RectTransform root)
@@ -247,6 +280,9 @@ namespace LxyDemo.UIFramework
             });
         }
 
+        /// <summary>
+        /// 尝试解析层级，并返回是否成功。
+        /// </summary>
         private static bool TryResolveLayer(
             string objectName,
             out UILayer layer)
@@ -305,6 +341,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 获取层级Node名称。
+        /// </summary>
         private static string GetLayerNodeName(UILayer layer)
         {
             switch (layer)
@@ -320,6 +359,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行SortLayers相关逻辑。
+        /// </summary>
         private void SortLayers()
         {
             var ordered =
@@ -339,6 +381,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 获取运行时层级。
+        /// </summary>
         private static IEnumerable<UILayer> GetRuntimeLayers()
         {
             yield return UILayer.Bottom;
@@ -351,6 +396,9 @@ namespace LxyDemo.UIFramework
             yield return UILayer.Debug;
         }
 
+        /// <summary>
+        /// 确保事件System。
+        /// </summary>
         private static void EnsureEventSystem(
             Transform parent)
         {
@@ -380,6 +428,9 @@ namespace LxyDemo.UIFramework
             eventSystemObject.transform.SetSiblingIndex(0);
         }
 
+        /// <summary>
+        /// 设置UI层级Recursively。
+        /// </summary>
         public static void SetUILayerRecursively(
             GameObject root)
         {
@@ -393,6 +444,9 @@ namespace LxyDemo.UIFramework
             SetLayerRecursively(root, uiLayer);
         }
 
+        /// <summary>
+        /// 设置层级Recursively。
+        /// </summary>
         public static void SetLayerRecursively(
             GameObject root,
             int layer)
@@ -414,6 +468,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行Stretch相关逻辑。
+        /// </summary>
         public static void Stretch(RectTransform rect)
         {
             rect.anchorMin = Vector2.zero;

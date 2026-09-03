@@ -18,6 +18,9 @@ namespace LuaObjectBind.Editor
         private bool isValidLuaFile = false;
         private static LuaFileBrowserWindow fileBrowserWindow;
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -77,6 +80,9 @@ namespace LuaObjectBind.Editor
             EditorGUI.EndProperty();
         }
 
+        /// <summary>
+        /// 执行显示Lua文件Browser相关逻辑。
+        /// </summary>
         private void ShowLuaFileBrowser(SerializedProperty property)
         {
             if (fileBrowserWindow == null)
@@ -91,6 +97,9 @@ namespace LuaObjectBind.Editor
             );
         }
 
+        /// <summary>
+        /// 打开Lua文件。
+        /// </summary>
         private void OpenLuaFile(string relativePath)
         {
             if (string.IsNullOrEmpty(relativePath))
@@ -110,6 +119,9 @@ namespace LuaObjectBind.Editor
             CodeEditor.CurrentEditor.OpenProject(fullPath);
         }
 
+        /// <summary>
+        /// 执行Export绑定注释相关逻辑。
+        /// </summary>
         private void ExportBindingComment(string relativePath)
         {
             if (string.IsNullOrEmpty(relativePath))
@@ -330,6 +342,9 @@ namespace LuaObjectBind.Editor
         private static string startMarker = "-------------------------------Object Binder Generated（请勿修改）-------------------------------";
         private static string logicBindMarker = "\n--------------------------------Logic Bind Generated（请勿修改）---------------------------------";
         private static string endMarker = "-----------------------------------Object Binder Generated End----------------------------------";
+        /// <summary>
+        /// 执行CleanOld对象绑定器Content相关逻辑。
+        /// </summary>
         private static string[] CleanOldObjectBinderContent(string[] lines)
         {
             List<string> cleanedLines = new List<string>();
@@ -361,6 +376,9 @@ namespace LuaObjectBind.Editor
             return cleanedLines.ToArray();
         }
 
+        /// <summary>
+        /// 查找Insert位置。
+        /// </summary>
         private static int FindInsertPosition(string[] lines)
         {
             // 查找local UIBaseLogic = require("Lua.Framework.UI.UIBaseLogic")
@@ -403,6 +421,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 转换CSharp类型ToLua类型。
+        /// </summary>
         private static string ConvertCSharpTypeToLuaType(System.Type type)
         {
             if (type == null)
@@ -466,6 +487,9 @@ namespace LuaObjectBind.Editor
             return type.Name;
         }
 
+        /// <summary>
+        /// 转换Field绑定EnumToLua类型。
+        /// </summary>
         private static string ConvertFieldBindEnumToLuaType(FieldBindEnum bindType)
         {
             // 获取枚举值的 FieldInfo
@@ -497,6 +521,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Generate字段注释相关逻辑。
+        /// </summary>
         private static List<string> GenerateFieldComments(GameObject selectedObject, string luaClassName = "")
         {
             List<string> fieldComments = new List<string>();
@@ -620,6 +647,9 @@ namespace LuaObjectBind.Editor
             return fieldComments;
         }
         
+        /// <summary>
+        /// 执行Generate状态Table类型名称相关逻辑。
+        /// </summary>
         private static string GenerateStateTableClassName(string fileName, string stateGroupName)
         {
             // 格式：S_文件名_状态组名
@@ -635,12 +665,18 @@ namespace LuaObjectBind.Editor
         private Dictionary<string, bool> folderFoldout = new Dictionary<string, bool>();
         private string luaPath;
 
+        /// <summary>
+        /// 初始化当前实例。
+        /// </summary>
         public void Initialize(SerializedProperty property)
         {
             targetProperty = property;
             luaPath = LuaObjectBindProxy.GetLuaPath();
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             if (targetProperty == null)
@@ -663,6 +699,9 @@ namespace LuaObjectBind.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        /// <summary>
+        /// 绘制Lua文件Tree。
+        /// </summary>
         private void DrawLuaFileTree(string rootPath, string relativePath)
         {
             string fullPath = string.IsNullOrEmpty(relativePath) ? rootPath : Path.Combine(rootPath, relativePath);

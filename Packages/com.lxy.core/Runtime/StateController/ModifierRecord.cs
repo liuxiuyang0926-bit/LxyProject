@@ -9,37 +9,61 @@ namespace StateControl.Runtime
     {
         [SerializeReference] public List<BaseModifier> Modifiers = new();
 
+        /// <summary>
+        /// 公开的Selected状态Groups数据。
+        /// </summary>
         public List<string> SelectedStateGroups = new();
+        /// <summary>
+        /// 公开的Selected状态数据。
+        /// </summary>
         public List<string> SelectedStates = new();
         
+        /// <summary>
+        /// 添加Modifier。
+        /// </summary>
         public void AddModifier(BaseModifier modifier)
         {
             Modifiers.Add(modifier);
         }
 
         // 新增：移除修改器（按实例）
+        /// <summary>
+        /// 移除Modifier。
+        /// </summary>
         public bool RemoveModifier(BaseModifier modifier)
         {
             return Modifiers.Remove(modifier);
         }
         
+        /// <summary>
+        /// 添加Selection。
+        /// </summary>
         public void AddSelection(string groupName, string stateName)
         {
             SelectedStateGroups.Add(groupName);
             SelectedStates.Add(stateName);
         }
 
+        /// <summary>
+        /// 设置状态。
+        /// </summary>
         public void SetState(string groupName, string stateName)
         {
             int groupIndex = SelectedStateGroups.FindIndex(x => x == groupName);
             SelectedStates[groupIndex] = stateName;
         }
 
+        /// <summary>
+        /// 执行判断是否包含Group相关逻辑。
+        /// </summary>
         public bool ContainsGroup(string groupName)
         {
             return SelectedStateGroups.Contains(groupName);
         }
 
+        /// <summary>
+        /// 执行RenameGroup相关逻辑。
+        /// </summary>
         public void RenameGroup(string oldName, string newName)
         {
             if (ContainsGroup(oldName))
@@ -49,6 +73,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 执行Satisfied状态Group相关逻辑。
+        /// </summary>
         public bool SatisfiedStateGroup(string groupName, string stateName)
         {
             if (ContainsGroup(groupName))
@@ -60,6 +87,9 @@ namespace StateControl.Runtime
             return false;
         }
 
+        /// <summary>
+        /// 创建当前实例的副本。
+        /// </summary>
         public ModifierRecord Clone()
         {
             var newRecord = new ModifierRecord();
@@ -75,6 +105,9 @@ namespace StateControl.Runtime
             return newRecord;
         }
 
+        /// <summary>
+        /// 执行Satisfied相关逻辑。
+        /// </summary>
         public bool Satisfied(StateController stateController)
         {
             for(int i=0;i<SelectedStateGroups.Count;i++)
@@ -87,6 +120,9 @@ namespace StateControl.Runtime
             return true;
         }
         
+        /// <summary>
+        /// 执行应用相关逻辑。
+        /// </summary>
         public void Apply(ModifierTarget target)
         {
             if (Modifiers == null || Modifiers.Count == 0)
@@ -100,11 +136,17 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 获取状态分组数量。
+        /// </summary>
         public int GetStateGroupCount()
         {
             return SelectedStateGroups.Count;
         }
 
+        /// <summary>
+        /// 获取选中项状态。
+        /// </summary>
         public string GetSelectedState(string groupName)
         {
             int index = SelectedStateGroups.FindIndex(x => x == groupName);

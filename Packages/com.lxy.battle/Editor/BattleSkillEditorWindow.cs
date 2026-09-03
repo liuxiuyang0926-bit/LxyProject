@@ -12,6 +12,9 @@ namespace Game.Battle.Editor
         private Vector2 scroll;
         private int selectedIndex;
 
+        /// <summary>
+        /// 执行打开相关逻辑。
+        /// </summary>
         [MenuItem("工具/战斗/技能编辑器", false, 10)]
         private static void Open()
         {
@@ -19,12 +22,18 @@ namespace Game.Battle.Editor
                 .Show();
         }
 
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         private void OnEnable()
         {
             SetDatabase(
                 BattleConfigEditorUtility.LoadOrCreateDatabase());
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             DrawDatabaseField();
@@ -54,6 +63,9 @@ namespace Game.Battle.Editor
             DrawBottomButtons(skills);
         }
 
+        /// <summary>
+        /// 绘制数据库Field。
+        /// </summary>
         private void DrawDatabaseField()
         {
             EditorGUI.BeginChangeCheck();
@@ -69,6 +81,9 @@ namespace Game.Battle.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制技能列表。
+        /// </summary>
         private void DrawSkillList(SerializedProperty skills)
         {
             EditorGUILayout.BeginVertical(
@@ -98,6 +113,9 @@ namespace Game.Battle.Editor
             EditorGUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// 绘制选中项技能。
+        /// </summary>
         private void DrawSelectedSkill(SerializedProperty skills)
         {
             EditorGUILayout.BeginVertical();
@@ -122,6 +140,9 @@ namespace Game.Battle.Editor
             EditorGUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// 绘制技能。
+        /// </summary>
         private static void DrawSkill(SerializedProperty skill)
         {
             EditorGUILayout.PropertyField(
@@ -145,6 +166,9 @@ namespace Game.Battle.Editor
                 Mathf.Max(1, totalFrames.intValue));
         }
 
+        /// <summary>
+        /// 绘制帧操作。
+        /// </summary>
         private static void DrawFrameOperations(
             SerializedProperty operations,
             int totalFrames)
@@ -183,6 +207,9 @@ namespace Game.Battle.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制帧操作。
+        /// </summary>
         private static bool DrawFrameOperation(
             SerializedProperty operations,
             SerializedProperty operation,
@@ -266,6 +293,9 @@ namespace Game.Battle.Editor
             return false;
         }
 
+        /// <summary>
+        /// 绘制DamageBox。
+        /// </summary>
         private static void DrawDamageBox(SerializedProperty operation)
         {
             SerializedProperty hitShape =
@@ -301,6 +331,9 @@ namespace Game.Battle.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制原始值Vector2。
+        /// </summary>
         private static void DrawRawVector2(
             SerializedProperty parent,
             string xName,
@@ -320,6 +353,9 @@ namespace Game.Battle.Editor
             EditorGUI.indentLevel--;
         }
 
+        /// <summary>
+        /// 重置帧操作。
+        /// </summary>
         private static void ResetFrameOperation(
             SerializedProperty operation,
             int frame)
@@ -346,6 +382,9 @@ namespace Game.Battle.Editor
                 0L;
         }
 
+        /// <summary>
+        /// 绘制BottomButtons。
+        /// </summary>
         private void DrawBottomButtons(SerializedProperty skills)
         {
             EditorGUILayout.Space(6f);
@@ -378,6 +417,9 @@ namespace Game.Battle.Editor
             EditorGUILayout.EndHorizontal();
         }
 
+        /// <summary>
+        /// 校验数据库。
+        /// </summary>
         private void ValidateDatabase()
         {
             if (database.TryBuildCatalog(out _, out string error))
@@ -392,6 +434,9 @@ namespace Game.Battle.Editor
             }
         }
 
+        /// <summary>
+        /// 设置数据库。
+        /// </summary>
         private void SetDatabase(BattleConfigDatabase value)
         {
             database = value;

@@ -9,6 +9,9 @@ namespace LuaObjectBind.Editor
     {
         private const float HORIZONTAL_GAP = 5;
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var name = property.FindPropertyRelative("name");
@@ -105,6 +108,9 @@ namespace LuaObjectBind.Editor
             HandleDragAndDrop(pathRect, path, property);
         }
 
+        /// <summary>
+        /// 处理DragAndDrop。
+        /// </summary>
         private void HandleDragAndDrop(Rect dropArea, SerializedProperty pathProperty, SerializedProperty property)
         {
             Event current = Event.current;
@@ -156,6 +162,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 获取属性高度。
+        /// </summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             return EditorGUIUtility.singleLineHeight + 4;

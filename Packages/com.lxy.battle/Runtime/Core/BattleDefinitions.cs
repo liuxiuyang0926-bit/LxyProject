@@ -6,7 +6,13 @@ namespace Game.Battle.Core
 {
     public static class BattleConst
     {
+        /// <summary>
+        /// 公开的LogicFps数据。
+        /// </summary>
         public const int LogicFps = 20;
+        /// <summary>
+        /// 公开的帧Delta数据。
+        /// </summary>
         public static readonly FP FrameDelta =
             FP.FromRatio(1, LogicFps);
     }
@@ -39,6 +45,9 @@ namespace Game.Battle.Core
 
     public readonly struct BattleSkillFrameOperationDefinition
     {
+        /// <summary>
+        /// 创建战斗Skill帧操作定义实例。
+        /// </summary>
         public BattleSkillFrameOperationDefinition(
             int frame,
             int order,
@@ -63,15 +72,45 @@ namespace Game.Battle.Core
             LocalDisplacement = localDisplacement;
         }
 
+        /// <summary>
+        /// 向调用方提供帧。
+        /// </summary>
         public int Frame { get; }
+        /// <summary>
+        /// 向调用方提供Order。
+        /// </summary>
         public int Order { get; }
+        /// <summary>
+        /// 向调用方提供操作类型。
+        /// </summary>
         public BattleSkillOperationType OperationType { get; }
+        /// <summary>
+        /// 向调用方提供HitShape。
+        /// </summary>
         public BattleCollisionShape HitShape { get; }
+        /// <summary>
+        /// 向调用方提供Damage。
+        /// </summary>
         public int Damage { get; }
+        /// <summary>
+        /// 向调用方提供增益标识。
+        /// </summary>
         public int BuffId { get; }
+        /// <summary>
+        /// 向调用方提供LocalOffset。
+        /// </summary>
         public FPVector2 LocalOffset { get; }
+        /// <summary>
+        /// 向调用方提供HalfExtents。
+        /// </summary>
         public FPVector2 HalfExtents { get; }
+        /// <summary>
+        /// 向调用方提供旋转角度。
+        /// </summary>
         public FP RotationDegrees { get; }
+        /// <summary>
+        /// 向调用方提供LocalDisplacement。
+        /// </summary>
         public FPVector2 LocalDisplacement { get; }
     }
 
@@ -79,6 +118,9 @@ namespace Game.Battle.Core
     {
         private readonly BattleSkillFrameOperationDefinition[] operations;
 
+        /// <summary>
+        /// 创建战斗Skill定义实例。
+        /// </summary>
         public BattleSkillDefinition(
             int id,
             string name,
@@ -98,14 +140,29 @@ namespace Game.Battle.Core
                 CompareOperations);
         }
 
+        /// <summary>
+        /// 向调用方提供标识。
+        /// </summary>
         public int Id { get; }
+        /// <summary>
+        /// 向调用方提供名称。
+        /// </summary>
         public string Name { get; }
+        /// <summary>
+        /// 向调用方提供总数Frames。
+        /// </summary>
         public int TotalFrames { get; }
+        /// <summary>
+        /// 向调用方提供CooldownFrames。
+        /// </summary>
         public int CooldownFrames { get; }
         public IReadOnlyList<BattleSkillFrameOperationDefinition>
             Operations => operations ??
                 Array.Empty<BattleSkillFrameOperationDefinition>();
 
+        /// <summary>
+        /// 执行比较操作相关逻辑。
+        /// </summary>
         private static int CompareOperations(
             BattleSkillFrameOperationDefinition left,
             BattleSkillFrameOperationDefinition right)
@@ -119,6 +176,9 @@ namespace Game.Battle.Core
 
     public readonly struct BattleBuffDefinition
     {
+        /// <summary>
+        /// 创建战斗Buff定义实例。
+        /// </summary>
         public BattleBuffDefinition(
             int id,
             string name,
@@ -139,19 +199,49 @@ namespace Game.Battle.Core
             MaxStacks = maxStacks;
         }
 
+        /// <summary>
+        /// 向调用方提供标识。
+        /// </summary>
         public int Id { get; }
+        /// <summary>
+        /// 向调用方提供名称。
+        /// </summary>
         public string Name { get; }
+        /// <summary>
+        /// 向调用方提供类型。
+        /// </summary>
         public BattleBuffType Type { get; }
+        /// <summary>
+        /// 向调用方提供DurationFrames。
+        /// </summary>
         public int DurationFrames { get; }
+        /// <summary>
+        /// 向调用方提供IntervalFrames。
+        /// </summary>
         public int IntervalFrames { get; }
+        /// <summary>
+        /// 向调用方提供值。
+        /// </summary>
         public int Value { get; }
+        /// <summary>
+        /// 向调用方提供栈Mode。
+        /// </summary>
         public BattleBuffStackMode StackMode { get; }
+        /// <summary>
+        /// 向调用方提供MaxStacks。
+        /// </summary>
         public int MaxStacks { get; }
     }
 
     public interface IBattleConfigProvider
     {
+        /// <summary>
+        /// 尝试获取技能，并返回是否成功。
+        /// </summary>
         bool TryGetSkill(int id, out BattleSkillDefinition definition);
+        /// <summary>
+        /// 尝试获取增益，并返回是否成功。
+        /// </summary>
         bool TryGetBuff(int id, out BattleBuffDefinition definition);
     }
 
@@ -162,6 +252,9 @@ namespace Game.Battle.Core
         private readonly Dictionary<int, BattleBuffDefinition> buffs =
             new Dictionary<int, BattleBuffDefinition>();
 
+        /// <summary>
+        /// 添加技能。
+        /// </summary>
         public void AddSkill(BattleSkillDefinition definition)
         {
             ValidateSkill(definition);
@@ -187,6 +280,9 @@ namespace Game.Battle.Core
             skills.Add(definition.Id, definition);
         }
 
+        /// <summary>
+        /// 添加增益。
+        /// </summary>
         public void AddBuff(BattleBuffDefinition definition)
         {
             ValidateBuff(definition);
@@ -199,16 +295,25 @@ namespace Game.Battle.Core
             buffs.Add(definition.Id, definition);
         }
 
+        /// <summary>
+        /// 尝试获取技能，并返回是否成功。
+        /// </summary>
         public bool TryGetSkill(
             int id,
             out BattleSkillDefinition definition) =>
             skills.TryGetValue(id, out definition);
 
+        /// <summary>
+        /// 尝试获取增益，并返回是否成功。
+        /// </summary>
         public bool TryGetBuff(
             int id,
             out BattleBuffDefinition definition) =>
             buffs.TryGetValue(id, out definition);
 
+        /// <summary>
+        /// 校验技能。
+        /// </summary>
         private static void ValidateSkill(
             BattleSkillDefinition definition)
         {
@@ -275,6 +380,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 校验增益。
+        /// </summary>
         private static void ValidateBuff(
             BattleBuffDefinition definition)
         {

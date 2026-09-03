@@ -24,9 +24,21 @@ namespace Game.Main
         private readonly List<Assembly> loadedHotUpdateAssemblies =
             new List<Assembly>();
 
+        /// <summary>
+        /// 指示当前对象是否正在加载。
+        /// </summary>
         public bool IsLoading { get; private set; }
+        /// <summary>
+        /// 指示当前对象是否已就绪。
+        /// </summary>
         public bool IsReady { get; private set; }
+        /// <summary>
+        /// 最近一次操作失败的错误信息；未发生错误时为 null。
+        /// </summary>
         public string LastError { get; private set; }
+        /// <summary>
+        /// 向调用方提供LoadedHotUpdateAssemblies。
+        /// </summary>
         public IReadOnlyList<Assembly> LoadedHotUpdateAssemblies =>
             loadedHotUpdateAssemblies;
 
@@ -152,6 +164,9 @@ namespace Game.Main
                 this);
         }
 
+        /// <summary>
+        /// 执行配置资源包相关逻辑。
+        /// </summary>
         public void ConfigurePackage(string value)
         {
             if (IsLoading || IsReady)
@@ -166,6 +181,9 @@ namespace Game.Main
         }
 
 #if !UNITY_EDITOR
+        /// <summary>
+        /// 加载程序集清单。
+        /// </summary>
         private IEnumerator LoadAssemblyManifest(
             ResourcePackage package)
         {
@@ -226,6 +244,9 @@ namespace Game.Main
                 this);
         }
 
+        /// <summary>
+        /// 加载AotMetadata。
+        /// </summary>
         private IEnumerator LoadAotMetadata(ResourcePackage package)
         {
             foreach (string dllName in
@@ -307,6 +328,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 加载热更新Update程序集。
+        /// </summary>
         private IEnumerator LoadHotUpdateAssemblies(
             ResourcePackage package)
         {
@@ -403,6 +427,9 @@ namespace Game.Main
 #endif
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// 尝试加载编辑器程序集清单，并返回是否成功。
+        /// </summary>
         private bool TryLoadEditorAssemblyManifest(
             out string error)
         {
@@ -431,6 +458,9 @@ namespace Game.Main
         }
 #endif
 
+        /// <summary>
+        /// 尝试解析程序集清单，并返回是否成功。
+        /// </summary>
         private static bool TryParseAssemblyManifest(
             string json,
             out HybridCLRAssemblyManifest manifest,
@@ -484,6 +514,9 @@ namespace Game.Main
             return true;
         }
 
+        /// <summary>
+        /// 尝试NormalizeDll列表，并返回是否成功。
+        /// </summary>
         private static bool TryNormalizeDllList(
             IEnumerable<string> source,
             bool requireAtLeastOne,
@@ -541,6 +574,9 @@ namespace Game.Main
             return true;
         }
 
+        /// <summary>
+        /// 查找Loaded热更新Update程序集。
+        /// </summary>
         private static Assembly FindLoadedHotUpdateAssembly(
             string assemblyName)
         {
@@ -553,6 +589,9 @@ namespace Game.Main
                         StringComparison.Ordinal));
         }
 
+        /// <summary>
+        /// 获取程序集名称From位置。
+        /// </summary>
         private static string GetAssemblyNameFromLocation(
             string location)
         {
@@ -566,6 +605,9 @@ namespace Game.Main
                 : location;
         }
 
+        /// <summary>
+        /// 执行标记失败相关逻辑。
+        /// </summary>
         private void Fail(
             string message,
             Exception exception = null)

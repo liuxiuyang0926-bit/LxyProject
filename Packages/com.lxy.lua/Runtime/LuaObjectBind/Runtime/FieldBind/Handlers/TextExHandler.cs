@@ -7,6 +7,9 @@ namespace LuaObjectBind.Handlers
     [FieldBindHandler]
     public class TextExHandler : AFieldBindHandler<Text>
     {
+        /// <summary>
+        /// 将字符串值写入文本组件。
+        /// </summary>
         protected override void HandleString(Text comp, FieldBindEnum type, string value)
         {
             switch (type)
@@ -17,6 +20,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取字符串。
+        /// </summary>
         protected override string GetString(Text comp, FieldBindEnum type)
         {
             switch (type)
@@ -28,6 +34,9 @@ namespace LuaObjectBind.Handlers
             return string.Empty;
         }
 
+        /// <summary>
+        /// 处理浮点数。
+        /// </summary>
         protected override void HandleFloat(Text obj, FieldBindEnum type, float value)
         {
             switch (type)
@@ -37,6 +46,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取浮点数。
+        /// </summary>
         protected override float GetFloat(Text obj, FieldBindEnum type)
         {
             switch (type)

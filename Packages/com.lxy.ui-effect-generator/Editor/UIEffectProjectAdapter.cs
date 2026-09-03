@@ -32,27 +32,60 @@ namespace Lxy.UIEffectGenerator.Editor
 
     public sealed class UIEffectProjectDefaults
     {
+        /// <summary>
+        /// 公开的prefabFolder数据。
+        /// </summary>
         public string prefabFolder = "Assets/GeneratedUI/Prefabs";
+        /// <summary>
+        /// 公开的codeNamespace数据。
+        /// </summary>
         public string codeNamespace = "Game.UI";
+        /// <summary>
+        /// 公开的脚本Folder数据。
+        /// </summary>
         public string scriptFolder = "Assets/GeneratedUI/Scripts";
+        /// <summary>
+        /// 公开的资源Search根节点数据。
+        /// </summary>
         public string resourceSearchRoot = "Assets";
+        /// <summary>
+        /// 公开的引用Folder数据。
+        /// </summary>
         public string referenceFolder =
             "Assets/Editor/UIEffectGenerator/References";
+        /// <summary>
+        /// 公开的schemaFolder数据。
+        /// </summary>
         public string schemaFolder =
             "Assets/Editor/UIEffectGenerator/Schemas";
+        /// <summary>
+        /// 公开的FigmaSpriteFolder数据。
+        /// </summary>
         public string figmaSpriteFolder =
             "Assets/GeneratedUI/FigmaSprites";
+        /// <summary>
+        /// 公开的脚本类型数据。
+        /// </summary>
         public UIEffectScriptType scriptType = UIEffectScriptType.None;
+        /// <summary>
+        /// 公开的ui层级数据。
+        /// </summary>
         public UIEffectLayer uiLayer = UIEffectLayer.Auto;
     }
 
     public readonly struct UIEffectPrefabHostResult
     {
+        /// <summary>
+        /// 创建UIEffectPrefabHostResult实例。
+        /// </summary>
         public UIEffectPrefabHostResult(string prefabPath)
         {
             PrefabPath = prefabPath;
         }
 
+        /// <summary>
+        /// 向调用方提供Prefab路径。
+        /// </summary>
         public string PrefabPath { get; }
     }
 
@@ -67,6 +100,9 @@ namespace Lxy.UIEffectGenerator.Editor
         string DisplayName { get; }
         bool SupportsScriptGeneration { get; }
         bool SupportsLayerSelection { get; }
+        /// <summary>
+        /// 创建Defaults。
+        /// </summary>
         UIEffectProjectDefaults CreateDefaults();
 
         UIEffectPrefabHostResult CreateOrUpdatePrefab(
@@ -90,9 +126,15 @@ namespace Lxy.UIEffectGenerator.Editor
         private static IUIEffectProjectAdapter registeredAdapter;
         private static int registeredPriority = int.MinValue;
 
+        /// <summary>
+        /// 向调用方提供Active。
+        /// </summary>
         public static IUIEffectProjectAdapter Active =>
             registeredAdapter ?? GenericAdapter;
 
+        /// <summary>
+        /// 注册当前实例。
+        /// </summary>
         public static void Register(
             IUIEffectProjectAdapter adapter,
             int priority = 0)
@@ -111,6 +153,9 @@ namespace Lxy.UIEffectGenerator.Editor
             registeredPriority = priority;
         }
 
+        /// <summary>
+        /// 注销当前实例。
+        /// </summary>
         public static void Unregister(IUIEffectProjectAdapter adapter)
         {
             if (!ReferenceEquals(registeredAdapter, adapter))
@@ -144,6 +189,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "virtual", "void", "volatile", "while",
             };
 
+        /// <summary>
+        /// 执行转换为Absolute路径相关逻辑。
+        /// </summary>
         public static string ToAbsolutePath(string assetPath)
         {
             if (string.IsNullOrWhiteSpace(assetPath))
@@ -157,6 +205,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 NormalizeAssetPath(assetPath)));
         }
 
+        /// <summary>
+        /// 执行Sanitize类型名称相关逻辑。
+        /// </summary>
         public static string SanitizeTypeName(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -203,6 +254,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : result;
         }
 
+        /// <summary>
+        /// 执行规范化资源路径相关逻辑。
+        /// </summary>
         public static string NormalizeAssetPath(string path)
         {
             return string.IsNullOrWhiteSpace(path)
@@ -210,6 +264,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : path.Trim().Replace('\\', '/').TrimEnd('/');
         }
 
+        /// <summary>
+        /// 执行Combine资源路径相关逻辑。
+        /// </summary>
         public static string CombineAssetPath(
             string folder,
             string fileName)
@@ -220,6 +277,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : normalizedFolder + "/" + fileName;
         }
 
+        /// <summary>
+        /// 确保资源目录。
+        /// </summary>
         public static void EnsureAssetFolder(string folder)
         {
             folder = NormalizeAssetPath(folder);
@@ -253,16 +313,34 @@ namespace Lxy.UIEffectGenerator.Editor
     internal sealed class GenericUGUIProjectAdapter :
         IUIEffectProjectAdapter
     {
+        /// <summary>
+        /// 向调用方提供标识。
+        /// </summary>
         public string Id => "generic-ugui";
+        /// <summary>
+        /// 向调用方提供Display名称。
+        /// </summary>
         public string DisplayName => "通用 UGUI";
+        /// <summary>
+        /// 向调用方提供SupportsScriptGeneration。
+        /// </summary>
         public bool SupportsScriptGeneration => false;
+        /// <summary>
+        /// 向调用方提供Supports层级Selection。
+        /// </summary>
         public bool SupportsLayerSelection => false;
 
+        /// <summary>
+        /// 创建Defaults。
+        /// </summary>
         public UIEffectProjectDefaults CreateDefaults()
         {
             return new UIEffectProjectDefaults();
         }
 
+        /// <summary>
+        /// 创建OrUpdate预制体。
+        /// </summary>
         public UIEffectPrefabHostResult CreateOrUpdatePrefab(
             UIEffectPrefabGenerationOptions options,
             bool promptForExistingPrefab)
@@ -308,18 +386,27 @@ namespace Lxy.UIEffectGenerator.Editor
             return new UIEffectPrefabHostResult(prefabPath);
         }
 
+        /// <summary>
+        /// 执行BeforeReplace生成结果Tree相关逻辑。
+        /// </summary>
         public void BeforeReplaceGeneratedTree(
             GameObject prefabRoot,
             Transform previousGeneratedRoot)
         {
         }
 
+        /// <summary>
+        /// 执行After构建生成结果Tree相关逻辑。
+        /// </summary>
         public void AfterBuildGeneratedTree(
             GameObject prefabRoot,
             UIEffectPrefabGenerationOptions options)
         {
         }
 
+        /// <summary>
+        /// 创建预制体。
+        /// </summary>
         private static void CreatePrefab(
             string prefabPath,
             string panelId)
@@ -348,6 +435,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 准备Existing预制体。
+        /// </summary>
         private static void PrepareExistingPrefab(string prefabPath)
         {
             GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
@@ -375,6 +465,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行配置根节点相关逻辑。
+        /// </summary>
         private static void ConfigureRoot(
             GameObject root,
             bool configureNewCanvas)

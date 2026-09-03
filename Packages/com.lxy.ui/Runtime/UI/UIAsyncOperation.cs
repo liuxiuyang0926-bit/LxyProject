@@ -14,15 +14,36 @@ namespace LxyDemo.UIFramework
         private float progress;
         private Action<UIAsyncOperation<TResult>> completed;
 
+        /// <summary>
+        /// 向调用方提供keepWaiting。
+        /// </summary>
         public override bool keepWaiting => !isDone;
+        /// <summary>
+        /// 指示当前操作是否已完成。
+        /// </summary>
         public bool IsDone => isDone;
+        /// <summary>
+        /// 指示Succeeded是否成立。
+        /// </summary>
         public bool IsSucceeded => isDone && exception == null;
+        /// <summary>
+        /// 指示CancellationRequested是否成立。
+        /// </summary>
         public bool IsCancellationRequested => cancellationRequested;
+        /// <summary>
+        /// 指示Cancelled是否成立。
+        /// </summary>
         public bool IsCancelled =>
             exception is UIFrameworkException frameworkException &&
             frameworkException.ErrorCode ==
             UIFrameworkErrorCode.OperationCancelled;
+        /// <summary>
+        /// 当前操作的归一化进度，取值范围为 0 到 1。
+        /// </summary>
         public float Progress => isDone ? 1f : progress;
+        /// <summary>
+        /// 向调用方提供Exception。
+        /// </summary>
         public Exception Exception => exception;
 
         public TResult Result
@@ -65,6 +86,9 @@ namespace LxyDemo.UIFramework
             remove => completed -= value;
         }
 
+        /// <summary>
+        /// 执行取消相关逻辑。
+        /// </summary>
         public void Cancel()
         {
             if (isDone)
@@ -78,17 +102,26 @@ namespace LxyDemo.UIFramework
                 "UI 操作已取消。"));
         }
 
+        /// <summary>
+        /// 释放当前实例持有的资源。
+        /// </summary>
         public void Dispose()
         {
             Cancel();
         }
 
+        /// <summary>
+        /// 尝试获取结果，并返回是否成功。
+        /// </summary>
         public bool TryGetResult(out TResult value)
         {
             value = IsSucceeded ? result : default;
             return IsSucceeded;
         }
 
+        /// <summary>
+        /// 设置进度。
+        /// </summary>
         internal void SetProgress(float value)
         {
             if (!isDone)
@@ -97,6 +130,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 标记当前操作成功。
+        /// </summary>
         internal void Succeed(TResult value)
         {
             if (isDone)
@@ -108,6 +144,9 @@ namespace LxyDemo.UIFramework
             Finish(null);
         }
 
+        /// <summary>
+        /// 执行标记失败相关逻辑。
+        /// </summary>
         internal void Fail(Exception error)
         {
             if (isDone)
@@ -118,6 +157,9 @@ namespace LxyDemo.UIFramework
             Finish(error ?? new Exception("未知 UI 框架错误。"));
         }
 
+        /// <summary>
+        /// 执行Finish相关逻辑。
+        /// </summary>
         private void Finish(Exception error)
         {
             exception = error;
@@ -138,6 +180,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 调用回调。
+        /// </summary>
         private void InvokeCallback(
             Action<UIAsyncOperation<TResult>> callback)
         {

@@ -9,14 +9,35 @@ namespace StateControl.Runtime
     public class StateController : MonoBehaviour
     {
         
+        /// <summary>
+        /// 向调用方提供状态Groups。
+        /// </summary>
         public List<StateGroup> StateGroups => stateGroups;
+        /// <summary>
+        /// 向调用方提供Continuous状态Groups。
+        /// </summary>
         public List<ContinuousStateGroup> ContinuousStateGroups => continuousStateGroups;
+        /// <summary>
+        /// 向调用方提供ModifierRecordGroups。
+        /// </summary>
         public List<ModifierRecordGroup> ModifierRecordGroups => modifierRecordGroups;
         
+        /// <summary>
+        /// 公开的状态Groups数据。
+        /// </summary>
         public List<StateGroup> stateGroups = new List<StateGroup>();
+        /// <summary>
+        /// 公开的continuous状态Groups数据。
+        /// </summary>
         public List<ContinuousStateGroup> continuousStateGroups = new List<ContinuousStateGroup>();
+        /// <summary>
+        /// 公开的modifierRecordGroups数据。
+        /// </summary>
         public List<ModifierRecordGroup> modifierRecordGroups = new List<ModifierRecordGroup>();
 
+        /// <summary>
+        /// 获取状态值。
+        /// </summary>
         public int GetStateValue(int stateGroupIndex)
         {
             if (stateGroupIndex < 0 || stateGroupIndex >= StateGroups.Count)
@@ -29,6 +50,9 @@ namespace StateControl.Runtime
             return stateGroup.States.IndexOf(stateGroup.CurState);
         }
         
+        /// <summary>
+        /// 获取状态值。
+        /// </summary>
         public int GetStateValue(string stateGroupName)
         {
             StateGroup stateGroup = FindStateGroup(stateGroupName);
@@ -37,6 +61,9 @@ namespace StateControl.Runtime
             return stateGroup.States.IndexOf(stateGroup.CurState);
         }
         
+        /// <summary>
+        /// 获取当前项状态。
+        /// </summary>
         public State GetCurrentState(string stateGroupName)
         {
             StateGroup stateGroup = FindStateGroup(stateGroupName);
@@ -45,6 +72,9 @@ namespace StateControl.Runtime
             return stateGroup.CurState;
         }
         
+        /// <summary>
+        /// 执行变更状态相关逻辑。
+        /// </summary>
         public void ChangeState(int stateGroupIndex, int stateIndex)
         {
             if (stateGroupIndex < 0 || stateGroupIndex >= StateGroups.Count)
@@ -73,6 +103,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 查找状态分组。
+        /// </summary>
         public StateGroup FindStateGroup(string groupName)
         {
             foreach (var group in StateGroups)
@@ -84,6 +117,9 @@ namespace StateControl.Runtime
             return null;
         }
 
+        /// <summary>
+        /// 查找Continuous状态Groups。
+        /// </summary>
         public ContinuousStateGroup FindContinuousStateGroups(string groupName)
         {
             foreach (var group in ContinuousStateGroups)
@@ -95,6 +131,9 @@ namespace StateControl.Runtime
             return null;
         }
         
+        /// <summary>
+        /// 执行变更状态相关逻辑。
+        /// </summary>
         public void ChangeState(string stateGroupName, int stateIndex)
         {
             var stateGroup = FindStateGroup(stateGroupName);
@@ -115,6 +154,9 @@ namespace StateControl.Runtime
             ApplyState(stateGroup.Name);
         }
         
+        /// <summary>
+        /// 执行变更状态相关逻辑。
+        /// </summary>
         public void ChangeState(BuiltInStateEnum builtInStateEnum, int stateIndex)
         {
             string stateGroupName = builtInStateEnum.ToString();
@@ -127,6 +169,9 @@ namespace StateControl.Runtime
             ChangeState(stateGroupName, stateIndex);
         }
 
+        /// <summary>
+        /// 执行变更状态By名称相关逻辑。
+        /// </summary>
         public void ChangeStateByName(string stateGroupName, string stateName)
         {
             var stateGroup = FindStateGroup(stateGroupName);
@@ -147,6 +192,9 @@ namespace StateControl.Runtime
             ApplyState(stateGroup.Name);
         }
         
+        /// <summary>
+        /// 执行变更Continuous状态相关逻辑。
+        /// </summary>
         public void ChangeContinuousState(string name, float progress)
         {
             var stateGroup = FindContinuousStateGroups(name);
@@ -159,6 +207,9 @@ namespace StateControl.Runtime
             stateGroup.Apply(progress);
         }
         
+        /// <summary>
+        /// 获取Continuous状态进度。
+        /// </summary>
         public float GetContinuousStateProgress(string name)
         {
             var stateGroup = FindContinuousStateGroups(name);
@@ -171,6 +222,9 @@ namespace StateControl.Runtime
             return stateGroup.CurrentValue;
         }
         
+        /// <summary>
+        /// 添加构建结果InContinuous分组。
+        /// </summary>
         public void AddBuiltInContinuousGroup(BuiltInContinuousStateEnum builtInState)
         {
             continuousStateGroups ??= new List<ContinuousStateGroup>();
@@ -187,6 +241,9 @@ namespace StateControl.Runtime
             continuousStateGroups.Add(newGroup);
         }
         
+        /// <summary>
+        /// 响应校验事件。
+        /// </summary>
         private void OnValidate()
         {
             // 确保每个组的当前状态引用正确
@@ -202,6 +259,9 @@ namespace StateControl.Runtime
             }
         }
         
+        /// <summary>
+        /// 初始化组件的运行时状态。
+        /// </summary>
         private void Awake()
         {
             // 确保每个StateGroup的当前状态已应用
@@ -209,6 +269,9 @@ namespace StateControl.Runtime
         }
 
         // 重新应用所有状态组的当前状态
+        /// <summary>
+        /// 执行ReapplyAll当前项状态相关逻辑。
+        /// </summary>
         public void ReapplyAllCurrentStates()
         {
             foreach (var group in StateGroups)
@@ -226,6 +289,9 @@ namespace StateControl.Runtime
         // 检查是否在Prefab模式下
         #if UNITY_EDITOR
         //[BlackList]
+        /// <summary>
+        /// 执行判断是否预制体Mode相关逻辑。
+        /// </summary>
         public bool IsPrefabMode()
         {
             return UnityEditor.EditorUtility.IsPersistent(this) || 
@@ -234,6 +300,9 @@ namespace StateControl.Runtime
         }
         #endif
 
+        /// <summary>
+        /// 添加构建结果In分组。
+        /// </summary>
         public void AddBuiltInGroup(BuiltInStateEnum builtInState)
         {
             string name = builtInState.ToString();
@@ -269,6 +338,9 @@ namespace StateControl.Runtime
             stateGroups.Add(newGroup);
         }
         
+        /// <summary>
+        /// 获取状态分组字符串。
+        /// </summary>
         public string GetStateGroupString()
         {
             StringBuilder sb = new StringBuilder();
@@ -291,6 +363,9 @@ namespace StateControl.Runtime
             return sb.ToString();
         }
         
+        /// <summary>
+        /// 执行判断是否状态Group名称Repeat相关逻辑。
+        /// </summary>
         public bool IsStateGroupNameRepeat(string n)
         {
             foreach (StateGroup stateGroup in StateGroups)
@@ -301,6 +376,9 @@ namespace StateControl.Runtime
             return false;
         }
         
+        /// <summary>
+        /// 执行判断是否状态名称Repeat相关逻辑。
+        /// </summary>
         public bool IsStateNameRepeat(StateGroup stateGroup, string n)
         {
             foreach (State state in stateGroup.States)
@@ -311,6 +389,9 @@ namespace StateControl.Runtime
             return false;
         }
 
+        /// <summary>
+        /// 执行变更状态Group名称相关逻辑。
+        /// </summary>
         public void ChangeStateGroupName(StateGroup stateGroup, string newName)
         {
             foreach (ModifierRecordGroup recordGroup in ModifierRecordGroups)
@@ -320,6 +401,9 @@ namespace StateControl.Runtime
             stateGroup.Name = newName;
         }
 
+        /// <summary>
+        /// 执行变更状态名称相关逻辑。
+        /// </summary>
         public void ChangeStateName(StateGroup stateGroup, State state, string newName)
         {
             foreach (ModifierRecordGroup recordGroup in ModifierRecordGroups)
@@ -330,6 +414,9 @@ namespace StateControl.Runtime
             state.Name = newName;
         }
         
+        /// <summary>
+        /// 添加Modifier分组。
+        /// </summary>
         public void AddModifierGroup(ModifierTarget target, ModifierTypeEnum modifierType)
         {
             var group = new ModifierRecordGroup();
@@ -338,6 +425,9 @@ namespace StateControl.Runtime
             ModifierRecordGroups.Add(group);
         }
         
+        /// <summary>
+        /// 执行Delete修饰器记录相关逻辑。
+        /// </summary>
         public void DeleteModifierRecord(int modifierIndex)
         {
             if (modifierIndex >= 0 && modifierIndex < ModifierRecordGroups.Count)
@@ -346,6 +436,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 移除状态分组。
+        /// </summary>
         public void RemoveStateGroup(int index)
         {
             StateGroup stateGroup = StateGroups[index];
@@ -356,6 +449,9 @@ namespace StateControl.Runtime
             StateGroups.RemoveAt(index);
         }
         
+        /// <summary>
+        /// 移除状态。
+        /// </summary>
         public void RemoveState(StateGroup stateGroup, int stateIndex)
         {
             string groupName = stateGroup.Name;
@@ -367,6 +463,9 @@ namespace StateControl.Runtime
             stateGroup.States.RemoveAt(stateIndex);
         }
 
+        /// <summary>
+        /// 添加状态。
+        /// </summary>
         public void AddState(StateGroup stateGroup, string stateName)
         {
             var newState = new State
@@ -389,6 +488,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 添加状态分组。
+        /// </summary>
         public void AddStateGroup(string groupName)
         {
             var newGroup = new StateGroup

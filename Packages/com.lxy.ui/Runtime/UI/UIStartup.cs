@@ -39,13 +39,34 @@ namespace LxyDemo.UIFramework
         private GameResourceInstanceHandle canvasRootInstanceHandle;
         private bool ownsLayerRoot;
 
+        /// <summary>
+        /// 向调用方提供实例。
+        /// </summary>
         public static UIStartup Instance => instance;
+        /// <summary>
+        /// 向调用方提供资源Launcher。
+        /// </summary>
         public YooAssetLauncher ResourceLauncher =>
             resourceLauncher;
+        /// <summary>
+        /// 向调用方提供层级Root。
+        /// </summary>
         public UILayerRoot LayerRoot => layerRoot;
+        /// <summary>
+        /// 指示当前对象是否已初始化。
+        /// </summary>
         public bool IsInitialized { get; private set; }
+        /// <summary>
+        /// 指示当前对象是否正在初始化。
+        /// </summary>
         public bool IsInitializing { get; private set; }
+        /// <summary>
+        /// 最近一次操作失败的错误信息；未发生错误时为 null。
+        /// </summary>
         public string LastError { get; private set; }
+        /// <summary>
+        /// 初始化组件的运行时状态。
+        /// </summary>
         private void Awake()
         {
             if (instance != null && instance != this)
@@ -60,6 +81,9 @@ namespace LxyDemo.UIFramework
             DontDestroyOnLoad(gameObject);
         }
 
+        /// <summary>
+        /// 启动组件的运行流程。
+        /// </summary>
         private IEnumerator Start()
         {
             if (initializeOnStart)
@@ -68,6 +92,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行初始化异步相关逻辑。
+        /// </summary>
         public IEnumerator InitializeAsync()
         {
             if (IsInitialized)
@@ -148,6 +175,9 @@ namespace LxyDemo.UIFramework
                 this);
         }
 
+        /// <summary>
+        /// 解析资源Launcher。
+        /// </summary>
         private YooAssetLauncher ResolveResourceLauncher()
         {
             // 正常启动时复用 Start 场景中已经完成下载和 HybridCLR
@@ -173,6 +203,9 @@ namespace LxyDemo.UIFramework
             return gameObject.AddComponent<YooAssetLauncher>();
         }
 
+        /// <summary>
+        /// 异步创建层级根节点。
+        /// </summary>
         private IEnumerator CreateLayerRootAsync()
         {
             layerRoot = FindObjectOfType<UILayerRoot>(true);
@@ -227,6 +260,9 @@ namespace LxyDemo.UIFramework
             ownsLayerRoot = true;
         }
 
+        /// <summary>
+        /// 执行规范化资源Location相关逻辑。
+        /// </summary>
         private static string NormalizeAssetLocation(
             string location)
         {
@@ -240,6 +276,9 @@ namespace LxyDemo.UIFramework
             return location.Trim().Replace('\\', '/');
         }
 
+        /// <summary>
+        /// 执行标记失败启动相关逻辑。
+        /// </summary>
         private void FailStartup(string message)
         {
             LastError = message;
@@ -248,6 +287,9 @@ namespace LxyDemo.UIFramework
             Debug.LogError("[UIStartup] " + message, this);
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             if (instance != this)

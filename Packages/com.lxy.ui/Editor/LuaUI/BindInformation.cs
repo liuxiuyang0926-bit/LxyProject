@@ -20,27 +20,48 @@ namespace VGame.GameLogic.Editor.LuaUI
             public struct Parameter
             {
                 [ShowInInspector, ReadOnly]
+                /// <summary>
+                /// 公开的类型数据。
+                /// </summary>
                 public Type Type;
                 
                 [LabelText("参数类型"), HorizontalGroup]
+                /// <summary>
+                /// 公开的类型名称数据。
+                /// </summary>
                 public string typeName;
                 
                 [LabelText("参数名"), HorizontalGroup]
+                /// <summary>
+                /// 公开的param名称数据。
+                /// </summary>
                 public string paramName;
             }
             
             [LabelText("绑定函数方法")]
             [ValueDropdown("GetFunNameList")]
+            /// <summary>
+            /// 公开的fun名称数据。
+            /// </summary>
             public string funName = "OnClick";
 
             [HideInInspector]
+            /// <summary>
+            /// 公开的widget类型数据。
+            /// </summary>
             public string widgetType;
 
             [LabelText("参数列表"), ListDrawerSettings(ShowFoldout = true, HideAddButton = true, HideRemoveButton = true)]
+            /// <summary>
+            /// 公开的parameters数据。
+            /// </summary>
             public List<Parameter> parameters = new List<Parameter>();
 
             // FunName的规则
             // 所有Public类型的成员变量或者属性，类型为继承自UnityEvent或者是UnityEvent
+            /// <summary>
+            /// 执行判断是否Unity事件类型相关逻辑。
+            /// </summary>
             private bool IsUnityEventType(Type type)
             {
                 if (type == null) return false;
@@ -54,6 +75,9 @@ namespace VGame.GameLogic.Editor.LuaUI
                 return false;
             }
 
+            /// <summary>
+            /// 获取Fun名称列表。
+            /// </summary>
             public IEnumerable<string> GetFunNameList()
             {
                 if (string.IsNullOrEmpty(widgetType))
@@ -87,6 +111,9 @@ namespace VGame.GameLogic.Editor.LuaUI
                 }
             }
 
+            /// <summary>
+            /// 尝试获取Unity事件GenericArgs，并返回是否成功。
+            /// </summary>
             private bool TryGetUnityEventGenericArgs(Type type, out Type[] genericArgs)
             {
                 genericArgs = null;
@@ -102,6 +129,9 @@ namespace VGame.GameLogic.Editor.LuaUI
                 return false;
             }
 
+            /// <summary>
+            /// 执行AutoGenFunctionParams相关逻辑。
+            /// </summary>
             public void AutoGenFunctionParams()
             {
                 if (string.IsNullOrEmpty(widgetType) || string.IsNullOrEmpty(funName))
@@ -176,6 +206,9 @@ namespace VGame.GameLogic.Editor.LuaUI
                 {typeof(float), "float"},
                 {typeof(double), "double"},
             };
+            /// <summary>
+            /// 执行Generate参数相关逻辑。
+            /// </summary>
             private static Parameter GenerateParameter(Type type)
             {
                 if (!cs2LuaType.TryGetValue(type, out var typeName))
@@ -197,18 +230,30 @@ namespace VGame.GameLogic.Editor.LuaUI
             [LabelText("组件类型")]
             [ValueDropdown("GetFunTypeNameList")]
             [OnValueChanged("OnWidgetTypeChanged")]
+            /// <summary>
+            /// 公开的widget类型数据。
+            /// </summary>
             public string widgetType;
 
             [LabelText("绑定函数组")]
+            /// <summary>
+            /// 公开的funcInfos数据。
+            /// </summary>
             public List<FuncInfo> funcInfos = new List<FuncInfo>();
 
             // 当组件类型改变时调用
+            /// <summary>
+            /// 响应Widget类型Changed事件。
+            /// </summary>
             private void OnWidgetTypeChanged()
             {
                 RefreshFunctionNames();
             }
 
             // 刷新函数方法列表
+            /// <summary>
+            /// 刷新Function名称。
+            /// </summary>
             public void RefreshFunctionNames()
             {
                 foreach (var func in funcInfos)
@@ -235,6 +280,9 @@ namespace VGame.GameLogic.Editor.LuaUI
                 }
             }
 
+            /// <summary>
+            /// 获取Fun类型名称列表。
+            /// </summary>
             public IEnumerable<string> GetFunTypeNameList()
             {
                 List<Type> types = new List<Type> {
@@ -258,6 +306,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             }
         }
 
+        /// <summary>
+        /// 公开的绑定Templates数据。
+        /// </summary>
         public List<BindTemplate> bindTemplates = new List<BindTemplate>();
 
         void OnValidate()
@@ -265,6 +316,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             RefreshBindTemplateList();
         }
 
+        /// <summary>
+        /// 刷新绑定Template列表。
+        /// </summary>
         private void RefreshBindTemplateList()
         {
             UnityEngine.Debug.Log("### RefreshBindTemplateList ###");

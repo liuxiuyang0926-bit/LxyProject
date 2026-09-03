@@ -8,11 +8,17 @@ namespace LuaObjectBind.Editor
     [CustomPropertyDrawer(typeof(BinderElement))]
     public class BinderElementDrawer : PropertyDrawer
     {
+        /// <summary>
+        /// 获取属性在 Inspector 中所需的显示高度。
+        /// </summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             return EditorGUI.GetPropertyHeight(property, label);
         }
         
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -54,6 +60,9 @@ namespace LuaObjectBind.Editor
 // 辅助方法：获取父级数组属性
 public static class SerializedPropertyExtensions
 {
+    /// <summary>
+    /// 获取Array属性Parent。
+    /// </summary>
     public static SerializedProperty GetArrayPropertyParent(this SerializedProperty property)
     {
         var path = property.propertyPath;

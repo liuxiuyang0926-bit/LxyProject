@@ -21,26 +21,71 @@ namespace Lxy.UIEffectGenerator.Editor
     [Serializable]
     public sealed class UIEffectPrefabGenerationOptions
     {
+        /// <summary>
+        /// 公开的面板标识数据。
+        /// </summary>
         public string panelId = string.Empty;
+        /// <summary>
+        /// 公开的prefabFolder数据。
+        /// </summary>
         public string prefabFolder = string.Empty;
+        /// <summary>
+        /// 公开的脚本类型数据。
+        /// </summary>
         public UIEffectScriptType scriptType =
             UIEffectScriptType.ProjectDefault;
+        /// <summary>
+        /// 公开的codeNamespace数据。
+        /// </summary>
         public string codeNamespace = string.Empty;
+        /// <summary>
+        /// 公开的logic类型名称数据。
+        /// </summary>
         public string logicClassName = string.Empty;
+        /// <summary>
+        /// 公开的脚本Folder数据。
+        /// </summary>
         public string scriptFolder = string.Empty;
+        /// <summary>
+        /// 公开的ui层级数据。
+        /// </summary>
         public UIEffectLayer uiLayer = UIEffectLayer.Auto;
+        /// <summary>
+        /// 公开的资源Match模式数据。
+        /// </summary>
         public UIEffectResourceMatchMode resourceMatchMode =
             UIEffectResourceMatchMode.NameAndSemantic;
+        /// <summary>
+        /// 公开的资源SearchRoots数据。
+        /// </summary>
         public string[] resourceSearchRoots = Array.Empty<string>();
     }
 
     public sealed class UIEffectPrefabGenerationResult
     {
+        /// <summary>
+        /// 向调用方提供Prefab路径。
+        /// </summary>
         public string PrefabPath { get; internal set; }
+        /// <summary>
+        /// 向调用方提供Schema名称。
+        /// </summary>
         public string SchemaName { get; internal set; }
+        /// <summary>
+        /// 向调用方提供UsedResources。
+        /// </summary>
         public IReadOnlyList<string> UsedResources { get; internal set; }
+        /// <summary>
+        /// 向调用方提供MissingResources。
+        /// </summary>
         public IReadOnlyList<string> MissingResources { get; internal set; }
+        /// <summary>
+        /// 当前GeneratedObject的数量。
+        /// </summary>
         public int GeneratedObjectCount { get; internal set; }
+        /// <summary>
+        /// 当前GeneratedComponent的数量。
+        /// </summary>
         public int GeneratedComponentCount { get; internal set; }
     }
 
@@ -53,6 +98,9 @@ namespace Lxy.UIEffectGenerator.Editor
     {
         private const string GeneratedRootName = "Generated";
 
+        /// <summary>
+        /// 执行Generate从结构定义路径相关逻辑。
+        /// </summary>
         public static UIEffectPrefabGenerationResult GenerateFromSchemaPath(
             string schemaAssetPath,
             UIEffectPrefabGenerationOptions options = null,
@@ -77,6 +125,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 promptForExistingPrefab);
         }
 
+        /// <summary>
+        /// 执行Generate相关逻辑。
+        /// </summary>
         public static UIEffectPrefabGenerationResult Generate(
             string schemaJson,
             UIEffectPrefabGenerationOptions options = null,
@@ -205,6 +256,9 @@ namespace Lxy.UIEffectGenerator.Editor
             };
         }
 
+        /// <summary>
+        /// 构建GeneratedTree。
+        /// </summary>
         private static void BuildGeneratedTree(
             string prefabPath,
             UIEffectSchema schema,
@@ -276,6 +330,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 ImportAssetOptions.ForceUpdate);
         }
 
+        /// <summary>
+        /// 校验Generated预制体。
+        /// </summary>
         private static PrefabContentStats ValidateGeneratedPrefab(
             string prefabPath,
             UIEffectSchema schema)
@@ -382,6 +439,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行数量结构定义节点相关逻辑。
+        /// </summary>
         private static int CountSchemaNodes(
             IEnumerable<UIEffectNode> nodes)
         {
@@ -401,6 +461,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return count;
         }
 
+        /// <summary>
+        /// 准备引用Visual结构定义。
+        /// </summary>
         private static void PrepareReferenceVisualSchema(
             UIEffectSchema schema)
         {
@@ -436,6 +499,9 @@ namespace Lxy.UIEffectGenerator.Editor
             UIEffectSchemaUtility.Validate(schema);
         }
 
+        /// <summary>
+        /// 转换VisualNodesTo颜色Blocks。
+        /// </summary>
         internal static int ConvertVisualNodesToColorBlocks(
             UIEffectSchema schema)
         {
@@ -447,12 +513,18 @@ namespace Lxy.UIEffectGenerator.Editor
             return ConvertNodesToColorBlocks(schema.children, true);
         }
 
+        /// <summary>
+        /// 转换引用CropNodesTo颜色Blocks。
+        /// </summary>
         private static int ConvertReferenceCropNodesToColorBlocks(
             IEnumerable<UIEffectNode> nodes)
         {
             return ConvertNodesToColorBlocks(nodes, false);
         }
 
+        /// <summary>
+        /// 准备引用CropNodesForVisualMatching。
+        /// </summary>
         private static void PrepareReferenceCropNodesForVisualMatching(
             IEnumerable<UIEffectNode> nodes)
         {
@@ -475,6 +547,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 转换NodesTo颜色Blocks。
+        /// </summary>
         private static int ConvertNodesToColorBlocks(
             IEnumerable<UIEffectNode> nodes,
             bool convertAllVisualNodes)
@@ -529,6 +604,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return convertedCount;
         }
 
+        /// <summary>
+        /// 执行配置Design根节点相关逻辑。
+        /// </summary>
         private static void ConfigureDesignRoot(
             RectTransform rect,
             UIEffectSchema schema)
@@ -543,11 +621,17 @@ namespace Lxy.UIEffectGenerator.Editor
             rect.localScale = Vector3.one;
         }
 
+        /// <summary>
+        /// 执行Approximately相关逻辑。
+        /// </summary>
         private static bool Approximately(float first, float second)
         {
             return Mathf.Abs(first - second) <= 0.01f;
         }
 
+        /// <summary>
+        /// 执行数量结构定义Ui组件相关逻辑。
+        /// </summary>
         private static int CountSchemaUiComponents(
             IEnumerable<UIEffectNode> nodes)
         {
@@ -574,6 +658,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return count;
         }
 
+        /// <summary>
+        /// 执行数量结构定义节点Of类型相关逻辑。
+        /// </summary>
         private static int CountSchemaNodesOfType(
             IEnumerable<UIEffectNode> nodes,
             string nodeType)
@@ -601,6 +688,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return count;
         }
 
+        /// <summary>
+        /// 校验开关分组Assignments。
+        /// </summary>
         private static void ValidateToggleGroupAssignments(
             Transform generated)
         {
@@ -622,6 +712,9 @@ namespace Lxy.UIEffectGenerator.Editor
 
         private readonly struct PrefabContentStats
         {
+            /// <summary>
+            /// 创建PrefabContentStats实例。
+            /// </summary>
             public PrefabContentStats(
                 int objectCount,
                 int componentCount)
@@ -630,10 +723,19 @@ namespace Lxy.UIEffectGenerator.Editor
                 ComponentCount = componentCount;
             }
 
+            /// <summary>
+            /// 当前Object的数量。
+            /// </summary>
             public int ObjectCount { get; }
+            /// <summary>
+            /// 当前Component的数量。
+            /// </summary>
             public int ComponentCount { get; }
         }
 
+        /// <summary>
+        /// 构建Node。
+        /// </summary>
         private static RectTransform BuildNode(
             UIEffectNode node,
             RectTransform parent,
@@ -746,6 +848,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 创建图片Node。
+        /// </summary>
         private static RectTransform CreateImageNode(
             string name,
             UIEffectNode node,
@@ -765,6 +870,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 创建文本Node。
+        /// </summary>
         private static RectTransform CreateTextNode(
             string name,
             UIEffectNode node,
@@ -777,6 +885,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 创建按钮Node。
+        /// </summary>
         private static RectTransform CreateButtonNode(
             string name,
             UIEffectNode node,
@@ -814,6 +925,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 创建开关Node。
+        /// </summary>
         private static RectTransform CreateToggleNode(
             string name,
             UIEffectNode node,
@@ -853,6 +967,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 创建开关分组Node。
+        /// </summary>
         private static RectTransform CreateToggleGroupNode(
             string name,
             UIEffectNode node,
@@ -864,6 +981,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 执行配置开关Group相关逻辑。
+        /// </summary>
         private static void ConfigureToggleGroup(
             ToggleGroup toggleGroup,
             UIEffectNode groupNode)
@@ -903,6 +1023,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行收集Owned开关状态相关逻辑。
+        /// </summary>
         private static void CollectOwnedToggleStates(
             IEnumerable<UIEffectNode> nodes,
             ICollection<bool> states)
@@ -936,6 +1059,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 创建滚动Node。
+        /// </summary>
         private static RectTransform CreateScrollNode(
             string name,
             UIEffectNode node,
@@ -985,6 +1111,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 应用图片。
+        /// </summary>
         private static void ApplyImage(
             Image image,
             UIEffectNode node,
@@ -1016,6 +1145,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行配置文本相关逻辑。
+        /// </summary>
         private static void ConfigureText(
             TextMeshProUGUI text,
             UIEffectNode node)
@@ -1039,6 +1171,9 @@ namespace Lxy.UIEffectGenerator.Editor
             text.overflowMode = TextOverflowModes.Overflow;
         }
 
+        /// <summary>
+        /// 添加按钮Label。
+        /// </summary>
         private static void AddButtonLabel(
             RectTransform parent,
             UIEffectNode source,
@@ -1063,6 +1198,9 @@ namespace Lxy.UIEffectGenerator.Editor
             text.raycastTarget = false;
         }
 
+        /// <summary>
+        /// 创建矩形变换。
+        /// </summary>
         private static RectTransform CreateRectTransform(
             string name,
             Transform parent)
@@ -1077,6 +1215,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return rect;
         }
 
+        /// <summary>
+        /// 应用布局。
+        /// </summary>
         private static void ApplyLayout(
             RectTransform rect,
             UIEffectNode node,
@@ -1153,6 +1294,9 @@ namespace Lxy.UIEffectGenerator.Editor
             rect.anchoredPosition = desiredCenter - anchorPosition;
         }
 
+        /// <summary>
+        /// 获取锚点点。
+        /// </summary>
         private static Vector2 GetAnchorPoint(string anchor)
         {
             switch (anchor)
@@ -1178,6 +1322,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 解析锚点。
+        /// </summary>
         private static string ResolveAnchor(
             UIEffectNode node,
             float parentWidth,
@@ -1227,6 +1374,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return vertical + horizontal;
         }
 
+        /// <summary>
+        /// 执行Stretch转换为Parent相关逻辑。
+        /// </summary>
         private static void StretchToParent(RectTransform rect)
         {
             rect.anchorMin = Vector2.zero;
@@ -1236,6 +1386,9 @@ namespace Lxy.UIEffectGenerator.Editor
             rect.offsetMax = Vector2.zero;
         }
 
+        /// <summary>
+        /// 执行配置滚动Content相关逻辑。
+        /// </summary>
         private static void ConfigureScrollContent(
             UIEffectNode node,
             RectTransform content,
@@ -1307,6 +1460,9 @@ namespace Lxy.UIEffectGenerator.Editor
             content.sizeDelta = new Vector2(0f, contentHeight);
         }
 
+        /// <summary>
+        /// 获取绑定名称。
+        /// </summary>
         private static string GetBindingName(UIEffectNode node)
         {
             string cleanName = UIEffectEditorUtility.SanitizeTypeName(
@@ -1342,6 +1498,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return prefix + cleanName;
         }
 
+        /// <summary>
+        /// 执行判断是否绑定相关逻辑。
+        /// </summary>
         private static bool ShouldBind(UIEffectNode node)
         {
             if (string.Equals(
@@ -1371,6 +1530,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 获取Placeholder颜色。
+        /// </summary>
         private static Color GetPlaceholderColor(UIEffectNode node)
         {
             string semantic = GetSemanticName(node).ToLowerInvariant();
@@ -1420,6 +1582,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return new Color32(220, 88, 88, 255);
         }
 
+        /// <summary>
+        /// 解析颜色。
+        /// </summary>
         private static Color ParseColor(
             string value,
             Color fallback)
@@ -1435,6 +1600,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return fallback;
         }
 
+        /// <summary>
+        /// 解析Alignment。
+        /// </summary>
         private static TextAlignmentOptions ParseAlignment(
             string alignment)
         {
@@ -1449,6 +1617,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return TextAlignmentOptions.Center;
         }
 
+        /// <summary>
+        /// 获取Semantic名称。
+        /// </summary>
         private static string GetSemanticName(UIEffectNode node)
         {
             return string.IsNullOrWhiteSpace(node.semantic)
@@ -1456,6 +1627,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : node.semantic;
         }
 
+        /// <summary>
+        /// 执行规范化选项相关逻辑。
+        /// </summary>
         private static void NormalizeOptions(
             UIEffectPrefabGenerationOptions options,
             UIEffectSchema schema,
@@ -1515,6 +1689,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行规范化资源路径相关逻辑。
+        /// </summary>
         private static string NormalizeAssetPath(string path)
         {
             return string.IsNullOrWhiteSpace(path)
@@ -1622,6 +1799,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 new Dictionary<UIEffectNode, VisualMatchEvidence>();
         private bool visualProgressShown;
 
+        /// <summary>
+        /// 创建UIEffect资源Resolver实例。
+        /// </summary>
         public UIEffectResourceResolver(
             string[] searchRoots,
             UIEffectResourceMatchMode matchMode)
@@ -1632,21 +1812,36 @@ namespace Lxy.UIEffectGenerator.Editor
                 : GetOrBuildSpriteIndex(searchRoots);
         }
 
+        /// <summary>
+        /// 向调用方提供UsedResources。
+        /// </summary>
         public IReadOnlyList<string> UsedResources => usedResources;
+        /// <summary>
+        /// 向调用方提供MissingResources。
+        /// </summary>
         public IReadOnlyList<string> MissingResources => missingResources;
 
+        /// <summary>
+        /// 清空Caches。
+        /// </summary>
         public static void ClearCaches()
         {
             SpriteIndexCache.Clear();
             VisualDescriptorCache.Clear();
         }
 
+        /// <summary>
+        /// 执行重建缓存相关逻辑。
+        /// </summary>
         public static int RebuildCaches(string[] searchRoots)
         {
             ClearCaches();
             return GetOrBuildSpriteIndex(searchRoots).Count;
         }
 
+        /// <summary>
+        /// 执行匹配视觉资源相关逻辑。
+        /// </summary>
         public void MatchVisualResources(UIEffectSchema schema)
         {
             if (schema == null)
@@ -1831,6 +2026,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Select运行时模板Candidates相关逻辑。
+        /// </summary>
         private int SelectRuntimeTemplateCandidates(
             List<UIEffectNode> nodes)
         {
@@ -1893,6 +2091,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return removed;
         }
 
+        /// <summary>
+        /// 执行评估运行时模板Candidate相关逻辑。
+        /// </summary>
         private RuntimeTemplateEvidence EvaluateRuntimeTemplateCandidate(
             UIEffectNode node,
             int siblingIndex)
@@ -1907,6 +2108,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 执行收集运行时模板Evidence相关逻辑。
+        /// </summary>
         private void CollectRuntimeTemplateEvidence(
             UIEffectNode node,
             string variant,
@@ -1954,6 +2158,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 获取运行时Variant资源Affinity。
+        /// </summary>
         private static int GetRuntimeVariantResourceAffinity(
             string variant,
             string resource)
@@ -1986,6 +2193,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return 0;
         }
 
+        /// <summary>
+        /// 获取运行时VariantFamily。
+        /// </summary>
         private static int GetRuntimeVariantFamily(string value)
         {
             HashSet<string> tokens = GetResourceTokens(value);
@@ -2003,6 +2213,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return -1;
         }
 
+        /// <summary>
+        /// 获取资源Tokens。
+        /// </summary>
         private static HashSet<string> GetResourceTokens(string value)
         {
             var result = new HashSet<string>(
@@ -2032,6 +2245,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 执行记录视觉匹配Evidence相关逻辑。
+        /// </summary>
         private void RecordVisualMatchEvidence(
             UIEffectNode node,
             SpriteEntry entry,
@@ -2049,6 +2265,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 margin);
         }
 
+        /// <summary>
+        /// 执行解析相关逻辑。
+        /// </summary>
         public Sprite Resolve(UIEffectNode node)
         {
             List<string> candidates = GetCandidates(node);
@@ -2099,6 +2318,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return best.Sprite;
         }
 
+        /// <summary>
+        /// 执行记录Missing相关逻辑。
+        /// </summary>
         public void RecordMissing(string nodePath, UIEffectNode node)
         {
             string semantic = node == null ||
@@ -2119,6 +2341,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行记录Used相关逻辑。
+        /// </summary>
         private void RecordUsed(string assetPath, Sprite sprite)
         {
             string value = assetPath;
@@ -2136,6 +2361,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 获取Or构建精灵图索引。
+        /// </summary>
         private static List<SpriteEntry> GetOrBuildSpriteIndex(
             string[] searchRoots)
         {
@@ -2159,6 +2387,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 构建精灵图索引。
+        /// </summary>
         private static List<SpriteEntry> BuildSpriteIndex(
             string[] searchRoots)
         {
@@ -2210,6 +2441,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 获取源数据Texture缩放。
+        /// </summary>
         private static void GetSourceTextureScale(
             string assetPath,
             out float scaleX,
@@ -2243,6 +2477,9 @@ namespace Lxy.UIEffectGenerator.Editor
             scaleY = sourceHeight / (float) imported.height;
         }
 
+        /// <summary>
+        /// 加载精灵图At路径。
+        /// </summary>
         private static Sprite LoadSpriteAtPath(string assetPath)
         {
             Sprite direct =
@@ -2270,6 +2507,9 @@ namespace Lxy.UIEffectGenerator.Editor
                         StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// 获取Candidates。
+        /// </summary>
         private static List<string> GetCandidates(UIEffectNode node)
         {
             var candidates = new List<string>();
@@ -2284,6 +2524,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return candidates;
         }
 
+        /// <summary>
+        /// 添加Candidate。
+        /// </summary>
         private static void AddCandidate(
             List<string> candidates,
             string value)
@@ -2295,6 +2538,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 获取MatchScore。
+        /// </summary>
         private static int GetMatchScore(
             string candidate,
             SpriteEntry entry)
@@ -2340,6 +2586,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return score;
         }
 
+        /// <summary>
+        /// 执行Tokenize相关逻辑。
+        /// </summary>
         private static string[] Tokenize(string value)
         {
             return value
@@ -2355,6 +2604,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 .ToArray();
         }
 
+        /// <summary>
+        /// 执行规范化Key相关逻辑。
+        /// </summary>
         private static string NormalizeKey(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -2375,6 +2627,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return builder.ToString();
         }
 
+        /// <summary>
+        /// 执行ReconcileFull画布Backgrounds相关逻辑。
+        /// </summary>
         private int ReconcileFullCanvasBackgrounds(
             List<UIEffectNode> nodes,
             float parentX,
@@ -2434,6 +2689,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return corrected;
         }
 
+        /// <summary>
+        /// 执行ReconcileSplitFullWidthBackgrounds相关逻辑。
+        /// </summary>
         private int ReconcileSplitFullWidthBackgrounds(
             List<UIEffectNode> nodes,
             float parentX,
@@ -2589,6 +2847,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return corrected;
         }
 
+        /// <summary>
+        /// 执行判断能否ProposeSplitFullWidth背景相关逻辑。
+        /// </summary>
         private static bool CanProposeSplitFullWidthBackground(
             UIEffectNode node)
         {
@@ -2603,6 +2864,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    node.height > 1f;
         }
 
+        /// <summary>
+        /// 尝试ExpandFull宽度背景，并返回是否成功。
+        /// </summary>
         private bool TryExpandFullWidthBackground(
             UIEffectNode owner,
             float parentX,
@@ -2791,6 +3055,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 尝试ExpandDirectFull宽度背景，并返回是否成功。
+        /// </summary>
         private bool TryExpandDirectFullWidthBackground(
             UIEffectNode owner,
             float parentX,
@@ -2903,6 +3170,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 获取Full宽度背景Parts。
+        /// </summary>
         private static List<UIEffectNode> GetFullWidthBackgroundParts(
             UIEffectNode owner)
         {
@@ -2970,6 +3240,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 执行判断是否背景Semantic相关逻辑。
+        /// </summary>
         private static bool IsBackgroundSemantic(UIEffectNode node)
         {
             string hint = NormalizeSemanticPhrase(
@@ -2986,6 +3259,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "底图");
         }
 
+        /// <summary>
+        /// 获取DimensionSimilarity。
+        /// </summary>
         private static float GetDimensionSimilarity(
             float first,
             float second)
@@ -2995,6 +3271,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : Mathf.Min(first, second) / Mathf.Max(first, second);
         }
 
+        /// <summary>
+        /// 执行Coalesce背景Regions相关逻辑。
+        /// </summary>
         private void CoalesceBackgroundRegions(
             List<UIEffectNode> nodes,
             float parentX,
@@ -3169,6 +3448,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行判断能否Coalesce背景相关逻辑。
+        /// </summary>
         private static bool CanCoalesceBackground(UIEffectNode node)
         {
             return node != null &&
@@ -3186,6 +3468,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    node.height > 1f;
         }
 
+        /// <summary>
+        /// 尝试获取AdjacentUnion，并返回是否成功。
+        /// </summary>
         private static bool TryGetAdjacentUnion(
             UIEffectNode first,
             UIEffectNode second,
@@ -3224,6 +3509,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行判断是否Earlier视觉Overlap相关逻辑。
+        /// </summary>
         private static bool HasEarlierVisualOverlap(
             IReadOnlyList<UIEffectNode> nodes,
             int beforeIndex,
@@ -3249,6 +3537,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return coverage.Any(rect => rect.Overlaps(absoluteUnion));
         }
 
+        /// <summary>
+        /// 执行收集视觉Coverage相关逻辑。
+        /// </summary>
         private static void CollectVisualCoverage(
             IEnumerable<UIEffectNode> nodes,
             float parentX,
@@ -3262,6 +3553,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行收集视觉Coverage相关逻辑。
+        /// </summary>
         private static void CollectVisualCoverage(
             UIEffectNode node,
             float parentX,
@@ -3292,6 +3586,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 coverage);
         }
 
+        /// <summary>
+        /// 执行判断是否RenderedGraphic节点相关逻辑。
+        /// </summary>
         private static bool IsRenderedGraphicNode(UIEffectNode node)
         {
             return IsVisualNode(node) ||
@@ -3301,6 +3598,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 执行收集文本Coverage相关逻辑。
+        /// </summary>
         private static void CollectTextCoverage(
             IEnumerable<UIEffectNode> nodes,
             float parentX,
@@ -3314,6 +3614,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行收集文本Coverage相关逻辑。
+        /// </summary>
         private static void CollectTextCoverage(
             UIEffectNode node,
             float parentX,
@@ -3351,6 +3654,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 coverage);
         }
 
+        /// <summary>
+        /// 执行MaterializeMissing文本Surfaces相关逻辑。
+        /// </summary>
         private int MaterializeMissingTextSurfaces(
             List<UIEffectNode> nodes,
             float parentX,
@@ -3454,6 +3760,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return created;
         }
 
+        /// <summary>
+        /// 执行判断能否Receive生成结果文本Surface相关逻辑。
+        /// </summary>
         private static bool CanReceiveGeneratedTextSurface(
             UIEffectNode node)
         {
@@ -3468,6 +3777,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    node.height > 8f;
         }
 
+        /// <summary>
+        /// 执行AreTextsOnSameRow相关逻辑。
+        /// </summary>
         private static bool AreTextsOnSameRow(
             UIEffectNode first,
             UIEffectNode second)
@@ -3478,6 +3790,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    Mathf.Max(first.height, second.height) * 0.35f;
         }
 
+        /// <summary>
+        /// 获取文本Surface分组键。
+        /// </summary>
         private static string GetTextSurfaceGroupKey(UIEffectNode node)
         {
             string key = NormalizeKey(node?.name ?? string.Empty);
@@ -3515,6 +3830,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return key;
         }
 
+        /// <summary>
+        /// 尝试创建文本Surface，并返回是否成功。
+        /// </summary>
         private bool TryCreateTextSurface(
             IReadOnlyList<UIEffectNode> textNodes,
             IReadOnlyList<UIEffectNode> siblings,
@@ -3653,6 +3971,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行匹配视觉节点相关逻辑。
+        /// </summary>
         private void MatchVisualNodes(
             IEnumerable<UIEffectNode> nodes,
             float parentX,
@@ -3886,6 +4207,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 构建BackdropOcclusions。
+        /// </summary>
         private static IReadOnlyCollection<Rect> BuildBackdropOcclusions(
             IEnumerable<UIEffectNode> siblings,
             UIEffectNode current,
@@ -3928,6 +4252,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 尝试创建ResolvedVisualParent上下文，并返回是否成功。
+        /// </summary>
         private VisualParentContext TryCreateResolvedVisualParentContext(
             UIEffectNode node,
             float absoluteX,
@@ -4037,6 +4364,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 resolved);
         }
 
+        /// <summary>
+        /// 应用VisualParentBackdrop。
+        /// </summary>
         private static void ApplyVisualParentBackdrop(
             VisualDescriptor source,
             float absoluteX,
@@ -4099,6 +4429,9 @@ namespace Lxy.UIEffectGenerator.Editor
             source.HasSpatialReferenceBackdrop = true;
         }
 
+        /// <summary>
+        /// 执行Sample视觉Descriptor相关逻辑。
+        /// </summary>
         private static Color SampleVisualDescriptor(
             VisualDescriptor descriptor,
             float normalizedX,
@@ -4125,6 +4458,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return Color.Lerp(lower, upper, vertical);
         }
 
+        /// <summary>
+        /// 查找VisualSampleBracket。
+        /// </summary>
         private static void FindVisualSampleBracket(
             float normalized,
             out int lower,
@@ -4159,6 +4495,9 @@ namespace Lxy.UIEffectGenerator.Editor
             upper = lower;
         }
 
+        /// <summary>
+        /// 尝试查找ExpandedCompactGraphicMatch，并返回是否成功。
+        /// </summary>
         private bool TryFindExpandedCompactGraphicMatch(
             UIEffectNode node,
             float parentX,
@@ -4245,6 +4584,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return accepted;
         }
 
+        /// <summary>
+        /// 执行ReconcileRepeated视觉资源相关逻辑。
+        /// </summary>
         private int ReconcileRepeatedVisualResources(
             List<UIEffectNode> nodes,
             float parentX,
@@ -4433,6 +4775,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return propagated;
         }
 
+        /// <summary>
+        /// 执行Reconcile运行时模板资源相关逻辑。
+        /// </summary>
         private int ReconcileRuntimeTemplateResources(
             List<UIEffectNode> nodes,
             float parentX,
@@ -4511,6 +4856,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return propagated;
         }
 
+        /// <summary>
+        /// 执行ReconcileEquivalent运行时模板节点相关逻辑。
+        /// </summary>
         private int ReconcileEquivalentRuntimeTemplateNodes(
             IReadOnlyList<RuntimeTemplateNodeLocation> locations,
             UIEffectSchema schema,
@@ -4585,6 +4933,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return propagated;
         }
 
+        /// <summary>
+        /// 执行Reconcile运行时模板视觉Slot相关逻辑。
+        /// </summary>
         private int ReconcileRuntimeTemplateVisualSlot(
             IReadOnlyList<RuntimeTemplateNodeLocation> locations,
             UIEffectSchema schema,
@@ -4795,6 +5146,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 执行HaveEquivalent运行时模板Geometry相关逻辑。
+        /// </summary>
         private static bool HaveEquivalentRuntimeTemplateGeometry(
             IReadOnlyList<RuntimeTemplateNodeLocation> locations,
             bool compareLocalPosition)
@@ -4832,6 +5186,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行Are模板DimensionsEquivalent相关逻辑。
+        /// </summary>
         private static bool AreTemplateDimensionsEquivalent(
             float first,
             float second,
@@ -4842,6 +5199,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 Mathf.Max(Mathf.Abs(first), Mathf.Abs(second)) * 0.015f);
         }
 
+        /// <summary>
+        /// 执行判断是否VariantSpecific运行时模板Slot相关逻辑。
+        /// </summary>
         private static bool IsVariantSpecificRuntimeTemplateSlot(
             IEnumerable<RuntimeTemplateNodeLocation> locations)
         {
@@ -4851,6 +5211,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     location.Node.resource) != 0);
         }
 
+        /// <summary>
+        /// 执行判断是否运行时模板Neutral资源相关逻辑。
+        /// </summary>
         private static bool IsRuntimeTemplateNeutralResource(
             SpriteEntry entry,
             IEnumerable<RuntimeTemplateNodeLocation> locations)
@@ -4862,6 +5225,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     resource) == 0);
         }
 
+        /// <summary>
+        /// 执行ScoreRepeatedSurfaceCandidate相关逻辑。
+        /// </summary>
         private RepeatedSurfaceCandidateScore ScoreRepeatedSurfaceCandidate(
             IReadOnlyCollection<UIEffectNode> group,
             SpriteEntry candidate,
@@ -4932,6 +5298,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 应用RepeatedSurface资源。
+        /// </summary>
         private void ApplyRepeatedSurfaceResource(
             UIEffectNode target,
             RepeatedSurfaceCandidateScore selected)
@@ -4951,6 +5320,9 @@ namespace Lxy.UIEffectGenerator.Editor
             visualFailures.Remove(target);
         }
 
+        /// <summary>
+        /// 执行判断是否Reusable文本Surface相关逻辑。
+        /// </summary>
         private static bool IsReusableTextSurface(UIEffectNode node)
         {
             if (node == null ||
@@ -4980,6 +5352,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "格");
         }
 
+        /// <summary>
+        /// 执行HaveEquivalentSurfaceGeometry相关逻辑。
+        /// </summary>
         private static bool HaveEquivalentSurfaceGeometry(
             UIEffectNode first,
             UIEffectNode second)
@@ -5005,6 +5380,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        second.height) >= 0.97f;
         }
 
+        /// <summary>
+        /// 尝试查找BestVisualMatch，并返回是否成功。
+        /// </summary>
         private bool TryFindBestVisualMatch(
             VisualDescriptor source,
             bool preferBorder,
@@ -5366,6 +5744,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     margin >= StrongVisualMargin);
         }
 
+        /// <summary>
+        /// 转换ParentIntegratedVisualWrappersToContainers。
+        /// </summary>
         private int ConvertParentIntegratedVisualWrappersToContainers(
             List<UIEffectNode> nodes,
             float parentX,
@@ -5446,6 +5827,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return converted;
         }
 
+        /// <summary>
+        /// 执行判断能否转换ParentIntegrated视觉Wrapper相关逻辑。
+        /// </summary>
         private bool CanConvertParentIntegratedVisualWrapper(
             UIEffectNode node)
         {
@@ -5508,6 +5892,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    !node.mayLayer;
         }
 
+        /// <summary>
+        /// 执行CollapseParentIntegrated文本Wrappers相关逻辑。
+        /// </summary>
         private int CollapseParentIntegratedTextWrappers(
             List<UIEffectNode> nodes,
             float parentX,
@@ -5604,6 +5991,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return collapsed;
         }
 
+        /// <summary>
+        /// 执行Reconcile文本Artwork相关逻辑。
+        /// </summary>
         private int ReconcileTextArtwork(
             List<UIEffectNode> nodes,
             float parentX,
@@ -5700,6 +6090,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return converted;
         }
 
+        /// <summary>
+        /// 尝试查找BestArtworkMatch，并返回是否成功。
+        /// </summary>
         private bool TryFindBestArtworkMatch(
             UIEffectNode node,
             float absoluteX,
@@ -5790,6 +6183,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return selected != null;
         }
 
+        /// <summary>
+        /// 执行LooksLikeArtwork文本相关逻辑。
+        /// </summary>
         private static bool LooksLikeArtworkText(UIEffectNode node)
         {
             if (node == null ||
@@ -5832,6 +6228,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     (node.text ?? string.Empty).Contains("\n"));
         }
 
+        /// <summary>
+        /// 执行判断是否Art文本Mode相关逻辑。
+        /// </summary>
         private static bool IsArtTextMode(UIEffectNode node)
         {
             return node != null &&
@@ -5845,6 +6244,9 @@ namespace Lxy.UIEffectGenerator.Editor
                         StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// 尝试查找SupportingArt层级，并返回是否成功。
+        /// </summary>
         private bool TryFindSupportingArtLayer(
             VisualDescriptor source,
             SpriteEntry seed,
@@ -5927,6 +6329,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    bestLayeredScore - seedScore >= LayeredArtImprovement;
         }
 
+        /// <summary>
+        /// 执行CompositeLayers相关逻辑。
+        /// </summary>
         private static VisualDescriptor CompositeLayers(
             VisualDescriptor back,
             VisualDescriptor front,
@@ -5969,6 +6374,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 false);
         }
 
+        /// <summary>
+        /// 转换文本NodeTo图片。
+        /// </summary>
         private static void ConvertTextNodeToImage(
             UIEffectNode node,
             SpriteEntry entry)
@@ -5993,6 +6401,9 @@ namespace Lxy.UIEffectGenerator.Editor
             node.mayLayer = false;
         }
 
+        /// <summary>
+        /// 创建Artwork层级。
+        /// </summary>
         private static UIEffectNode CreateArtworkLayer(
             UIEffectNode source,
             string name,
@@ -6017,6 +6428,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return layer;
         }
 
+        /// <summary>
+        /// 应用AuthoredArtwork尺寸。
+        /// </summary>
         private static void ApplyAuthoredArtworkSize(
             UIEffectNode node,
             SpriteEntry entry)
@@ -6041,6 +6455,9 @@ namespace Lxy.UIEffectGenerator.Editor
             node.y = centerY - authoredHeight * 0.5f;
         }
 
+        /// <summary>
+        /// 获取UniqueSibling名称。
+        /// </summary>
         private static string GetUniqueSiblingName(
             IEnumerable<UIEffectNode> siblings,
             string preferredName)
@@ -6066,6 +6483,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return candidate;
         }
 
+        /// <summary>
+        /// 执行SuppressBaked文本节点相关逻辑。
+        /// </summary>
         private int SuppressBakedTextNodes(
             List<UIEffectNode> nodes,
             float parentX,
@@ -6155,6 +6575,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return suppressed;
         }
 
+        /// <summary>
+        /// 执行判断是否检查Baked文本相关逻辑。
+        /// </summary>
         private static bool ShouldCheckBakedText(
             UIEffectNode textNode,
             UIEffectNode visualParent)
@@ -6201,6 +6624,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        "排名");
         }
 
+        /// <summary>
+        /// 执行判断能否CollapseParentIntegrated文本Wrapper相关逻辑。
+        /// </summary>
         private bool CanCollapseParentIntegratedTextWrapper(
             UIEffectNode node)
         {
@@ -6217,6 +6643,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    !ContainsNonTextGraphicDescendant(node.children);
         }
 
+        /// <summary>
+        /// 执行判断能否推断ParentIntegrated文本Wrapper相关逻辑。
+        /// </summary>
         private bool CanInferParentIntegratedTextWrapper(
             UIEffectNode node,
             VisualParentContext visualParent)
@@ -6262,6 +6691,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    InferredIntegratedParentSizeSimilarity;
         }
 
+        /// <summary>
+        /// 执行判断是否包含文本Descendant相关逻辑。
+        /// </summary>
         private static bool ContainsTextDescendant(
             IEnumerable<UIEffectNode> nodes)
         {
@@ -6286,6 +6718,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return false;
         }
 
+        /// <summary>
+        /// 执行判断是否包含Non文本GraphicDescendant相关逻辑。
+        /// </summary>
         private static bool ContainsNonTextGraphicDescendant(
             IEnumerable<UIEffectNode> nodes)
         {
@@ -6307,6 +6742,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return false;
         }
 
+        /// <summary>
+        /// 尝试获取ParentIntegratedVisualScore，并返回是否成功。
+        /// </summary>
         private bool TryGetParentIntegratedVisualScore(
             UIEffectNode node,
             float absoluteX,
@@ -6392,6 +6830,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 获取VisualExplanationScore。
+        /// </summary>
         private static float GetVisualExplanationScore(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -6416,6 +6857,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return Mathf.Max(authoredScore, compositeScore);
         }
 
+        /// <summary>
+        /// 尝试创建VisualParent上下文，并返回是否成功。
+        /// </summary>
         private VisualParentContext TryCreateVisualParentContext(
             UIEffectNode node,
             float absoluteX,
@@ -6437,6 +6881,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     absoluteY);
         }
 
+        /// <summary>
+        /// 尝试获取精灵图Entry，并返回是否成功。
+        /// </summary>
         private SpriteEntry TryGetSpriteEntry(string resource)
         {
             if (string.IsNullOrWhiteSpace(resource))
@@ -6451,6 +6898,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// 执行收集Explicit视觉资源相关逻辑。
+        /// </summary>
         private void CollectExplicitVisualResources(
             IEnumerable<UIEffectNode> nodes)
         {
@@ -6472,11 +6922,17 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 获取TintTransformationPenalty。
+        /// </summary>
         private static float GetTintTransformationPenalty(Color color)
         {
             return GetTintTransformationDistance(color) * 0.06f;
         }
 
+        /// <summary>
+        /// 获取TintTransformationDistance。
+        /// </summary>
         private static float GetTintTransformationDistance(Color color)
         {
             return
@@ -6485,6 +6941,9 @@ namespace Lxy.UIEffectGenerator.Editor
                  1f - Mathf.Clamp01(color.b)) / 3f;
         }
 
+        /// <summary>
+        /// 获取VisualSemanticHint。
+        /// </summary>
         private static string GetVisualSemanticHint(UIEffectNode node)
         {
             return node == null
@@ -6493,6 +6952,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    node.name).Trim();
         }
 
+        /// <summary>
+        /// 执行判断是否KeepIntentional颜色相关逻辑。
+        /// </summary>
         private static bool ShouldKeepIntentionalColor(
             UIEffectNode node,
             UIEffectSchema schema,
@@ -6569,6 +7031,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    GetColorError(mean, declaredColor) <= 0.035f;
         }
 
+        /// <summary>
+        /// 执行判断是否KeepIntentionalOverlay相关逻辑。
+        /// </summary>
         private static bool ShouldKeepIntentionalOverlay(
             UIEffectNode node,
             UIEffectSchema schema)
@@ -6600,6 +7065,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    color.a < 0.98f;
         }
 
+        /// <summary>
+        /// 执行判断是否CompactGraphic节点相关逻辑。
+        /// </summary>
         private static bool IsCompactGraphicNode(
             UIEffectNode node,
             UIEffectSchema schema)
@@ -6624,6 +7092,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    designShortEdge * 0.1f;
         }
 
+        /// <summary>
+        /// 执行判断是否ShapeSensitive视觉节点相关逻辑。
+        /// </summary>
         private static bool IsShapeSensitiveVisualNode(
             UIEffectNode node,
             UIEffectSchema schema)
@@ -6659,6 +7130,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "印章");
         }
 
+        /// <summary>
+        /// 获取VisualSemanticBonus。
+        /// </summary>
         private static float GetVisualSemanticBonus(
             string semanticHint,
             SpriteEntry entry)
@@ -6719,6 +7193,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return Mathf.Min(0.05f, bonus);
         }
 
+        /// <summary>
+        /// 获取Sliced目标缩放Penalty。
+        /// </summary>
         private static float GetSlicedTargetScalePenalty(
             VisualDescriptor source,
             SpriteEntry entry,
@@ -6781,6 +7258,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    collapsedBorderPenalty;
         }
 
+        /// <summary>
+        /// 获取SlicedStructuralFit。
+        /// </summary>
         private static float GetSlicedStructuralFit(
             VisualDescriptor source,
             SpriteEntry entry)
@@ -6820,6 +7300,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 Mathf.Min(borderWidthFit, borderHeightFit));
         }
 
+        /// <summary>
+        /// 执行规范化SemanticPhrase相关逻辑。
+        /// </summary>
         private static string NormalizeSemanticPhrase(string value)
         {
             var builder = new StringBuilder(value?.Length ?? 0);
@@ -6835,6 +7318,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return builder.ToString();
         }
 
+        /// <summary>
+        /// 执行判断是否包含Any相关逻辑。
+        /// </summary>
         private static bool ContainsAny(
             string value,
             params string[] tokens)
@@ -6845,6 +7331,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
+        /// <summary>
+        /// 获取精灵图Descriptor。
+        /// </summary>
         private static VisualDescriptor GetSpriteDescriptor(
             SpriteEntry entry,
             VisualDescriptor source,
@@ -6879,6 +7368,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return result;
         }
 
+        /// <summary>
+        /// 获取QuickVisualScore。
+        /// </summary>
         private static float GetQuickVisualScore(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -6908,6 +7400,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    GetSizeSimilarity(source, candidate) * 0.1f;
         }
 
+        /// <summary>
+        /// 获取文本CoveredQuickScore。
+        /// </summary>
         private static float GetTextCoveredQuickScore(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -6947,6 +7442,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return score;
         }
 
+        /// <summary>
+        /// 获取BackdropAwareQuickScore。
+        /// </summary>
         private static float GetBackdropAwareQuickScore(
             VisualDescriptor source,
             VisualDescriptor candidate)
@@ -6986,6 +7484,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 total / Mathf.Max(1, keepCount) / 0.32f);
         }
 
+        /// <summary>
+        /// 执行比较CompositeDescriptors相关逻辑。
+        /// </summary>
         private static float CompareCompositeDescriptors(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -7154,6 +7655,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return score;
         }
 
+        /// <summary>
+        /// 执行判断是否ProtectedSurfaceEdgeSample相关逻辑。
+        /// </summary>
         private static bool IsProtectedSurfaceEdgeSample(int index)
         {
             int x = index % VisualSampleSize;
@@ -7165,6 +7669,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    y >= VisualSampleSize - protectedBand;
         }
 
+        /// <summary>
+        /// 执行FitCompositeModel相关逻辑。
+        /// </summary>
         private static void FitCompositeModel(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -7287,6 +7794,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行比较CompositeEdge相关逻辑。
+        /// </summary>
         private static void CompareCompositeEdge(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -7320,6 +7830,9 @@ namespace Lxy.UIEffectGenerator.Editor
             totalWeight += weight;
         }
 
+        /// <summary>
+        /// 执行CompositeCandidate相关逻辑。
+        /// </summary>
         private static Color CompositeCandidate(
             Color candidate,
             Vector3 backdrop,
@@ -7336,6 +7849,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 1f);
         }
 
+        /// <summary>
+        /// 获取引用Backdrop。
+        /// </summary>
         private static Vector3 GetReferenceBackdrop(
             VisualDescriptor source,
             int index,
@@ -7351,6 +7867,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return ToVector(source.ReferenceBackdropPixels[index]);
         }
 
+        /// <summary>
+        /// 执行比较ForegroundStructure相关逻辑。
+        /// </summary>
         private static float CompareForegroundStructure(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -7415,6 +7934,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : Mathf.Clamp01(score / totalWeight);
         }
 
+        /// <summary>
+        /// 获取颜色错误。
+        /// </summary>
         private static float GetColorError(Color first, Color second)
         {
             return (Mathf.Abs(first.r - second.r) +
@@ -7422,6 +7944,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     Mathf.Abs(first.b - second.b)) / 3f;
         }
 
+        /// <summary>
+        /// 执行判断是否Tintable相关逻辑。
+        /// </summary>
         private static bool IsTintable(VisualDescriptor candidate)
         {
             float chroma = 0f;
@@ -7450,6 +7975,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    chroma / weight <= 0.08f;
         }
 
+        /// <summary>
+        /// 执行判断是否AlphaVariation相关逻辑。
+        /// </summary>
         private static bool HasAlphaVariation(
             VisualDescriptor candidate)
         {
@@ -7465,6 +7993,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return maximum - minimum >= 0.12f;
         }
 
+        /// <summary>
+        /// 获取Channel。
+        /// </summary>
         private static float GetChannel(Color color, int channel)
         {
             return channel == 0
@@ -7474,6 +8005,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     : color.b;
         }
 
+        /// <summary>
+        /// 获取Channel。
+        /// </summary>
         private static float GetChannel(Vector3 color, int channel)
         {
             return channel == 0
@@ -7483,6 +8017,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     : color.z;
         }
 
+        /// <summary>
+        /// 设置Channel。
+        /// </summary>
         private static void SetChannel(
             ref Vector3 value,
             int channel,
@@ -7502,6 +8039,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 尝试获取IntersectionStats，并返回是否成功。
+        /// </summary>
         private static bool TryGetIntersectionStats(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -7571,6 +8111,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 创建引用Descriptor。
+        /// </summary>
         private static VisualDescriptor CreateReferenceDescriptor(
             Texture2D reference,
             float designWidth,
@@ -7665,6 +8208,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return descriptor;
         }
 
+        /// <summary>
+        /// 获取VisualSampleCoordinate。
+        /// </summary>
         private static float GetVisualSampleCoordinate(int sampleIndex)
         {
             float linear =
@@ -7676,6 +8222,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return 0.5f - 0.5f * Mathf.Cos(Mathf.PI * linear);
         }
 
+        /// <summary>
+        /// 执行SampleReferenceBackdrop相关逻辑。
+        /// </summary>
         private static Color SampleReferenceBackdrop(
             Texture2D reference,
             float designWidth,
@@ -7755,6 +8304,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 1f);
         }
 
+        /// <summary>
+        /// 添加引用Sample。
+        /// </summary>
         private static void AddReferenceSample(
             Texture2D reference,
             float designWidth,
@@ -7783,6 +8335,9 @@ namespace Lxy.UIEffectGenerator.Editor
             blue.Add(color.b);
         }
 
+        /// <summary>
+        /// 执行SampleReferenceBackdropProfile相关逻辑。
+        /// </summary>
         private static Color[] SampleReferenceBackdropProfile(
             Texture2D reference,
             float designWidth,
@@ -7897,6 +8452,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return resolved >= MinimumVisibleSamples ? result : null;
         }
 
+        /// <summary>
+        /// 尝试Sample引用Pixel，并返回是否成功。
+        /// </summary>
         private static bool TrySampleReferencePixel(
             Texture2D reference,
             float designWidth,
@@ -7921,6 +8479,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行判断是否Occluded相关逻辑。
+        /// </summary>
         private static bool IsOccluded(
             float designX,
             float designY,
@@ -7943,6 +8504,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return false;
         }
 
+        /// <summary>
+        /// 执行比较Descriptors相关逻辑。
+        /// </summary>
         private static float CompareDescriptors(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -8046,6 +8610,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    sizeSimilarity * 0.08f;
         }
 
+        /// <summary>
+        /// 获取Mean颜色Distance。
+        /// </summary>
         private static float GetMeanColorDistance(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -8080,6 +8647,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     Mathf.Abs(sourceMean.z - candidateMean.z)) / 3f;
         }
 
+        /// <summary>
+        /// 执行比较Edge相关逻辑。
+        /// </summary>
         private static void CompareEdge(
             VisualDescriptor source,
             VisualDescriptor candidate,
@@ -8108,6 +8678,9 @@ namespace Lxy.UIEffectGenerator.Editor
             totalWeight += weight;
         }
 
+        /// <summary>
+        /// 获取SampleWeight。
+        /// </summary>
         private static float GetSampleWeight(
             int index,
             bool preferBorder)
@@ -8128,11 +8701,17 @@ namespace Lxy.UIEffectGenerator.Editor
                 : 0.35f;
         }
 
+        /// <summary>
+        /// 执行转换为向量相关逻辑。
+        /// </summary>
         private static Vector3 ToVector(Color value)
         {
             return new Vector3(value.r, value.g, value.b);
         }
 
+        /// <summary>
+        /// 获取Luma。
+        /// </summary>
         private static float GetLuma(Color value)
         {
             return value.r * 0.2126f +
@@ -8140,6 +8719,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    value.b * 0.0722f;
         }
 
+        /// <summary>
+        /// 获取AspectSimilarity。
+        /// </summary>
         private static float GetAspectSimilarity(
             float source,
             float candidate)
@@ -8153,6 +8735,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    Mathf.Max(source, candidate);
         }
 
+        /// <summary>
+        /// 获取尺寸Similarity。
+        /// </summary>
         private static float GetSizeSimilarity(
             VisualDescriptor source,
             VisualDescriptor candidate)
@@ -8179,6 +8764,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return (widthSimilarity + heightSimilarity) * 0.5f;
         }
 
+        /// <summary>
+        /// 执行判断是否视觉节点相关逻辑。
+        /// </summary>
         private static bool IsVisualNode(UIEffectNode node)
         {
             return string.Equals(
@@ -8195,6 +8783,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 执行判断是否Explicit资源资源相关逻辑。
+        /// </summary>
         private static bool HasExplicitAssetResource(UIEffectNode node)
         {
             return GetCandidates(node).Any(candidate =>
@@ -8203,6 +8794,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     StringComparison.OrdinalIgnoreCase));
         }
 
+        /// <summary>
+        /// 获取精灵图资源路径。
+        /// </summary>
         private static string GetSpriteResourcePath(SpriteEntry entry)
         {
             string value = entry.AssetPath;
@@ -8219,6 +8813,9 @@ namespace Lxy.UIEffectGenerator.Editor
 
         private sealed class VisualDescriptor
         {
+            /// <summary>
+            /// 创建VisualDescriptor实例。
+            /// </summary>
             public VisualDescriptor(
                 Color[] pixels,
                 bool[] mask,
@@ -8235,20 +8832,53 @@ namespace Lxy.UIEffectGenerator.Editor
                 IsSliced = isSliced;
             }
 
+            /// <summary>
+            /// 向调用方提供Pixels。
+            /// </summary>
             public Color[] Pixels { get; }
+            /// <summary>
+            /// 向调用方提供Mask。
+            /// </summary>
             public bool[] Mask { get; }
+            /// <summary>
+            /// 向调用方提供Aspect。
+            /// </summary>
             public float Aspect { get; }
+            /// <summary>
+            /// 向调用方提供Width。
+            /// </summary>
             public float Width { get; }
+            /// <summary>
+            /// 向调用方提供Height。
+            /// </summary>
             public float Height { get; }
+            /// <summary>
+            /// 指示Sliced是否成立。
+            /// </summary>
             public bool IsSliced { get; }
+            /// <summary>
+            /// 向调用方提供引用Backdrop。
+            /// </summary>
             public Color ReferenceBackdrop { get; set; }
+            /// <summary>
+            /// 指示是否具有引用Backdrop。
+            /// </summary>
             public bool HasReferenceBackdrop { get; set; }
+            /// <summary>
+            /// 向调用方提供引用BackdropPixels。
+            /// </summary>
             public Color[] ReferenceBackdropPixels { get; set; }
+            /// <summary>
+            /// 指示是否具有Spatial引用Backdrop。
+            /// </summary>
             public bool HasSpatialReferenceBackdrop { get; set; }
         }
 
         private sealed class VisualMatchEvidence
         {
+            /// <summary>
+            /// 创建VisualMatchEvidence实例。
+            /// </summary>
             public VisualMatchEvidence(
                 string resource,
                 float score,
@@ -8259,13 +8889,25 @@ namespace Lxy.UIEffectGenerator.Editor
                 Margin = margin;
             }
 
+            /// <summary>
+            /// 向调用方提供资源。
+            /// </summary>
             public string Resource { get; }
+            /// <summary>
+            /// 向调用方提供Score。
+            /// </summary>
             public float Score { get; }
+            /// <summary>
+            /// 向调用方提供Margin。
+            /// </summary>
             public float Margin { get; }
         }
 
         private sealed class RuntimeTemplateEvidence
         {
+            /// <summary>
+            /// 创建运行时TemplateEvidence实例。
+            /// </summary>
             public RuntimeTemplateEvidence(
                 UIEffectNode node,
                 int siblingIndex)
@@ -8274,22 +8916,58 @@ namespace Lxy.UIEffectGenerator.Editor
                 SiblingIndex = siblingIndex;
             }
 
+            /// <summary>
+            /// 向调用方提供Node。
+            /// </summary>
             public UIEffectNode Node { get; }
+            /// <summary>
+            /// 向调用方提供SiblingIndex。
+            /// </summary>
             public int SiblingIndex { get; }
+            /// <summary>
+            /// 当前Visual的数量。
+            /// </summary>
             public int VisualCount { get; set; }
+            /// <summary>
+            /// 当前ResolvedVisual的数量。
+            /// </summary>
             public int ResolvedVisualCount { get; set; }
+            /// <summary>
+            /// 当前FailedVisual的数量。
+            /// </summary>
             public int FailedVisualCount { get; set; }
+            /// <summary>
+            /// 当前ScoredVisual的数量。
+            /// </summary>
             public int ScoredVisualCount { get; set; }
+            /// <summary>
+            /// 向调用方提供VariantAffinity。
+            /// </summary>
             public int VariantAffinity { get; set; }
+            /// <summary>
+            /// 向调用方提供Score总数。
+            /// </summary>
             public float ScoreTotal { get; set; }
+            /// <summary>
+            /// 向调用方提供Margin总数。
+            /// </summary>
             public float MarginTotal { get; set; }
+            /// <summary>
+            /// 向调用方提供AverageScore。
+            /// </summary>
             public float AverageScore => ScoredVisualCount == 0
                 ? 0f
                 : ScoreTotal / ScoredVisualCount;
+            /// <summary>
+            /// 向调用方提供AverageMargin。
+            /// </summary>
             public float AverageMargin => ScoredVisualCount == 0
                 ? 0f
                 : MarginTotal / ScoredVisualCount;
 
+            /// <summary>
+            /// 执行转换为Log字符串相关逻辑。
+            /// </summary>
             public string ToLogString()
             {
                 return $"{Node.name}[变体证据 {VariantAffinity}，" +
@@ -8302,6 +8980,9 @@ namespace Lxy.UIEffectGenerator.Editor
 
         private sealed class RuntimeTemplateNodeLocation
         {
+            /// <summary>
+            /// 创建运行时TemplateNodeLocation实例。
+            /// </summary>
             public RuntimeTemplateNodeLocation(
                 UIEffectNode node,
                 IReadOnlyList<UIEffectNode> siblings,
@@ -8320,19 +9001,49 @@ namespace Lxy.UIEffectGenerator.Editor
                 RootVariant = rootVariant ?? string.Empty;
             }
 
+            /// <summary>
+            /// 向调用方提供Node。
+            /// </summary>
             public UIEffectNode Node { get; }
+            /// <summary>
+            /// 向调用方提供Siblings。
+            /// </summary>
             public IReadOnlyList<UIEffectNode> Siblings { get; }
+            /// <summary>
+            /// 向调用方提供ParentX。
+            /// </summary>
             public float ParentX { get; }
+            /// <summary>
+            /// 向调用方提供ParentY。
+            /// </summary>
             public float ParentY { get; }
+            /// <summary>
+            /// 向调用方提供AbsoluteX。
+            /// </summary>
             public float AbsoluteX => ParentX + Node.x;
+            /// <summary>
+            /// 向调用方提供AbsoluteY。
+            /// </summary>
             public float AbsoluteY => ParentY + Node.y;
+            /// <summary>
+            /// 向调用方提供VisualParent。
+            /// </summary>
             public VisualParentContext VisualParent { get; }
+            /// <summary>
+            /// 向调用方提供ParentSemanticHint。
+            /// </summary>
             public string ParentSemanticHint { get; }
+            /// <summary>
+            /// 向调用方提供RootVariant。
+            /// </summary>
             public string RootVariant { get; }
         }
 
         private sealed class VisualCandidate
         {
+            /// <summary>
+            /// 创建VisualCandidate实例。
+            /// </summary>
             public VisualCandidate(
                 SpriteEntry entry,
                 VisualDescriptor descriptor,
@@ -8349,17 +9060,53 @@ namespace Lxy.UIEffectGenerator.Editor
                 SlicedScalePenalty = slicedScalePenalty;
             }
 
+            /// <summary>
+            /// 向调用方提供Entry。
+            /// </summary>
             public SpriteEntry Entry { get; }
+            /// <summary>
+            /// 向调用方提供Descriptor。
+            /// </summary>
             public VisualDescriptor Descriptor { get; }
+            /// <summary>
+            /// 向调用方提供AspectSimilarity。
+            /// </summary>
             public float AspectSimilarity { get; }
+            /// <summary>
+            /// 向调用方提供QuickScore。
+            /// </summary>
             public float QuickScore { get; }
+            /// <summary>
+            /// 向调用方提供SemanticBonus。
+            /// </summary>
             public float SemanticBonus { get; }
+            /// <summary>
+            /// 向调用方提供SlicedScalePenalty。
+            /// </summary>
             public float SlicedScalePenalty { get; }
+            /// <summary>
+            /// 向调用方提供AuthoredScore。
+            /// </summary>
             public float AuthoredScore { get; set; }
+            /// <summary>
+            /// 向调用方提供AuthoredColorDistance。
+            /// </summary>
             public float AuthoredColorDistance { get; set; }
+            /// <summary>
+            /// 向调用方提供CompositeScore。
+            /// </summary>
             public float CompositeScore { get; set; }
+            /// <summary>
+            /// 向调用方提供Score。
+            /// </summary>
             public float Score { get; set; }
+            /// <summary>
+            /// 向调用方提供MatchedColor。
+            /// </summary>
             public Color MatchedColor { get; set; }
+            /// <summary>
+            /// 向调用方提供UsesMaterialTint。
+            /// </summary>
             public bool UsesMaterialTint { get; set; }
         }
 
@@ -8367,21 +9114,36 @@ namespace Lxy.UIEffectGenerator.Editor
         {
             private float scoreTotal;
 
+            /// <summary>
+            /// 创建RepeatedSurfaceCandidateScore实例。
+            /// </summary>
             public RepeatedSurfaceCandidateScore(SpriteEntry entry)
             {
                 Entry = entry;
             }
 
+            /// <summary>
+            /// 向调用方提供Entry。
+            /// </summary>
             public SpriteEntry Entry { get; }
             public Dictionary<UIEffectNode, float> Scores { get; } =
                 new Dictionary<UIEffectNode, float>();
             public Dictionary<UIEffectNode, Color> Colors { get; } =
                 new Dictionary<UIEffectNode, Color>();
+            /// <summary>
+            /// 当前Sample的数量。
+            /// </summary>
             public int SampleCount => Scores.Count;
+            /// <summary>
+            /// 向调用方提供AverageScore。
+            /// </summary>
             public float AverageScore => SampleCount == 0
                 ? 0f
                 : scoreTotal / SampleCount;
 
+            /// <summary>
+            /// 执行添加相关逻辑。
+            /// </summary>
             public void Add(
                 UIEffectNode node,
                 float score,
@@ -8395,6 +9157,9 @@ namespace Lxy.UIEffectGenerator.Editor
 
         private sealed class VisualParentContext
         {
+            /// <summary>
+            /// 创建VisualParent上下文实例。
+            /// </summary>
             public VisualParentContext(
                 UIEffectNode node,
                 SpriteEntry entry,
@@ -8409,10 +9174,25 @@ namespace Lxy.UIEffectGenerator.Editor
                 ResolvedDescriptor = resolvedDescriptor;
             }
 
+            /// <summary>
+            /// 向调用方提供Node。
+            /// </summary>
             public UIEffectNode Node { get; }
+            /// <summary>
+            /// 向调用方提供Entry。
+            /// </summary>
             public SpriteEntry Entry { get; }
+            /// <summary>
+            /// 向调用方提供AbsoluteX。
+            /// </summary>
             public float AbsoluteX { get; }
+            /// <summary>
+            /// 向调用方提供AbsoluteY。
+            /// </summary>
             public float AbsoluteY { get; }
+            /// <summary>
+            /// 向调用方提供ResolvedDescriptor。
+            /// </summary>
             public VisualDescriptor ResolvedDescriptor { get; }
         }
 
@@ -8427,6 +9207,9 @@ namespace Lxy.UIEffectGenerator.Editor
             private readonly RenderTexture renderTexture;
             private readonly Texture2D readbackTexture;
 
+            /// <summary>
+            /// 创建SpritePreviewRenderer实例。
+            /// </summary>
             public SpritePreviewRenderer(int sampleSize)
             {
                 this.sampleSize = sampleSize;
@@ -8475,6 +9258,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 previewCamera.targetTexture = renderTexture;
             }
 
+            /// <summary>
+            /// 执行渲染相关逻辑。
+            /// </summary>
             public VisualDescriptor Render(
                 Sprite sprite,
                 float targetWidth,
@@ -8496,6 +9282,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     authoredHeight);
             }
 
+            /// <summary>
+            /// 执行渲染Region相关逻辑。
+            /// </summary>
             public VisualDescriptor RenderRegion(
                 Sprite sprite,
                 float targetWidth,
@@ -8516,6 +9305,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     targetRegion.height);
             }
 
+            /// <summary>
+            /// 执行渲染Region内部相关逻辑。
+            /// </summary>
             private VisualDescriptor RenderRegionInternal(
                 Sprite sprite,
                 float targetWidth,
@@ -8629,6 +9421,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 }
             }
 
+            /// <summary>
+            /// 获取源数据Coordinate。
+            /// </summary>
             private float GetSourceCoordinate(
                 float targetCoordinate,
                 float targetSize,
@@ -8691,6 +9486,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        targetCenter * sourceCenter;
             }
 
+            /// <summary>
+            /// 执行SampleRendered精灵图相关逻辑。
+            /// </summary>
             private Color SampleRenderedSprite(
                 Color[] pixels,
                 float u,
@@ -8715,6 +9513,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 return Color.Lerp(bottom, top, ty);
             }
 
+            /// <summary>
+            /// 执行UnpremultiplyRendered颜色相关逻辑。
+            /// </summary>
             private static Color UnpremultiplyRenderedColor(Color color)
             {
                 if (color.a <= 0.001f)
@@ -8747,6 +9548,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 return color;
             }
 
+            /// <summary>
+            /// 释放当前实例持有的资源。
+            /// </summary>
             public void Dispose()
             {
                 previewCamera.targetTexture = null;
@@ -8759,6 +9563,9 @@ namespace Lxy.UIEffectGenerator.Editor
 
         private sealed class SpriteEntry
         {
+            /// <summary>
+            /// 创建SpriteEntry实例。
+            /// </summary>
             public SpriteEntry(
                 string assetPath,
                 Sprite sprite,
@@ -8792,19 +9599,61 @@ namespace Lxy.UIEffectGenerator.Editor
                         .ToString();
             }
 
+            /// <summary>
+            /// 向调用方提供资源路径。
+            /// </summary>
             public string AssetPath { get; }
+            /// <summary>
+            /// 向调用方提供Sprite。
+            /// </summary>
             public Sprite Sprite { get; }
+            /// <summary>
+            /// 向调用方提供名称Key。
+            /// </summary>
             public string NameKey { get; }
+            /// <summary>
+            /// 向调用方提供文件Key。
+            /// </summary>
             public string FileKey { get; }
+            /// <summary>
+            /// 向调用方提供路径Key。
+            /// </summary>
             public string PathKey { get; }
+            /// <summary>
+            /// 向调用方提供AuthoredWidth。
+            /// </summary>
             public float AuthoredWidth { get; }
+            /// <summary>
+            /// 向调用方提供AuthoredHeight。
+            /// </summary>
             public float AuthoredHeight { get; }
+            /// <summary>
+            /// 向调用方提供BorderLeft。
+            /// </summary>
             public float BorderLeft { get; }
+            /// <summary>
+            /// 向调用方提供BorderBottom。
+            /// </summary>
             public float BorderBottom { get; }
+            /// <summary>
+            /// 向调用方提供BorderRight。
+            /// </summary>
             public float BorderRight { get; }
+            /// <summary>
+            /// 向调用方提供BorderTop。
+            /// </summary>
             public float BorderTop { get; }
+            /// <summary>
+            /// 向调用方提供Aspect。
+            /// </summary>
             public float Aspect { get; }
+            /// <summary>
+            /// 指示是否具有Border。
+            /// </summary>
             public bool HasBorder { get; }
+            /// <summary>
+            /// 向调用方提供Dependency哈希。
+            /// </summary>
             public string DependencyHash { get; }
         }
     }
@@ -8828,6 +9677,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 },
                 StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// 响应Postprocess全部资源事件。
+        /// </summary>
         private static void OnPostprocessAllAssets(
             string[] importedAssets,
             string[] deletedAssets,
@@ -8843,6 +9695,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行判断是否包含精灵图源数据相关逻辑。
+        /// </summary>
         private static bool ContainsSpriteSource(
             IEnumerable<string> assetPaths)
         {

@@ -7,10 +7,16 @@ namespace Game.Battle.Editor
 {
     internal static class BattleConfigEditorUtility
     {
+        /// <summary>
+        /// 公开的数据库资源路径数据。
+        /// </summary>
         public const string DatabaseAssetPath =
             "Assets/GameResources/Battle/Config/" +
             "BattleConfigDatabase.asset";
 
+        /// <summary>
+        /// 加载Or创建数据库。
+        /// </summary>
         public static BattleConfigDatabase LoadOrCreateDatabase()
         {
             BattleConfigDatabase database =
@@ -37,6 +43,9 @@ namespace Game.Battle.Editor
             return database;
         }
 
+        /// <summary>
+        /// 执行保存相关逻辑。
+        /// </summary>
         public static void Save(Object target)
         {
             if (target == null)
@@ -48,6 +57,9 @@ namespace Game.Battle.Editor
             AssetDatabase.SaveAssets();
         }
 
+        /// <summary>
+        /// 确保资源目录。
+        /// </summary>
         private static void EnsureAssetFolder(string folder)
         {
             if (string.IsNullOrEmpty(folder) ||

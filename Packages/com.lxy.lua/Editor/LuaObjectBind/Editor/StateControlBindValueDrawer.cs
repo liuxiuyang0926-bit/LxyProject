@@ -10,6 +10,9 @@ namespace LuaObjectBind.Editor
     {
         private const float HORIZONTAL_GAP = 5;
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);

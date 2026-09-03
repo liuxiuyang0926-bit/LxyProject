@@ -9,8 +9,14 @@ namespace Game.Battle.Client
         private readonly Dictionary<int, FrameData> frames =
             new Dictionary<int, FrameData>();
 
+        /// <summary>
+        /// 当前的数量。
+        /// </summary>
         public int Count => frames.Count;
 
+        /// <summary>
+        /// 添加帧。
+        /// </summary>
         public void AddFrame(FrameData frameData)
         {
             if (frameData == null)
@@ -21,6 +27,9 @@ namespace Game.Battle.Client
             frames[frameData.Frame] = frameData;
         }
 
+        /// <summary>
+        /// 尝试获取帧，并返回是否成功。
+        /// </summary>
         public bool TryGetFrame(int frame, out FrameData frameData)
         {
             if (!frames.TryGetValue(frame, out frameData))
@@ -32,6 +41,9 @@ namespace Game.Battle.Client
             return true;
         }
 
+        /// <summary>
+        /// 执行清空相关逻辑。
+        /// </summary>
         public void Clear()
         {
             frames.Clear();

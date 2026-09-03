@@ -14,6 +14,9 @@ namespace LxyDemo.UIFramework.Editor
         private static readonly IUIEffectProjectAdapter Adapter =
             new UIEffectLxyProjectAdapter();
 
+        /// <summary>
+        /// 创建UIEffectLxy项目适配器Registration实例。
+        /// </summary>
         static UIEffectLxyProjectAdapterRegistration()
         {
             UIEffectProjectAdapterRegistry.Register(Adapter, 100);
@@ -23,11 +26,26 @@ namespace LxyDemo.UIFramework.Editor
     internal sealed class UIEffectLxyProjectAdapter :
         IUIEffectProjectAdapter
     {
+        /// <summary>
+        /// 向调用方提供标识。
+        /// </summary>
         public string Id => "lxy-ui-framework";
+        /// <summary>
+        /// 向调用方提供Display名称。
+        /// </summary>
         public string DisplayName => "Lxy UI Framework";
+        /// <summary>
+        /// 向调用方提供SupportsScriptGeneration。
+        /// </summary>
         public bool SupportsScriptGeneration => true;
+        /// <summary>
+        /// 向调用方提供Supports层级Selection。
+        /// </summary>
         public bool SupportsLayerSelection => true;
 
+        /// <summary>
+        /// 创建Defaults。
+        /// </summary>
         public UIEffectProjectDefaults CreateDefaults()
         {
             return new UIEffectProjectDefaults
@@ -46,6 +64,9 @@ namespace LxyDemo.UIFramework.Editor
             };
         }
 
+        /// <summary>
+        /// 创建OrUpdate预制体。
+        /// </summary>
         public UIEffectPrefabHostResult CreateOrUpdatePrefab(
             UIEffectPrefabGenerationOptions options,
             bool promptForExistingPrefab)
@@ -75,6 +96,9 @@ namespace LxyDemo.UIFramework.Editor
             return new UIEffectPrefabHostResult(result.PrefabPath);
         }
 
+        /// <summary>
+        /// 执行BeforeReplace生成结果Tree相关逻辑。
+        /// </summary>
         public void BeforeReplaceGeneratedTree(
             GameObject prefabRoot,
             Transform previousGeneratedRoot)
@@ -95,6 +119,9 @@ namespace LxyDemo.UIFramework.Editor
             EditorUtility.SetDirty(objectBinder);
         }
 
+        /// <summary>
+        /// 执行After构建生成结果Tree相关逻辑。
+        /// </summary>
         public void AfterBuildGeneratedTree(
             GameObject prefabRoot,
             UIEffectPrefabGenerationOptions options)
@@ -109,6 +136,9 @@ namespace LxyDemo.UIFramework.Editor
             CSharpUIGenerator.AutoCollectObjectBindings(objectBinder);
         }
 
+        /// <summary>
+        /// 执行判断是否Inside生成结果根节点相关逻辑。
+        /// </summary>
         private static bool IsInsideGeneratedRoot(
             UnityEngine.Object target,
             Transform generatedRoot)

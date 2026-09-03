@@ -20,11 +20,17 @@ namespace LuaObjectBind
             return (T)GetValue();
         }
 
+        /// <summary>
+        /// 设置值。
+        /// </summary>
         public void SetValue(string value)
         {
             path = value;
         }
 
+        /// <summary>
+        /// 获取值。
+        /// </summary>
         public object GetValue()
         {
             return this.path;

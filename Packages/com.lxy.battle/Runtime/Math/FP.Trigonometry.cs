@@ -2,8 +2,17 @@ namespace Game.Battle.Core.Math
 {
     public readonly partial struct FP
     {
+        /// <summary>
+        /// 公开的Degrees90数据。
+        /// </summary>
         public static readonly FP Degrees90 = FromInt(90);
+        /// <summary>
+        /// 公开的Degrees180数据。
+        /// </summary>
         public static readonly FP Degrees180 = FromInt(180);
+        /// <summary>
+        /// 公开的Degrees360数据。
+        /// </summary>
         public static readonly FP Degrees360 = FromInt(360);
 
         private const long CordicScale = 1L << 30;
@@ -51,6 +60,9 @@ namespace Game.Battle.Core.Math
             return cos;
         }
 
+        /// <summary>
+        /// 执行计算正弦值计算余弦值相关逻辑。
+        /// </summary>
         public static void SinCos(
             FP degrees,
             out FP sin,
@@ -162,6 +174,9 @@ namespace Game.Battle.Core.Math
             return FromRaw(angle);
         }
 
+        /// <summary>
+        /// 执行规范化Angle相关逻辑。
+        /// </summary>
         public static FP NormalizeAngle(FP degrees)
         {
             long normalized =
@@ -178,6 +193,9 @@ namespace Game.Battle.Core.Math
             return FromRaw(normalized);
         }
 
+        /// <summary>
+        /// 执行缩放Cordic相关逻辑。
+        /// </summary>
         private static long ScaleCordic(long value)
         {
             long scaled = checked(value * Precision);
@@ -187,6 +205,9 @@ namespace Game.Battle.Core.Math
                 : checked(scaled - half) / CordicScale;
         }
 
+        /// <summary>
+        /// 执行限制原始值转换为Unit相关逻辑。
+        /// </summary>
         private static long ClampRawToUnit(long value)
         {
             if (value > Precision)
@@ -197,6 +218,9 @@ namespace Game.Battle.Core.Math
             return value < -Precision ? -Precision : value;
         }
 
+        /// <summary>
+        /// 执行规范化Cordic输入相关逻辑。
+        /// </summary>
         private static void NormalizeCordicInput(
             long sourceX,
             long sourceY,
@@ -221,6 +245,9 @@ namespace Game.Battle.Core.Math
             }
         }
 
+        /// <summary>
+        /// 执行MaxMagnitude相关逻辑。
+        /// </summary>
         private static ulong MaxMagnitude(long left, long right)
         {
             ulong leftMagnitude = GetMagnitude(left);

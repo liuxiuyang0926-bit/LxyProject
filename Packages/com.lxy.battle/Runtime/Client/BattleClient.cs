@@ -7,13 +7,22 @@ namespace Game.Battle.Client
 {
     public readonly struct BattleFrameSnapshot
     {
+        /// <summary>
+        /// 创建战斗帧快照实例。
+        /// </summary>
         public BattleFrameSnapshot(int frame, ulong stateHash)
         {
             Frame = frame;
             StateHash = stateHash;
         }
 
+        /// <summary>
+        /// 向调用方提供帧。
+        /// </summary>
         public int Frame { get; }
+        /// <summary>
+        /// 向调用方提供状态哈希。
+        /// </summary>
         public ulong StateHash { get; }
     }
 
@@ -27,6 +36,9 @@ namespace Game.Battle.Client
         private readonly List<BattleFrameSnapshot> snapshots =
             new List<BattleFrameSnapshot>();
 
+        /// <summary>
+        /// 创建战斗客户端实例。
+        /// </summary>
         public BattleClient(
             BattleWorld world,
             FrameBuffer frameBuffer,
@@ -40,10 +52,19 @@ namespace Game.Battle.Client
             this.eventSink = eventSink;
         }
 
+        /// <summary>
+        /// 向调用方提供ReplayFrames。
+        /// </summary>
         public IReadOnlyList<FrameData> ReplayFrames => replayFrames;
+        /// <summary>
+        /// 向调用方提供状态Snapshots。
+        /// </summary>
         public IReadOnlyList<BattleFrameSnapshot> StateSnapshots =>
             snapshots;
 
+        /// <summary>
+        /// 尝试推进一帧，并返回是否成功。
+        /// </summary>
         public bool TryAdvanceOneFrame()
         {
             if (!frameBuffer.TryGetFrame(
@@ -63,6 +84,9 @@ namespace Game.Battle.Client
             return true;
         }
 
+        /// <summary>
+        /// 消费可用项帧。
+        /// </summary>
         public int ConsumeAvailableFrames(int maxFrames = 8)
         {
             int consumed = 0;

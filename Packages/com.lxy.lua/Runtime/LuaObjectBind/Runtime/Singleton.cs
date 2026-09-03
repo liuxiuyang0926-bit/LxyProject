@@ -9,6 +9,9 @@ namespace LuaObjectBind
     
     public abstract class ASingleton: DisposeObject
     {
+        /// <summary>
+        /// 注册当前实例。
+        /// </summary>
         internal abstract void Register();
     }
     
@@ -32,21 +35,33 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 注册当前实例。
+        /// </summary>
         internal override void Register()
         {
             Instance = (T)this;
         }
 
+        /// <summary>
+        /// 执行判断是否Disposed相关逻辑。
+        /// </summary>
         public bool IsDisposed()
         {
             return this.isDisposed;
         }
 
+        /// <summary>
+        /// 销毁目标对象。
+        /// </summary>
         protected virtual void Destroy()
         {
             
         }
 
+        /// <summary>
+        /// 释放当前实例持有的资源。
+        /// </summary>
         public override void Dispose()
         {
             if (this.isDisposed)
@@ -63,6 +78,9 @@ namespace LuaObjectBind
 
         // Roslyn Auto Gen - ResetHandler
 #if UNITY_EDITOR
+        /// <summary>
+        /// 重置处理器。
+        /// </summary>
         protected static void ResetHandler(UnityEditor.EnterPlayModeOptions options)
         {
             if (!options.HasFlag(UnityEditor.EnterPlayModeOptions.DisableDomainReload))

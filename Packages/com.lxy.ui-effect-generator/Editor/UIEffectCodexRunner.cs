@@ -12,41 +12,119 @@ namespace Lxy.UIEffectGenerator.Editor
 {
     internal sealed class UIEffectCodexRequest
     {
+        /// <summary>
+        /// 公开的provider数据。
+        /// </summary>
         public string provider = "Codex";
+        /// <summary>
+        /// 公开的codexCommand数据。
+        /// </summary>
         public string codexCommand = "codex";
+        /// <summary>
+        /// 公开的project根节点数据。
+        /// </summary>
         public string projectRoot = string.Empty;
+        /// <summary>
+        /// 公开的图片路径数据。
+        /// </summary>
         public string imagePath = string.Empty;
+        /// <summary>
+        /// 公开的图片路径数据。
+        /// </summary>
         public string[] imagePaths = Array.Empty<string>();
+        /// <summary>
+        /// 公开的prompt数据。
+        /// </summary>
         public string prompt = string.Empty;
+        /// <summary>
+        /// 公开的输出Schema路径数据。
+        /// </summary>
         public string outputSchemaPath = string.Empty;
+        /// <summary>
+        /// 公开的输出路径数据。
+        /// </summary>
         public string outputPath = string.Empty;
+        /// <summary>
+        /// 公开的requiresFigmaMcp数据。
+        /// </summary>
         public bool requiresFigmaMcp;
+        /// <summary>
+        /// 公开的requiresUnityMcp数据。
+        /// </summary>
         public bool requiresUnityMcp;
+        /// <summary>
+        /// 公开的允许WorkspaceWrite数据。
+        /// </summary>
         public bool allowWorkspaceWrite;
+        /// <summary>
+        /// 公开的unityMcp服务器路径数据。
+        /// </summary>
         public string unityMcpServerPath = string.Empty;
+        /// <summary>
+        /// 公开的unityMcpNodeCommand数据。
+        /// </summary>
         public string unityMcpNodeCommand = "node";
+        /// <summary>
+        /// 公开的unityBridgePort数据。
+        /// </summary>
         public int unityBridgePort;
+        /// <summary>
+        /// 公开的reasoningEffort数据。
+        /// </summary>
         public string reasoningEffort = "high";
     }
 
     internal sealed class UIEffectCodexRunResult
     {
+        /// <summary>
+        /// 公开的成功数据。
+        /// </summary>
         public bool succeeded;
+        /// <summary>
+        /// 公开的canceled数据。
+        /// </summary>
         public bool canceled;
+        /// <summary>
+        /// 公开的exitCode数据。
+        /// </summary>
         public int exitCode;
+        /// <summary>
+        /// 公开的输出Json数据。
+        /// </summary>
         public string outputJson = string.Empty;
+        /// <summary>
+        /// 公开的错误数据。
+        /// </summary>
         public string error = string.Empty;
+        /// <summary>
+        /// 公开的usage数据。
+        /// </summary>
         public UIEffectCodexUsage usage;
     }
 
     [Serializable]
     internal sealed class UIEffectCodexUsage
     {
+        /// <summary>
+        /// 公开的输入tokens数据。
+        /// </summary>
         public long input_tokens;
+        /// <summary>
+        /// 公开的cached输入tokens数据。
+        /// </summary>
         public long cached_input_tokens;
+        /// <summary>
+        /// 公开的输出tokens数据。
+        /// </summary>
         public long output_tokens;
+        /// <summary>
+        /// 公开的reasoning输出tokens数据。
+        /// </summary>
         public long reasoning_output_tokens;
 
+        /// <summary>
+        /// 向调用方提供总数Tokens。
+        /// </summary>
         public long TotalTokens => input_tokens + output_tokens;
     }
 
@@ -77,13 +155,25 @@ namespace Lxy.UIEffectGenerator.Editor
         [Serializable]
         private sealed class CodexEvent
         {
+            /// <summary>
+            /// 公开的类型数据。
+            /// </summary>
             public string type;
+            /// <summary>
+            /// 公开的usage数据。
+            /// </summary>
             public UIEffectCodexUsage usage;
         }
 
+        /// <summary>
+        /// 指示当前对象是否正在运行。
+        /// </summary>
         public bool IsRunning =>
             Interlocked.CompareExchange(ref isRunning, 0, 0) == 1;
 
+        /// <summary>
+        /// 启动组件的运行流程。
+        /// </summary>
         public void Start(UIEffectCodexRequest runRequest)
         {
             if (runRequest == null)
@@ -178,11 +268,17 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 尝试Dequeue进度，并返回是否成功。
+        /// </summary>
         public bool TryDequeueProgress(out string message)
         {
             return progressMessages.TryDequeue(out message);
         }
 
+        /// <summary>
+        /// 尝试Take结果，并返回是否成功。
+        /// </summary>
         public bool TryTakeResult(out UIEffectCodexRunResult result)
         {
             result = null;
@@ -204,6 +300,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行取消相关逻辑。
+        /// </summary>
         public void Cancel()
         {
             if (!IsRunning)
@@ -261,6 +360,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 释放当前实例持有的资源。
+        /// </summary>
         public void Dispose()
         {
             if (disposed)
@@ -273,6 +375,9 @@ namespace Lxy.UIEffectGenerator.Editor
             DisposeProcess();
         }
 
+        /// <summary>
+        /// 解析Executable。
+        /// </summary>
         internal static string ResolveExecutable(string command)
         {
             string value = (command ?? string.Empty)
@@ -328,6 +433,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 value);
         }
 
+        /// <summary>
+        /// 创建启动信息。
+        /// </summary>
         private static ProcessStartInfo CreateStartInfo(
             string executable,
             UIEffectCodexRequest runRequest)
@@ -451,6 +559,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return startInfo;
         }
 
+        /// <summary>
+        /// 添加UnityMcp参数。
+        /// </summary>
         private static void AddUnityMcpArguments(
             List<string> argumentParts,
             UIEffectCodexRequest runRequest)
@@ -479,6 +590,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "mcp_servers.unity.tool_timeout_sec=300");
         }
 
+        /// <summary>
+        /// 添加配置参数。
+        /// </summary>
         private static void AddConfigArgument(
             List<string> argumentParts,
             string value)
@@ -487,6 +601,9 @@ namespace Lxy.UIEffectGenerator.Editor
             argumentParts.Add(QuoteArgument(value));
         }
 
+        /// <summary>
+        /// 添加DisabledMcp服务器。
+        /// </summary>
         private static void AddDisabledMcpServer(
             List<string> argumentParts,
             string serverName)
@@ -501,6 +618,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "={enabled=false,command=\"codex\",args=[\"--version\"]}");
         }
 
+        /// <summary>
+        /// 执行规范化ReasoningEffort相关逻辑。
+        /// </summary>
         private static string NormalizeReasoningEffort(string value)
         {
             string normalized = (value ?? string.Empty)
@@ -518,11 +638,17 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行规范化Toml路径相关逻辑。
+        /// </summary>
         private static string NormalizeTomlPath(string value)
         {
             return (value ?? string.Empty).Replace('\\', '/');
         }
 
+        /// <summary>
+        /// 执行转义Toml字符串相关逻辑。
+        /// </summary>
         private static string EscapeTomlString(string value)
         {
             return (value ?? string.Empty)
@@ -530,6 +656,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 .Replace("\"", "\\\"");
         }
 
+        /// <summary>
+        /// 执行判断是否Command脚本相关逻辑。
+        /// </summary>
         private static bool IsCommandScript(string executable)
         {
             string extension = Path.GetExtension(executable);
@@ -543,6 +672,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 获取图片Paths。
+        /// </summary>
         private static List<string> GetImagePaths(
             UIEffectCodexRequest runRequest)
         {
@@ -568,6 +700,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return paths;
         }
 
+        /// <summary>
+        /// 处理输出数据Received。
+        /// </summary>
         private void HandleOutputDataReceived(
             object sender,
             DataReceivedEventArgs eventArgs)
@@ -586,6 +721,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 处理错误数据Received。
+        /// </summary>
         private void HandleErrorDataReceived(
             object sender,
             DataReceivedEventArgs eventArgs)
@@ -596,6 +734,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 处理ProcessExited。
+        /// </summary>
         private void HandleProcessExited(object sender, EventArgs eventArgs)
         {
             if (Interlocked.CompareExchange(ref exitHandled, 1, 0) != 0)
@@ -660,6 +801,9 @@ namespace Lxy.UIEffectGenerator.Editor
             Interlocked.Exchange(ref completionAvailable, 1);
         }
 
+        /// <summary>
+        /// 构建启动异常。
+        /// </summary>
         private Exception BuildStartupException(Exception cause)
         {
             Process current = process;
@@ -707,6 +851,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 cause);
         }
 
+        /// <summary>
+        /// 校验FigmaMcp配置。
+        /// </summary>
         private static void ValidateFigmaMcpConfiguration(
             string executable,
             UIEffectCodexRequest runRequest)
@@ -760,6 +907,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 校验UnityMcp配置。
+        /// </summary>
         private static void ValidateUnityMcpConfiguration(
             UIEffectCodexRequest runRequest)
         {
@@ -790,6 +940,9 @@ namespace Lxy.UIEffectGenerator.Editor
             ResolveExecutable(runRequest.unityMcpNodeCommand);
         }
 
+        /// <summary>
+        /// 执行判断是否包含AuthenticationFailure相关逻辑。
+        /// </summary>
         private static bool ContainsAuthenticationFailure(string value)
         {
             string text = value ?? string.Empty;
@@ -807,6 +960,9 @@ namespace Lxy.UIEffectGenerator.Editor
                        StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
+        /// <summary>
+        /// 创建McpInspection启动信息。
+        /// </summary>
         private static ProcessStartInfo CreateMcpInspectionStartInfo(
             string executable,
             string projectRoot)
@@ -857,6 +1013,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return startInfo;
         }
 
+        /// <summary>
+        /// 执行追加错误相关逻辑。
+        /// </summary>
         private void AppendError(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
@@ -879,6 +1038,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 获取进度消息。
+        /// </summary>
         private string GetProgressMessage(string jsonLine)
         {
             if (jsonLine.IndexOf(
@@ -933,6 +1095,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return string.Empty;
         }
 
+        /// <summary>
+        /// 尝试CaptureUsage，并返回是否成功。
+        /// </summary>
         private void TryCaptureUsage(string jsonLine)
         {
             if (jsonLine.IndexOf(
@@ -958,6 +1123,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 校验请求。
+        /// </summary>
         private static void ValidateRequest(UIEffectCodexRequest value)
         {
             if (string.IsNullOrWhiteSpace(value.projectRoot) ||
@@ -991,6 +1159,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行引用参数相关逻辑。
+        /// </summary>
         private static string QuoteArgument(string value)
         {
             value ??= string.Empty;
@@ -1029,11 +1200,17 @@ namespace Lxy.UIEffectGenerator.Editor
             return builder.ToString();
         }
 
+        /// <summary>
+        /// 执行判断是否Windows相关逻辑。
+        /// </summary>
         private static bool IsWindows()
         {
             return Path.DirectorySeparatorChar == '\\';
         }
 
+        /// <summary>
+        /// 执行Dispose流程相关逻辑。
+        /// </summary>
         private void DisposeProcess()
         {
             Process current = process;

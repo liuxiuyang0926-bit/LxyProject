@@ -18,6 +18,9 @@ namespace VGame.GameLogic.Editor.LuaUI
         private readonly LuaUIBaseLogicGenerator generator = new();
         
         #region Menu Items
+        /// <summary>
+        /// 执行显示窗口相关逻辑。
+        /// </summary>
         [MenuItem("Assets/生成Lua脚本文件", false, 10)]
         private static void ShowWindow()
         {
@@ -26,6 +29,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             window.Show();
         }
 
+        /// <summary>
+        /// 执行显示窗口从Tools相关逻辑。
+        /// </summary>
         [MenuItem("Tools/Lua Logic Creator", false, 10)]
         private static void ShowWindowFromTools()
         {
@@ -35,6 +41,9 @@ namespace VGame.GameLogic.Editor.LuaUI
         }
         #endregion
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             generator.OnGUI(this);
@@ -70,6 +79,9 @@ namespace VGame.GameLogic.Editor.LuaUI
         private BindTemplateList genBindTemplateList = null;
 
         #region Initialization
+        /// <summary>
+        /// 初始化FromSelection。
+        /// </summary>
         public void InitializeFromSelection()
         {
             // Always initialize default values first
@@ -88,6 +100,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             }
         }
         
+        /// <summary>
+        /// 初始化With目标。
+        /// </summary>
         public void InitializeWithTarget(GameObject prefab)
         {
             // Always initialize default values first
@@ -98,6 +113,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             UpdatePreview(); // 确保预览被更新
         }
 
+        /// <summary>
+        /// 初始化默认值值。
+        /// </summary>
         public void InitializeDefaultValues()
         {
             username = System.Environment.UserName;
@@ -110,6 +128,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             }
         }
 
+        /// <summary>
+        /// 更新From预制体。
+        /// </summary>
         private void UpdateFromPrefab(GameObject prefab)
         {
             if (prefab == null)
@@ -136,6 +157,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             UpdateFromClassName(newClassName);
         }
 
+        /// <summary>
+        /// 设置输出目录。
+        /// </summary>
         public void SetOutputFolder(string relativeFolder)
         {
             if (string.IsNullOrWhiteSpace(relativeFolder) ||
@@ -157,6 +181,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             UpdatePreview();
         }
 
+        /// <summary>
+        /// 更新From类型名称。
+        /// </summary>
         private void UpdateFromClassName(string newClassName)
         {
             if (string.IsNullOrEmpty(newClassName)) return;
@@ -171,6 +198,9 @@ namespace VGame.GameLogic.Editor.LuaUI
         #endregion
 
         #region UI Rendering
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public void OnGUI(EditorWindow window)
         {
             RenderHeader();
@@ -182,12 +212,18 @@ namespace VGame.GameLogic.Editor.LuaUI
             RenderPreview();
         }
 
+        /// <summary>
+        /// 执行渲染Header相关逻辑。
+        /// </summary>
         private void RenderHeader()
         {
             GUILayout.Label("Generate UIBaseLogic Lua File", EditorStyles.boldLabel);
             EditorGUILayout.Space();
         }
 
+        /// <summary>
+        /// 执行渲染预制体Selection相关逻辑。
+        /// </summary>
         private void RenderPrefabSelection(EditorWindow window)
         {
             EditorGUILayout.BeginHorizontal();
@@ -204,6 +240,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             EditorGUILayout.Space();
         }
 
+        /// <summary>
+        /// 执行渲染UserInputs相关逻辑。
+        /// </summary>
         private void RenderUserInputs()
         {
             // Username field
@@ -263,6 +302,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             EditorGUILayout.EndHorizontal();
         }
 
+        /// <summary>
+        /// 执行渲染Validation相关逻辑。
+        /// </summary>
         private void RenderValidation()
         {
             if (string.IsNullOrEmpty(className)) return;
@@ -273,12 +315,18 @@ namespace VGame.GameLogic.Editor.LuaUI
             EditorGUILayout.HelpBox(message, messageType);
         }
 
+        /// <summary>
+        /// 执行渲染输出信息相关逻辑。
+        /// </summary>
         private void RenderOutputInfo()
         {
             RenderFileExistenceStatus();
             RenderPrefabInfo();
         }
 
+        /// <summary>
+        /// 执行渲染文件Existence状态相关逻辑。
+        /// </summary>
         private void RenderFileExistenceStatus()
         {
             if (string.IsNullOrEmpty(outputPath))
@@ -319,6 +367,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             EditorGUILayout.HelpBox(statusMessage, messageType);
         }
 
+        /// <summary>
+        /// 执行渲染预制体信息相关逻辑。
+        /// </summary>
         private void RenderPrefabInfo()
         {
             EditorGUILayout.Space();
@@ -333,6 +384,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             EditorGUILayout.Space();
         }
 
+        /// <summary>
+        /// 执行渲染Generate按钮相关逻辑。
+        /// </summary>
         private void RenderGenerateButton()
         {
             var canGenerate = !string.IsNullOrEmpty(className) && IsValidClassName(className);
@@ -345,6 +399,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             EditorGUILayout.Space();
         }
 
+        /// <summary>
+        /// 执行渲染Preview相关逻辑。
+        /// </summary>
         private void RenderPreview()
         {
             showPreview = EditorGUILayout.Foldout(showPreview, "预览生成的内容", true);
@@ -362,6 +419,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             EditorGUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// 执行渲染PreviewContent相关逻辑。
+        /// </summary>
         private void RenderPreviewContent()
         {
             EditorGUILayout.LabelField("生成的Lua内容:", EditorStyles.boldLabel);
@@ -378,12 +438,18 @@ namespace VGame.GameLogic.Editor.LuaUI
         #endregion
 
         #region Utility Methods
+        /// <summary>
+        /// 执行Copy转换为Clipboard相关逻辑。
+        /// </summary>
         private void CopyToClipboard(string content, string description)
         {
             EditorGUIUtility.systemCopyBuffer = content;
             Debug.Log($"{description} copied to clipboard!");
         }
 
+        /// <summary>
+        /// 更新预览。
+        /// </summary>
         private void UpdatePreview()
         {
             if (string.IsNullOrEmpty(className))
@@ -407,6 +473,9 @@ namespace VGame.GameLogic.Editor.LuaUI
         #endregion
 
         #region Path Generation
+        /// <summary>
+        /// 执行GenerateRes路径相关逻辑。
+        /// </summary>
         private string GenerateResPath(string prefabPath)
         {
             if (string.IsNullOrEmpty(prefabPath)) return string.Empty;
@@ -420,6 +489,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return $"{UI_RES_PREFIX}{Path.GetFileName(prefabPath)}";
         }
 
+        /// <summary>
+        /// 执行GenerateAuto文件路径相关逻辑。
+        /// </summary>
         private string GenerateAutoFilePath(string mainFilePath)
         {
             var directory = Path.GetDirectoryName(mainFilePath);
@@ -428,6 +500,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return Path.Combine(directory, $"{fileName}_Auto{extension}");
         }
 
+        /// <summary>
+        /// 执行GenerateLua输出路径相关逻辑。
+        /// </summary>
         private string GenerateLuaOutputPath(string prefabPath, string prefabName)
         {
             var projectRoot = Path.GetDirectoryName(Application.dataPath);
@@ -451,6 +526,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return Path.Combine(luaDirectory, $"{fileName}{LUA_EXTENSION}");
         }
 
+        /// <summary>
+        /// 执行ExtractRelative路径相关逻辑。
+        /// </summary>
         private string ExtractRelativePath(string prefabPath)
         {
             if (prefabPath.Contains("UIRes/Prefabs/View/"))
@@ -468,6 +546,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return Path.GetFileNameWithoutExtension(prefabPath);
         }
 
+        /// <summary>
+        /// 执行Generate类型名称从预制体路径相关逻辑。
+        /// </summary>
         private string GenerateClassNameFromPrefabPath(string prefabPath, string prefabName)
         {
             // Extract the relative path from UIRes/Prefabs/View/...
@@ -497,6 +578,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return className;
         }
 
+        /// <summary>
+        /// 执行Generate类型名称从路径相关逻辑。
+        /// </summary>
         private string GenerateClassNameFromPath(string luaFilePath)
         {
             var projectRoot = Path.GetDirectoryName(Application.dataPath);
@@ -513,6 +597,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return fileName.StartsWith(UI_PREFIX) ? fileName : $"{UI_PREFIX}{fileName}";
         }
 
+        /// <summary>
+        /// 执行ExtractLua类型名称相关逻辑。
+        /// </summary>
         private string ExtractLuaClassName(string className)
         {
             if (string.IsNullOrEmpty(className)) return string.Empty;
@@ -520,6 +607,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return parts[parts.Length - 1];
         }
 
+        /// <summary>
+        /// 执行Generate输出路径从类型名称相关逻辑。
+        /// </summary>
         private string GenerateOutputPathFromClassName(string className)
         {
             var parts = className.Split('.');
@@ -544,6 +634,9 @@ namespace VGame.GameLogic.Editor.LuaUI
         #endregion
 
         #region Validation
+        /// <summary>
+        /// 执行判断是否Valid类型名称相关逻辑。
+        /// </summary>
         private bool IsValidClassName(string className)
         {
             if (string.IsNullOrEmpty(className)) return false;
@@ -555,6 +648,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return parts.All(IsValidIdentifier);
         }
 
+        /// <summary>
+        /// 执行判断是否Valid标识符相关逻辑。
+        /// </summary>
         private bool IsValidIdentifier(string identifier)
         {
             if (string.IsNullOrEmpty(identifier)) return false;
@@ -562,6 +658,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return identifier.All(c => char.IsLetterOrDigit(c) || c == '_');
         }
 
+        /// <summary>
+        /// 获取类型名称校验消息。
+        /// </summary>
         private string GetClassNameValidationMessage(string className)
         {
             if (string.IsNullOrEmpty(className)) return "类名不能为空";
@@ -583,6 +682,9 @@ namespace VGame.GameLogic.Editor.LuaUI
         #endregion
 
         #region File Operations
+        /// <summary>
+        /// 执行GenerateLua文件相关逻辑。
+        /// </summary>
         public void GenerateLuaFile(
             bool showCompletionDialog = true)
         {
@@ -801,6 +903,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             Debug.Log($"已写入绑定信息和函数到: {autoLuaFilePath}");
         }
 
+        /// <summary>
+        /// 校验Generation。
+        /// </summary>
         private bool ValidateGeneration()
         {
             if (string.IsNullOrEmpty(className))
@@ -825,6 +930,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return true;
         }
 
+        /// <summary>
+        /// 确保目录Exists。
+        /// </summary>
         private void EnsureDirectoryExists(string filePath)
         {
             var directoryPath = Path.GetDirectoryName(filePath);
@@ -834,6 +942,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             }
         }
 
+        /// <summary>
+        /// 执行读取All文本从文件相关逻辑。
+        /// </summary>
         private string ReadAllTextFromFile(string filePath)
         {
             var templatePath = Path.Combine(Application.dataPath, "..", filePath);
@@ -846,6 +957,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return templateContent;
         }
 
+        /// <summary>
+        /// 执行GenerateLua文件Content相关逻辑。
+        /// </summary>
         private string GenerateLuaFileContent()
         {
             string templateContent = ReadAllTextFromFile(TEMPLATE_PATH);
@@ -863,6 +977,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return luaContent;
         }
 
+        /// <summary>
+        /// 执行GenerateAutoLua文件Content相关逻辑。
+        /// </summary>
         private string GenerateAutoLuaFileContent()
         {
             string templateContent = ReadAllTextFromFile(TEMPLATE_AUTO_PATH);
@@ -880,6 +997,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             return luaContent;
         }
 
+        /// <summary>
+        /// 执行GenerateLua状态Content相关逻辑。
+        /// </summary>
         private static string GenerateLuaStateContent(ObjectBinder objectBinder, string realClassName)
         {
             StringBuilder sb = new StringBuilder();
@@ -909,12 +1029,18 @@ namespace VGame.GameLogic.Editor.LuaUI
             }
             return sb.ToString();
         }
+        /// <summary>
+        /// 执行Generate状态Table类型名称相关逻辑。
+        /// </summary>
         private static string GenerateStateTableClassName(string fileName, string stateGroupName)
         {
             // 格式：S_文件名_状态组名
             return $"S_{fileName}_{stateGroupName}";
         }
 
+        /// <summary>
+        /// 执行Generate状态Table定义相关逻辑。
+        /// </summary>
         private static string GenerateStateTableDefinition(string bindingName, StateControl.Runtime.StateGroup stateGroup, string className)
         {
             if (stateGroup == null || stateGroup.States == null || stateGroup.States.Count == 0)
@@ -980,18 +1106,27 @@ namespace VGame.GameLogic.Editor.LuaUI
             return sb.ToString();
         }
 
+        /// <summary>
+        /// 执行显示Success消息相关逻辑。
+        /// </summary>
         private void ShowSuccessMessage()
         {
             Debug.Log($"Lua文件生成成功: {outputPath}");
             EditorUtility.DisplayDialog("成功", $"Lua文件已生成:\n{outputPath}", "确定");
         }
 
+        /// <summary>
+        /// 执行显示错误消息相关逻辑。
+        /// </summary>
         private void ShowErrorMessage(string message)
         {
             Debug.LogError($"生成Lua文件失败: {message}");
             EditorUtility.DisplayDialog("错误", $"生成Lua文件失败:\n{message}", "确定");
         }
 
+        /// <summary>
+        /// 添加对象BinderComponent。
+        /// </summary>
         private void AddObjectBinderComponent(GameObject prefab)
         {
             if (prefab == null) return;
@@ -1020,6 +1155,9 @@ namespace VGame.GameLogic.Editor.LuaUI
             }
         }
 
+        /// <summary>
+        /// 执行Export绑定注释相关逻辑。
+        /// </summary>
         private void ExportBindingComments(GameObject prefab, string insertLine)
         {
             if (prefab == null) return;

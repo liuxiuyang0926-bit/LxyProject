@@ -37,10 +37,25 @@ namespace Game.Main
         [Serializable]
         private sealed class BackgroundConfig
         {
+            /// <summary>
+            /// 公开的启用数据。
+            /// </summary>
             public bool enabled = true;
+            /// <summary>
+            /// 公开的启用旋转数据。
+            /// </summary>
             public bool enableRotation;
+            /// <summary>
+            /// 公开的旋转间隔Seconds数据。
+            /// </summary>
             public float rotationIntervalSeconds = 5f;
+            /// <summary>
+            /// 公开的fade持续时间Seconds数据。
+            /// </summary>
             public float fadeDurationSeconds = 0.5f;
+            /// <summary>
+            /// 公开的background位置数据。
+            /// </summary>
             public string[] backgroundLocations =
                 Array.Empty<string>();
         }
@@ -58,6 +73,9 @@ namespace Game.Main
         private int currentIndex;
         private bool disposed;
 
+        /// <summary>
+        /// 创建启动背景轮播器实例。
+        /// </summary>
         public StartupBackgroundCarousel(
             MonoBehaviour host,
             Image targetImage)
@@ -69,6 +87,9 @@ namespace Game.Main
                 : Color.white;
         }
 
+        /// <summary>
+        /// 执行准备异步相关逻辑。
+        /// </summary>
         public IEnumerator PrepareAsync(ResourcePackage package)
         {
             if (disposed || host == null || targetImage == null)
@@ -92,6 +113,9 @@ namespace Game.Main
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// 异步准备From资源数据库。
+        /// </summary>
         private IEnumerator PrepareFromAssetDatabaseAsync()
         {
             TextAsset configAsset =
@@ -125,6 +149,9 @@ namespace Game.Main
             yield return ActivateAsync(config);
         }
 
+        /// <summary>
+        /// 查找编辑器精灵图。
+        /// </summary>
         private static Sprite FindEditorSprite(string location)
         {
             if (location.StartsWith(
@@ -168,6 +195,9 @@ namespace Game.Main
         }
 #endif
 
+        /// <summary>
+        /// 异步准备From资源包。
+        /// </summary>
         private IEnumerator PrepareFromPackageAsync(
             ResourcePackage package)
         {
@@ -305,6 +335,9 @@ namespace Game.Main
             yield return ActivateAsync(config);
         }
 
+        /// <summary>
+        /// 执行下载资源异步相关逻辑。
+        /// </summary>
         private static IEnumerator DownloadAssetsAsync(
             ResourcePackage package,
             AssetInfo[] assetInfos,
@@ -344,6 +377,9 @@ namespace Game.Main
             completed?.Invoke(succeeded);
         }
 
+        /// <summary>
+        /// 执行Activate异步相关逻辑。
+        /// </summary>
         private IEnumerator ActivateAsync(BackgroundConfig config)
         {
             if (backgrounds.Count == 0)
@@ -376,6 +412,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 执行旋转异步相关逻辑。
+        /// </summary>
         private IEnumerator RotateAsync(
             float intervalSeconds,
             float fadeDurationSeconds)
@@ -391,6 +430,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 执行渐变转换为异步相关逻辑。
+        /// </summary>
         private IEnumerator FadeToAsync(
             Sprite sprite,
             float durationSeconds)
@@ -418,6 +460,9 @@ namespace Game.Main
                 halfDuration);
         }
 
+        /// <summary>
+        /// 执行渐变Alpha异步相关逻辑。
+        /// </summary>
         private IEnumerator FadeAlphaAsync(
             float from,
             float to,
@@ -446,6 +491,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 设置目标Alpha。
+        /// </summary>
         private void SetTargetAlpha(float alpha)
         {
             if (targetImage == null)
@@ -458,6 +506,9 @@ namespace Game.Main
             targetImage.color = color;
         }
 
+        /// <summary>
+        /// 尝试解析配置，并返回是否成功。
+        /// </summary>
         private static bool TryParseConfig(
             TextAsset configAsset,
             out BackgroundConfig config)
@@ -495,6 +546,9 @@ namespace Game.Main
             return true;
         }
 
+        /// <summary>
+        /// 获取Unique位置。
+        /// </summary>
         private static IEnumerable<string> GetUniqueLocations(
             BackgroundConfig config)
         {
@@ -513,6 +567,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 释放当前实例持有的资源。
+        /// </summary>
         public void Dispose()
         {
             if (disposed)

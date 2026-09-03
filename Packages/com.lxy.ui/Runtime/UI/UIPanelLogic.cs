@@ -18,19 +18,46 @@ namespace LxyDemo.UIFramework
         private readonly List<UIPanelLogic> embeddedLogics =
             new List<UIPanelLogic>();
 
+        /// <summary>
+        /// 向调用方提供Owner。
+        /// </summary>
         public UIManager Owner => owner;
+        /// <summary>
+        /// 向调用方提供配置。
+        /// </summary>
         public UIPanelConfig Config { get; private set; }
+        /// <summary>
+        /// 向调用方提供GameObject。
+        /// </summary>
         public GameObject GameObject => gameObject;
+        /// <summary>
+        /// 向调用方提供Transform。
+        /// </summary>
         public Transform Transform =>
             gameObject == null ? null : gameObject.transform;
+        /// <summary>
+        /// 向调用方提供RectTransform。
+        /// </summary>
         public RectTransform RectTransform =>
             gameObject == null
                 ? null
                 : gameObject.transform as RectTransform;
+        /// <summary>
+        /// 指示当前对象是否已加载。
+        /// </summary>
         public bool IsLoaded => gameObject != null;
+        /// <summary>
+        /// 指示Visible是否成立。
+        /// </summary>
         public bool IsVisible => visible && gameObject != null;
+        /// <summary>
+        /// 指示Disposed是否成立。
+        /// </summary>
         public bool IsDisposed => disposed;
 
+        /// <summary>
+        /// 初始化当前实例。
+        /// </summary>
         internal void Initialize(
             UIManager manager,
             UIPanelConfig config,
@@ -47,6 +74,9 @@ namespace LxyDemo.UIFramework
             OnInitialize(userData);
         }
 
+        /// <summary>
+        /// 执行绑定游戏对象相关逻辑。
+        /// </summary>
         internal void BindGameObject(GameObject instance)
         {
             if (disposed)
@@ -60,6 +90,9 @@ namespace LxyDemo.UIFramework
             OnBind();
         }
 
+        /// <summary>
+        /// 显示目标界面。
+        /// </summary>
         internal void Show(object userData)
         {
             if (disposed || gameObject == null)
@@ -73,6 +106,9 @@ namespace LxyDemo.UIFramework
             OnShow(userData);
         }
 
+        /// <summary>
+        /// 隐藏目标界面。
+        /// </summary>
         internal void Hide(bool skipAnimation)
         {
             if (disposed || gameObject == null || !visible)
@@ -85,6 +121,9 @@ namespace LxyDemo.UIFramework
             visible = false;
         }
 
+        /// <summary>
+        /// 执行DisposeLogic相关逻辑。
+        /// </summary>
         internal void DisposeLogic()
         {
             if (disposed)
@@ -151,11 +190,17 @@ namespace LxyDemo.UIFramework
                     includeInactive);
         }
 
+        /// <summary>
+        /// 执行查找相关逻辑。
+        /// </summary>
         public Transform Find(string path)
         {
             return Transform == null ? null : Transform.Find(path);
         }
 
+        /// <summary>
+        /// 关闭Self。
+        /// </summary>
         protected void CloseSelf(bool forceDestroy = false)
         {
             owner?.ClosePanel(Config.Id, forceDestroy);
@@ -196,6 +241,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 释放EmbeddedLogic。
+        /// </summary>
         protected void ReleaseEmbeddedLogic(
             UIPanelLogic logic)
         {
@@ -208,6 +256,9 @@ namespace LxyDemo.UIFramework
             logic.DisposeLogic();
         }
 
+        /// <summary>
+        /// 执行显示EmbeddedLogics相关逻辑。
+        /// </summary>
         private void ShowEmbeddedLogics(object userData)
         {
             for (int index = 0;
@@ -222,6 +273,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行隐藏EmbeddedLogics相关逻辑。
+        /// </summary>
         private void HideEmbeddedLogics(bool skipAnimation)
         {
             for (int index = embeddedLogics.Count - 1;
@@ -245,6 +299,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行DisposeEmbeddedLogics相关逻辑。
+        /// </summary>
         private void DisposeEmbeddedLogics()
         {
             for (int index = embeddedLogics.Count - 1;
@@ -265,26 +322,44 @@ namespace LxyDemo.UIFramework
             embeddedLogics.Clear();
         }
 
+        /// <summary>
+        /// 响应Initialize事件。
+        /// </summary>
         protected virtual void OnInitialize(object userData)
         {
         }
 
+        /// <summary>
+        /// 响应绑定事件。
+        /// </summary>
         protected virtual void OnBind()
         {
         }
 
+        /// <summary>
+        /// 响应Show事件。
+        /// </summary>
         protected virtual void OnShow(object userData)
         {
         }
 
+        /// <summary>
+        /// 响应Hide事件。
+        /// </summary>
         protected virtual void OnHide(bool skipAnimation)
         {
         }
 
+        /// <summary>
+        /// 响应Unbind事件。
+        /// </summary>
         protected virtual void OnUnbind()
         {
         }
 
+        /// <summary>
+        /// 响应Dispose事件。
+        /// </summary>
         protected virtual void OnDispose()
         {
         }

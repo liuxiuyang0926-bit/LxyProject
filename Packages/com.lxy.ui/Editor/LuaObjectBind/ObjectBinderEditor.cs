@@ -13,6 +13,9 @@ namespace LuaObjectBind.Editor
     [CustomEditor(typeof(ObjectBinder))]
     public class ObjectBinderEditor : UnityEditor.Editor
     {
+        /// <summary>
+        /// 绘制 ObjectBinder 的 Inspector 界面。
+        /// </summary>
         public override void OnInspectorGUI()
         {
             ObjectBinder binder = (ObjectBinder)target;
@@ -280,6 +283,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制Conditional检查器。
+        /// </summary>
         private void DrawConditionalInspector()
         {
             serializedObject.Update();
@@ -319,6 +325,9 @@ namespace LuaObjectBind.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 执行判断是否Lua脚本类型相关逻辑。
+        /// </summary>
         private static bool IsLuaScriptType(
             SerializedProperty scriptTypeProperty)
         {
@@ -327,6 +336,9 @@ namespace LuaObjectBind.Editor
                    (int)UIObjectBinderScriptType.Lua;
         }
 
+        /// <summary>
+        /// 执行GenerateLua脚本相关逻辑。
+        /// </summary>
         private static void GenerateLuaScripts(
             ObjectBinder binder)
         {
@@ -373,6 +385,9 @@ namespace LuaObjectBind.Editor
             AssetDatabase.SaveAssets();
         }
 
+        /// <summary>
+        /// 构建Lua模块名称。
+        /// </summary>
         private static string BuildLuaModuleName(
             string outputFolder,
             string prefabName)
@@ -402,6 +417,9 @@ namespace LuaObjectBind.Editor
                 : modulePrefix + "." + prefabName;
         }
 
+        /// <summary>
+        /// 执行GenerateCSharp脚本相关逻辑。
+        /// </summary>
         private static void GenerateCSharpScripts(
             ObjectBinder binder)
         {
@@ -426,6 +444,9 @@ namespace LuaObjectBind.Editor
                 true);
         }
 
+        /// <summary>
+        /// 执行收集BindingsAnd保存相关逻辑。
+        /// </summary>
         private static void CollectBindingsAndSave(
             string prefabPath)
         {
@@ -453,6 +474,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 解析预制体资源。
+        /// </summary>
         private static GameObject ResolvePrefabAsset(
             ObjectBinder binder)
         {

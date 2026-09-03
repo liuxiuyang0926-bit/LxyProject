@@ -22,11 +22,23 @@ namespace StateControl.Editor
 
         private struct MissingInfo
         {
+            /// <summary>
+            /// 公开的Prefab路径数据。
+            /// </summary>
             public string PrefabPath;
+            /// <summary>
+            /// 公开的Node路径数据。
+            /// </summary>
             public string NodePath;
+            /// <summary>
+            /// 公开的Description数据。
+            /// </summary>
             public string Description;
         }
 
+        /// <summary>
+        /// 执行显示窗口相关逻辑。
+        /// </summary>
         [MenuItem("Tools/StateController/检查丢失引用")]
         public static void ShowWindow()
         {
@@ -35,6 +47,9 @@ namespace StateControl.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             EditorGUILayout.LabelField("StateController 丢失引用检查工具", EditorStyles.boldLabel);
@@ -106,6 +121,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 检查全部Prefabs。
+        /// </summary>
         private void CheckAllPrefabs()
         {
             results.Clear();
@@ -155,6 +173,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 检查预制体。
+        /// </summary>
         private void CheckPrefab(string prefabPath)
         {
             GameObject prefabInstance = PrefabUtility.LoadPrefabContents(prefabPath);
@@ -188,6 +209,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 执行判断是否Nested预制体节点相关逻辑。
+        /// </summary>
         private bool IsNestedPrefabNode(GameObject go, GameObject prefabRoot)
         {
             if (go == prefabRoot) return false;
@@ -202,6 +226,9 @@ namespace StateControl.Editor
             return false;
         }
 
+        /// <summary>
+        /// 执行Export转换为Xlsx相关逻辑。
+        /// </summary>
         private void ExportToXlsx()
         {
             //string path = EditorUtility.SaveFilePanel("导出丢失引用报告", "", "StateController丢失引用报告", "xlsx");
@@ -243,6 +270,9 @@ namespace StateControl.Editor
             //EditorUtility.DisplayDialog("导出成功", $"已导出 {results.Count} 条记录到:\n{path}", "确定");
         }
 
+        /// <summary>
+        /// 获取游戏对象路径。
+        /// </summary>
         private string GetGameObjectPath(GameObject go, GameObject root)
         {
             var sb = new StringBuilder(go.name);

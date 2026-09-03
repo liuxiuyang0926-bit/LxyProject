@@ -10,27 +10,57 @@ namespace Game.Battle.Core.Math
         IEquatable<FP>,
         IComparable<FP>
     {
+        /// <summary>
+        /// 公开的Precision数据。
+        /// </summary>
         public const long Precision = 10000L;
 
         private const ulong NegativeLimit = 1UL << 63;
 
+        /// <summary>
+        /// 公开的最小值数据。
+        /// </summary>
         public static readonly FP MinValue = new FP(long.MinValue);
+        /// <summary>
+        /// 公开的最大值数据。
+        /// </summary>
         public static readonly FP MaxValue = new FP(long.MaxValue);
+        /// <summary>
+        /// 公开的Zero数据。
+        /// </summary>
         public static readonly FP Zero = new FP(0L);
+        /// <summary>
+        /// 公开的One数据。
+        /// </summary>
         public static readonly FP One = new FP(Precision);
 
+        /// <summary>
+        /// 创建定点数实例。
+        /// </summary>
         public FP(long rawValue)
         {
             RawValue = rawValue;
         }
 
+        /// <summary>
+        /// 向调用方提供原始值值。
+        /// </summary>
         public long RawValue { get; }
 
+        /// <summary>
+        /// 执行从原始值相关逻辑。
+        /// </summary>
         public static FP FromRaw(long value) => new FP(value);
 
+        /// <summary>
+        /// 执行从整数相关逻辑。
+        /// </summary>
         public static FP FromInt(int value) =>
             new FP(checked((long)value * Precision));
 
+        /// <summary>
+        /// 执行从长整数相关逻辑。
+        /// </summary>
         public static FP FromLong(long value)
         {
             if (!TryMultiplyDivide(
@@ -48,6 +78,9 @@ namespace Game.Battle.Core.Math
             return new FP(rawValue);
         }
 
+        /// <summary>
+        /// 执行从Ratio相关逻辑。
+        /// </summary>
         public static FP FromRatio(long numerator, long denominator)
         {
             if (denominator == 0)
@@ -71,6 +104,9 @@ namespace Game.Battle.Core.Math
             return new FP(rawValue);
         }
 
+        /// <summary>
+        /// 将定点数向下取整为整数。
+        /// </summary>
         public int FloorToInt()
         {
             long result = RawValue / Precision;
@@ -82,6 +118,9 @@ namespace Game.Battle.Core.Math
             return checked((int)result);
         }
 
+        /// <summary>
+        /// 计算绝对值。
+        /// </summary>
         public static FP Abs(FP value)
         {
             if (value.RawValue == long.MinValue)
@@ -97,12 +136,21 @@ namespace Game.Battle.Core.Math
                 : new FP(-value.RawValue);
         }
 
+        /// <summary>
+        /// 执行Min相关逻辑。
+        /// </summary>
         public static FP Min(FP left, FP right) =>
             left <= right ? left : right;
 
+        /// <summary>
+        /// 执行Max相关逻辑。
+        /// </summary>
         public static FP Max(FP left, FP right) =>
             left >= right ? left : right;
 
+        /// <summary>
+        /// 将数值限制在指定范围内。
+        /// </summary>
         public static FP Clamp(FP value, FP min, FP max)
         {
             if (min > max)
@@ -114,6 +162,9 @@ namespace Game.Battle.Core.Math
             return value < min ? min : value > max ? max : value;
         }
 
+        /// <summary>
+        /// 执行Sqrt相关逻辑。
+        /// </summary>
         public static FP Sqrt(FP value)
         {
             if (value.RawValue < 0)
@@ -129,6 +180,9 @@ namespace Game.Battle.Core.Math
             return new FP((long)IntegerSqrt(scaled));
         }
 
+        /// <summary>
+        /// 尝试加法，并返回是否成功。
+        /// </summary>
         public static bool TryAdd(FP left, FP right, out FP result)
         {
             long leftRaw = left.RawValue;
@@ -144,6 +198,9 @@ namespace Game.Battle.Core.Math
             return true;
         }
 
+        /// <summary>
+        /// 尝试减法，并返回是否成功。
+        /// </summary>
         public static bool TrySubtract(
             FP left,
             FP right,
@@ -162,6 +219,9 @@ namespace Game.Battle.Core.Math
             return true;
         }
 
+        /// <summary>
+        /// 尝试乘法，并返回是否成功。
+        /// </summary>
         public static bool TryMultiply(
             FP left,
             FP right,
@@ -181,6 +241,9 @@ namespace Game.Battle.Core.Math
             return true;
         }
 
+        /// <summary>
+        /// 尝试除法，并返回是否成功。
+        /// </summary>
         public static bool TryDivide(
             FP left,
             FP right,
@@ -201,6 +264,9 @@ namespace Game.Battle.Core.Math
             return true;
         }
 
+        /// <summary>
+        /// 执行 + 运算符重载。
+        /// </summary>
         public static FP operator +(FP left, FP right)
         {
             if (!TryAdd(left, right, out FP result))
@@ -214,6 +280,9 @@ namespace Game.Battle.Core.Math
             return result;
         }
 
+        /// <summary>
+        /// 执行 - 运算符重载。
+        /// </summary>
         public static FP operator -(FP left, FP right)
         {
             if (!TrySubtract(left, right, out FP result))
@@ -227,6 +296,9 @@ namespace Game.Battle.Core.Math
             return result;
         }
 
+        /// <summary>
+        /// 执行 - 运算符重载。
+        /// </summary>
         public static FP operator -(FP value)
         {
             if (value.RawValue == long.MinValue)
@@ -240,6 +312,9 @@ namespace Game.Battle.Core.Math
             return new FP(-value.RawValue);
         }
 
+        /// <summary>
+        /// 执行 * 运算符重载。
+        /// </summary>
         public static FP operator *(FP left, FP right)
         {
             if (!TryMultiply(left, right, out FP result))
@@ -253,6 +328,9 @@ namespace Game.Battle.Core.Math
             return result;
         }
 
+        /// <summary>
+        /// 执行 / 运算符重载。
+        /// </summary>
         public static FP operator /(FP left, FP right)
         {
             if (right.RawValue == 0)
@@ -272,36 +350,69 @@ namespace Game.Battle.Core.Math
             return result;
         }
 
+        /// <summary>
+        /// 执行 == 运算符重载。
+        /// </summary>
         public static bool operator ==(FP left, FP right) =>
             left.RawValue == right.RawValue;
 
+        /// <summary>
+        /// 执行 != 运算符重载。
+        /// </summary>
         public static bool operator !=(FP left, FP right) =>
             left.RawValue != right.RawValue;
 
+        /// <summary>
+        /// 执行 < 运算符重载。
+        /// </summary>
         public static bool operator <(FP left, FP right) =>
             left.RawValue < right.RawValue;
 
+        /// <summary>
+        /// 执行 > 运算符重载。
+        /// </summary>
         public static bool operator >(FP left, FP right) =>
             left.RawValue > right.RawValue;
 
+        /// <summary>
+        /// 执行 <= 运算符重载。
+        /// </summary>
         public static bool operator <=(FP left, FP right) =>
             left.RawValue <= right.RawValue;
 
+        /// <summary>
+        /// 执行 >= 运算符重载。
+        /// </summary>
         public static bool operator >=(FP left, FP right) =>
             left.RawValue >= right.RawValue;
 
+        /// <summary>
+        /// 比较当前实例与指定对象是否相等。
+        /// </summary>
         public bool Equals(FP other) =>
             RawValue == other.RawValue;
 
+        /// <summary>
+        /// 比较当前实例与指定对象是否相等。
+        /// </summary>
         public override bool Equals(object obj) =>
             obj is FP other && Equals(other);
 
+        /// <summary>
+        /// 获取当前实例的哈希代码。
+        /// </summary>
         public override int GetHashCode() =>
             RawValue.GetHashCode();
 
+        /// <summary>
+        /// 比较当前实例与指定对象的排序关系。
+        /// </summary>
         public int CompareTo(FP other) =>
             RawValue.CompareTo(other.RawValue);
 
+        /// <summary>
+        /// 生成当前实例的字符串表示。
+        /// </summary>
         public override string ToString()
         {
             ulong magnitude = GetMagnitude(RawValue);
@@ -311,6 +422,9 @@ namespace Game.Battle.Core.Math
             return $"{sign}{whole}.{fraction:D4}";
         }
 
+        /// <summary>
+        /// 尝试执行乘除运算，并检测计算溢出。
+        /// </summary>
         private static bool TryMultiplyDivide(
             long left,
             long right,
@@ -358,6 +472,9 @@ namespace Game.Battle.Core.Math
             return true;
         }
 
+        /// <summary>
+        /// 执行MultiplyUnsigned相关逻辑。
+        /// </summary>
         private static UInt128 MultiplyUnsigned(
             ulong left,
             ulong right)
@@ -387,6 +504,9 @@ namespace Game.Battle.Core.Math
             }
         }
 
+        /// <summary>
+        /// 尝试除法Unsigned，并返回是否成功。
+        /// </summary>
         private static bool TryDivideUnsigned(
             UInt128 value,
             ulong divisor,
@@ -434,6 +554,9 @@ namespace Game.Battle.Core.Math
             return true;
         }
 
+        /// <summary>
+        /// 计算无符号整数的平方根。
+        /// </summary>
         private static ulong IntegerSqrt(UInt128 value)
         {
             if (value.High == 0 && value.Low == 0)
@@ -460,6 +583,9 @@ namespace Game.Battle.Core.Math
             return low;
         }
 
+        /// <summary>
+        /// 获取Magnitude。
+        /// </summary>
         private static ulong GetMagnitude(long value)
         {
             return value >= 0
@@ -467,6 +593,9 @@ namespace Game.Battle.Core.Math
                 : (ulong)(-(value + 1L)) + 1UL;
         }
 
+        /// <summary>
+        /// 创建溢出。
+        /// </summary>
         private static OverflowException CreateOverflow(
             string operation,
             long leftRaw,
@@ -479,15 +608,27 @@ namespace Game.Battle.Core.Math
 
         private readonly struct UInt128 : IComparable<UInt128>
         {
+            /// <summary>
+            /// 创建UInt128实例。
+            /// </summary>
             public UInt128(ulong high, ulong low)
             {
                 High = high;
                 Low = low;
             }
 
+            /// <summary>
+            /// 向调用方提供高位。
+            /// </summary>
             public ulong High { get; }
+            /// <summary>
+            /// 向调用方提供低位。
+            /// </summary>
             public ulong Low { get; }
 
+            /// <summary>
+            /// 比较当前实例与指定对象的排序关系。
+            /// </summary>
             public int CompareTo(UInt128 other)
             {
                 int highResult = High.CompareTo(other.High);

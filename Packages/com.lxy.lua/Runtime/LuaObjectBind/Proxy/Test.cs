@@ -6,6 +6,9 @@ namespace LuaObjectBind
 {
     public class Test : MonoBehaviour
     {
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         public void OnEnable()
         {
             FieldBindDispatcher dispatcher = new();

@@ -4,6 +4,9 @@ namespace LuaObjectBind.Handlers
 {
     public class RectTransformHandler : AFieldBindHandler<RectTransform>
     {
+        /// <summary>
+        /// 处理Vector2。
+        /// </summary>
         protected override void HandleVector2(RectTransform comp, FieldBindEnum type, Vector2 value)
         {
             switch (type)
@@ -17,6 +20,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取Vector2。
+        /// </summary>
         protected override Vector2 GetVector2(RectTransform comp, FieldBindEnum type)
         {
             switch (type)

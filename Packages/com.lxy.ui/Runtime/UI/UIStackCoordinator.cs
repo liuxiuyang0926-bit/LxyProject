@@ -5,22 +5,37 @@ namespace LxyDemo.UIFramework
 {
     internal sealed class UIStackEntry
     {
+        /// <summary>
+        /// 公开的配置数据。
+        /// </summary>
         public UIPanelConfig Config;
+        /// <summary>
+        /// 指示User数据。
+        /// </summary>
         public object UserData;
     }
 
     internal readonly struct UIStackPushResult
     {
+        /// <summary>
+        /// 创建UI栈PushResult实例。
+        /// </summary>
         public UIStackPushResult(UIPanelConfig previousTop)
         {
             PreviousTop = previousTop;
         }
 
+        /// <summary>
+        /// 向调用方提供PreviousTop。
+        /// </summary>
         public UIPanelConfig PreviousTop { get; }
     }
 
     internal readonly struct UIStackPopResult
     {
+        /// <summary>
+        /// 创建UI栈PopResult实例。
+        /// </summary>
         public UIStackPopResult(
             bool found,
             bool wasTop,
@@ -31,13 +46,25 @@ namespace LxyDemo.UIFramework
             NewTop = newTop;
         }
 
+        /// <summary>
+        /// 向调用方提供Found。
+        /// </summary>
         public bool Found { get; }
+        /// <summary>
+        /// 向调用方提供WasTop。
+        /// </summary>
         public bool WasTop { get; }
+        /// <summary>
+        /// 向调用方提供NewTop。
+        /// </summary>
         public UIStackEntry NewTop { get; }
     }
 
     internal sealed class UIStackCoordinator
     {
+        /// <summary>
+        /// 执行压入相关逻辑。
+        /// </summary>
         public UIStackPushResult Push(
             List<UIStackEntry> stack,
             UIPanelConfig config,
@@ -82,6 +109,9 @@ namespace LxyDemo.UIFramework
                     : null);
         }
 
+        /// <summary>
+        /// 执行弹出相关逻辑。
+        /// </summary>
         public UIStackPopResult Pop(
             List<UIStackEntry> stack,
             UIPanelConfig config,
@@ -110,6 +140,9 @@ namespace LxyDemo.UIFramework
             return new UIStackPopResult(true, wasTop, newTop);
         }
 
+        /// <summary>
+        /// 执行移除相关逻辑。
+        /// </summary>
         public bool Remove(
             List<UIStackEntry> stack,
             string panelId)
@@ -124,6 +157,9 @@ namespace LxyDemo.UIFramework
             return true;
         }
 
+        /// <summary>
+        /// 执行判断是否包含相关逻辑。
+        /// </summary>
         public bool Contains(
             List<UIStackEntry> stack,
             string panelId)
@@ -131,6 +167,9 @@ namespace LxyDemo.UIFramework
             return FindIndex(stack, panelId) >= 0;
         }
 
+        /// <summary>
+        /// 获取Top。
+        /// </summary>
         public UIStackEntry GetTop(List<UIStackEntry> stack)
         {
             return stack.Count == 0
@@ -138,6 +177,9 @@ namespace LxyDemo.UIFramework
                 : stack[stack.Count - 1];
         }
 
+        /// <summary>
+        /// 查找索引。
+        /// </summary>
         private static int FindIndex(
             List<UIStackEntry> stack,
             string panelId)

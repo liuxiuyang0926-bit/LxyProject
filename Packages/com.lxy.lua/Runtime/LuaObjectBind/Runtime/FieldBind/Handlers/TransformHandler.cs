@@ -4,6 +4,9 @@ namespace LuaObjectBind.Handlers
 {
     public class TransformHandler : AFieldBindHandler<Transform>
     {
+        /// <summary>
+        /// 处理Vector3。
+        /// </summary>
         protected override void HandleVector3(Transform comp, FieldBindEnum type, Vector3 value)
         {
             switch (type)
@@ -26,6 +29,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取Vector3。
+        /// </summary>
         protected override Vector3 GetVector3(Transform comp, FieldBindEnum type)
         {
             switch (type)

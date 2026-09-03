@@ -29,6 +29,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 执行获取相关逻辑。
+        /// </summary>
         public object Get(string name)
         {
             if (this.binds == null || this.binds.Count <= 0)

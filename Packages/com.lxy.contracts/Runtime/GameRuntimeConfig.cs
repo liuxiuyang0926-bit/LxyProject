@@ -94,6 +94,9 @@ namespace Game.Contracts
             return true;
         }
 
+        /// <summary>
+        /// 重置BootstrapOverride。
+        /// </summary>
         public static void ResetBootstrapOverride()
         {
             gameConfigUrl = SeedGameConfigUrl;
@@ -105,6 +108,9 @@ namespace Game.Contracts
             PlayerPrefs.Save();
         }
 
+        /// <summary>
+        /// 确保Initialized。
+        /// </summary>
         private static void EnsureInitialized()
         {
             if (initialized)
@@ -129,6 +135,9 @@ namespace Game.Contracts
             initialized = true;
         }
 
+        /// <summary>
+        /// 尝试校验Http地址，并返回是否成功。
+        /// </summary>
         private static bool TryValidateHttpUrl(
             string value,
             out string error)

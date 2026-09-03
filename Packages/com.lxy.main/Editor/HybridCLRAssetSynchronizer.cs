@@ -22,6 +22,9 @@ namespace Game.Main.Editor
             "Assets/GameResources/HybridCLR/" +
             "HybridCLRAssemblyManifest.bytes";
 
+        /// <summary>
+        /// 执行GenerateAllAndSync相关逻辑。
+        /// </summary>
         [MenuItem(
             "工具/HybridCLR/生成全部并同步到 YooAsset",
             priority = 100)]
@@ -31,6 +34,9 @@ namespace Game.Main.Editor
             SyncActiveBuildTarget();
         }
 
+        /// <summary>
+        /// 执行SyncActive构建目标相关逻辑。
+        /// </summary>
         [MenuItem(
             "工具/HybridCLR/同步现有产物到 YooAsset",
             priority = 101)]
@@ -50,6 +56,9 @@ namespace Game.Main.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Sync相关逻辑。
+        /// </summary>
         public static void Sync(BuildTarget target)
         {
             IReadOnlyList<string> aotDlls =
@@ -168,6 +177,9 @@ namespace Game.Main.Editor
                 .ToArray();
         }
 
+        /// <summary>
+        /// 校验热更新Update加载顺序。
+        /// </summary>
         private static void ValidateHotUpdateLoadOrder(
             IReadOnlyList<string> hotUpdateDlls)
         {
@@ -192,6 +204,9 @@ namespace Game.Main.Editor
                 "Assembly-CSharp.dll");
         }
 
+        /// <summary>
+        /// 校验DependencyBefore。
+        /// </summary>
         private static void ValidateDependencyBefore(
             IReadOnlyList<string> hotUpdateDlls,
             string dependency,
@@ -215,6 +230,9 @@ namespace Game.Main.Editor
                 "Hot Update Assemblies 顺序。");
         }
 
+        /// <summary>
+        /// 查找索引。
+        /// </summary>
         private static int FindIndex(
             IReadOnlyList<string> values,
             string target)
@@ -233,6 +251,9 @@ namespace Game.Main.Editor
             return -1;
         }
 
+        /// <summary>
+        /// 构建复制项。
+        /// </summary>
         private static IReadOnlyList<CopyItem> BuildCopyItems(
             string sourceDirectory,
             string destinationAssetDirectory,
@@ -246,6 +267,9 @@ namespace Game.Main.Editor
                 .ToArray();
         }
 
+        /// <summary>
+        /// 校验Sources。
+        /// </summary>
         private static void ValidateSources(
             IEnumerable<CopyItem> copies,
             string category)
@@ -267,6 +291,9 @@ namespace Game.Main.Editor
                 "HybridCLR/Generate/All。");
         }
 
+        /// <summary>
+        /// 执行同步目录相关逻辑。
+        /// </summary>
         private static int SynchronizeDirectory(
             string destinationAssetDirectory,
             IReadOnlyList<CopyItem> copies)
@@ -316,6 +343,9 @@ namespace Game.Main.Editor
             return changedCount;
         }
 
+        /// <summary>
+        /// 执行写入运行时清单相关逻辑。
+        /// </summary>
         private static bool WriteRuntimeManifest(
             IReadOnlyList<string> aotDlls,
             IReadOnlyList<string> hotUpdateDlls)
@@ -358,6 +388,9 @@ namespace Game.Main.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行追加JsonArray相关逻辑。
+        /// </summary>
         private static void AppendJsonArray(
             StringBuilder builder,
             string fieldName,
@@ -375,6 +408,9 @@ namespace Game.Main.Editor
             builder.AppendLine(appendComma ? "  ]," : "  ]");
         }
 
+        /// <summary>
+        /// 执行转义相关逻辑。
+        /// </summary>
         private static string Escape(string value)
         {
             return value
@@ -382,6 +418,9 @@ namespace Game.Main.Editor
                 .Replace("\"", "\\\"");
         }
 
+        /// <summary>
+        /// 执行文件Equal相关逻辑。
+        /// </summary>
         private static bool FilesEqual(
             string firstPath,
             string secondPath)
@@ -437,6 +476,9 @@ namespace Game.Main.Editor
             }
         }
 
+        /// <summary>
+        /// 执行资源路径转换为Absolute路径相关逻辑。
+        /// </summary>
         private static string AssetPathToAbsolutePath(
             string assetPath)
         {
@@ -444,6 +486,9 @@ namespace Game.Main.Editor
                 Path.Combine(SettingsUtil.ProjectDir, assetPath));
         }
 
+        /// <summary>
+        /// 执行Absolute路径转换为资源路径相关逻辑。
+        /// </summary>
         private static string AbsolutePathToAssetPath(
             string absolutePath)
         {
@@ -468,6 +513,9 @@ namespace Game.Main.Editor
 
         private readonly struct CopyItem
         {
+            /// <summary>
+            /// 创建CopyItem实例。
+            /// </summary>
             public CopyItem(
                 string sourcePath,
                 string destinationAssetPath)
@@ -476,7 +524,13 @@ namespace Game.Main.Editor
                 DestinationAssetPath = destinationAssetPath;
             }
 
+            /// <summary>
+            /// 向调用方提供源数据路径。
+            /// </summary>
             public string SourcePath { get; }
+            /// <summary>
+            /// 向调用方提供目标位置资源路径。
+            /// </summary>
             public string DestinationAssetPath { get; }
         }
     }

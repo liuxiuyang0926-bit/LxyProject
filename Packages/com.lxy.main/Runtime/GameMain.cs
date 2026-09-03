@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Reflection;
 using Game.Contracts;
 using Game.Main;
 using LxyDemo.SceneManagement;
@@ -15,11 +16,43 @@ namespace LxyDemo
     [DisallowMultipleComponent]
     public class GameMain : MonoBehaviour
     {
+        /// <summary>
+        /// 启动下载界面的 Resources 加载路径；资源更新期间用于显示进度与错误。
+        /// </summary>
         private const string StartupDownloadViewResourcePath =
             "UI/UISlider";
+
+        /// <summary>
+        /// 是否在资源和热更新运行时就绪后自动进入首个业务场景。
+        /// </summary>
         private const bool LoadFirstSceneOnStart = true;
+
+        /// <summary>
+        /// 自动启动时要加载的首个业务场景名称。
+        /// </summary>
         private const string FirstSceneName = "Login";
+
+        /// <summary>
+        /// 首场景 UI 启动类型位于热更新程序集。不能直接序列化在
+        /// APK 内置场景中，必须在 HybridCLR 完成后动态创建。
+        /// </summary>
+        private const string FirstSceneRuntimeAssemblyName =
+            "Game.UI";
+
+        private const string FirstSceneRuntimeTypeName =
+            "LxyDemo.UIFramework.UIStartup";
+
+        private const string FirstSceneRuntimeObjectName =
+            "[UIStartup]";
+
+        /// <summary>
+        /// 是否在首个业务场景加载完成后等待其热更新运行时初始化。
+        /// </summary>
         private const bool InitializeFirstSceneRuntime = true;
+
+        /// <summary>
+        /// 等待首个业务场景运行时完成初始化的最长时间，单位为秒。
+        /// </summary>
         private const float FirstSceneRuntimeTimeoutSeconds = 30f;
 
         public enum BootstrapStage
@@ -36,6 +69,9 @@ namespace LxyDemo
 
         public readonly struct BootstrapSnapshot
         {
+            /// <summary>
+            /// 创建Bootstrap快照实例。
+            /// </summary>
             public BootstrapSnapshot(
                 BootstrapStage stage,
                 float progress,
@@ -46,8 +82,17 @@ namespace LxyDemo
                 Message = message ?? string.Empty;
             }
 
+            /// <summary>
+            /// 当前操作所处的执行阶段。
+            /// </summary>
             public BootstrapStage Stage { get; }
+            /// <summary>
+            /// 当前操作的归一化进度，取值范围为 0 到 1。
+            /// </summary>
             public float Progress { get; }
+            /// <summary>
+            /// 当前操作的状态说明文本。
+            /// </summary>
             public string Message { get; }
         }
 
@@ -55,12 +100,39 @@ namespace LxyDemo
         private YooAssetLauncher resourceLauncher;
         private HybridCLRLoader hybridCLRLoader;
 
+        /// <summary>
+        /// 向调用方提供实例。
+        /// </summary>
         public static GameMain Instance => instance;
+
+        /// <summary>
+        /// 指示当前对象是否正在初始化。
+        /// </summary>
         public bool IsInitializing { get; private set; }
+
+        /// <summary>
+        /// 指示当前对象是否已初始化。
+        /// </summary>
         public bool IsInitialized { get; private set; }
+
+        /// <summary>
+        /// 最近一次启动失败的错误信息；启动成功且未发生错误时为 null。
+        /// </summary>
         public string LastError { get; private set; }
+
+        /// <summary>
+        /// 当前操作所处的执行阶段。
+        /// </summary>
         public BootstrapStage Stage { get; private set; }
+
+        /// <summary>
+        /// 当前操作的归一化进度，取值范围为 0 到 1。
+        /// </summary>
         public float Progress { get; private set; }
+
+        /// <summary>
+        /// 当前操作的状态说明文本。
+        /// </summary>
         public string StatusMessage { get; private set; }
 
         public event Action<BootstrapSnapshot> StatusChanged;
@@ -68,6 +140,9 @@ namespace LxyDemo
         private HotUpdateStartupContext hotUpdateContext;
         private StartupDownloadView startupDownloadView;
 
+        /// <summary>
+        /// 初始化组件的运行时状态。
+        /// </summary>
         protected virtual void Awake()
         {
             if (instance != null && instance != this)
@@ -87,6 +162,9 @@ namespace LxyDemo
             DontDestroyOnLoad(gameObject);
         }
 
+        /// <summary>
+        /// 启动组件的运行流程。
+        /// </summary>
         protected virtual IEnumerator Start()
         {
             IsInitializing = true;
@@ -234,6 +312,9 @@ namespace LxyDemo
             }
         }
 
+        /// <summary>
+        /// 异步加载首个场景。
+        /// </summary>
         private IEnumerator LoadFirstSceneAsync(string targetScene)
         {
             GameSceneManager manager =
@@ -278,9 +359,102 @@ namespace LxyDemo
                 Fail(
                     $"业务场景加载结果不一致，期望 {targetScene}，" +
                     $"实际 {manager.ActiveSceneName}。");
+                yield break;
+            }
+
+            if (!TryCreateFirstSceneRuntime(out string runtimeError))
+            {
+                Fail(runtimeError);
             }
         }
 
+        /// <summary>
+        /// 从已加载的热更新程序集动态创建首场景运行时。
+        /// Login 是 APK 内置场景，若把 Game.UI 的 MonoBehaviour 直接
+        /// 序列化到场景中，远端 DLL 的字段变更会和旧 APK 的场景数据
+        /// 产生序列化布局冲突。
+        /// </summary>
+        private bool TryCreateFirstSceneRuntime(out string error)
+        {
+            error = null;
+            if (FirstSceneRuntimeBridge.Current != null)
+            {
+                return true;
+            }
+
+            if (hybridCLRLoader == null || !hybridCLRLoader.IsReady)
+            {
+                error = "HybridCLR 尚未就绪，不能创建首场景 UI 运行时。";
+                return false;
+            }
+
+            Assembly runtimeAssembly = null;
+            foreach (Assembly assembly in
+                     hybridCLRLoader.LoadedHotUpdateAssemblies)
+            {
+                if (string.Equals(
+                        assembly.GetName().Name,
+                        FirstSceneRuntimeAssemblyName,
+                        StringComparison.Ordinal))
+                {
+                    runtimeAssembly = assembly;
+                    break;
+                }
+            }
+
+            if (runtimeAssembly == null)
+            {
+                error = "未加载首场景 UI 热更新程序集：" +
+                        FirstSceneRuntimeAssemblyName;
+                return false;
+            }
+
+            Type runtimeType = runtimeAssembly.GetType(
+                FirstSceneRuntimeTypeName);
+            if (runtimeType == null)
+            {
+                error = "热更新程序集缺少首场景 UI 类型：" +
+                        FirstSceneRuntimeTypeName;
+                return false;
+            }
+
+            if (!typeof(MonoBehaviour).IsAssignableFrom(runtimeType))
+            {
+                error = "首场景 UI 类型不是 MonoBehaviour：" +
+                        FirstSceneRuntimeTypeName;
+                return false;
+            }
+
+            if (!typeof(IFirstSceneRuntime).IsAssignableFrom(
+                    runtimeType))
+            {
+                error = "首场景 UI 类型未实现 IFirstSceneRuntime：" +
+                        FirstSceneRuntimeTypeName;
+                return false;
+            }
+
+            var runtimeObject = new GameObject(
+                FirstSceneRuntimeObjectName);
+            runtimeObject.AddComponent(runtimeType);
+
+            if (FirstSceneRuntimeBridge.Current == null)
+            {
+                Destroy(runtimeObject);
+                error = "首场景 UI 热更新组件未注册 IFirstSceneRuntime：" +
+                        FirstSceneRuntimeTypeName;
+                return false;
+            }
+
+            Debug.Log(
+                "[GameMain] 已动态创建首场景 UI 运行时：" +
+                FirstSceneRuntimeTypeName,
+                runtimeObject);
+            return true;
+        }
+
+        /// <summary>
+        /// 执行等待For首个场景运行时异步相关逻辑。
+        /// </summary>
         private IEnumerator WaitForFirstSceneRuntimeAsync()
         {
             SetStage(
@@ -317,12 +491,21 @@ namespace LxyDemo
 
             hotUpdateContext?.CompleteFirstSceneRuntime();
 
+            // UISlider 必须跨过 Start -> Login 的 Single 场景切换；
+            // 等 Login UI 至少绘制一帧后再隐藏，避免旧场景销毁与
+            // UICanvasRoot 出现之间露出相机的黑色清屏。
+            yield return null;
+            startupDownloadView?.HideAfterStartup();
+
             SetStage(
                 BootstrapStage.StartingUIAndLua,
                 0.99f,
                 "首场景 UI 运行时已就绪");
         }
 
+        /// <summary>
+        /// 响应资源状态Changed事件。
+        /// </summary>
         private void OnResourceStatusChanged(
             YooAssetLauncher.UpdateSnapshot snapshot)
         {
@@ -332,6 +515,9 @@ namespace LxyDemo
                 snapshot.Message);
         }
 
+        /// <summary>
+        /// 响应热更新Update状态Changed事件。
+        /// </summary>
         private void OnHotUpdateStatusChanged(
             HotUpdateStartupProgress progress)
         {
@@ -341,6 +527,9 @@ namespace LxyDemo
                 progress.Message);
         }
 
+        /// <summary>
+        /// 响应场景加载进度Changed事件。
+        /// </summary>
         private void OnSceneLoadProgressChanged(
             string sceneName,
             float progress)
@@ -351,6 +540,9 @@ namespace LxyDemo
                 $"加载业务场景：{sceneName}");
         }
 
+        /// <summary>
+        /// 设置阶段。
+        /// </summary>
         private void SetStage(
             BootstrapStage stage,
             float progress,
@@ -382,6 +574,9 @@ namespace LxyDemo
             }
         }
 
+        /// <summary>
+        /// 执行标记失败相关逻辑。
+        /// </summary>
         private void Fail(string message)
         {
             LastError = message;
@@ -395,6 +590,9 @@ namespace LxyDemo
             Debug.LogError("[GameMain] " + message, this);
         }
 
+        /// <summary>
+        /// 执行要求强制更新相关逻辑。
+        /// </summary>
         private void RequireForceUpdate()
         {
             string message =
@@ -420,6 +618,9 @@ namespace LxyDemo
                 this);
         }
 
+        /// <summary>
+        /// 尝试创建启动下载视图，并返回是否成功。
+        /// </summary>
         private bool TryCreateStartupDownloadView(out string error)
         {
             if (startupDownloadView != null)
@@ -441,6 +642,7 @@ namespace LxyDemo
 
             GameObject viewObject = Instantiate(template);
             viewObject.name = "UISlider";
+            viewObject.transform.SetParent(transform, false);
             viewObject.transform.localScale = Vector3.one;
 
             if (viewObject.TryGetComponent(
@@ -472,6 +674,9 @@ namespace LxyDemo
             return true;
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         protected virtual void OnDestroy()
         {
             if (instance == this)

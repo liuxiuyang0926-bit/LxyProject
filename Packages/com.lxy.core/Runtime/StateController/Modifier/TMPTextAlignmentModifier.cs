@@ -7,9 +7,15 @@ namespace StateControl.Runtime
     [Serializable]
     public class TMPTextAlignmentModifier : BaseModifier
     {
+        /// <summary>
+        /// 公开的值数据。
+        /// </summary>
         public TextAlignmentOptions Value;
         private TextAlignmentOptions _originValue;
         
+        /// <summary>
+        /// 修改目标状态。
+        /// </summary>
         public override void Modify(ModifierTarget target)
         {
             if (target.TargetObject is TMP_Text tmpText)
@@ -23,6 +29,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 执行记录原始值值相关逻辑。
+        /// </summary>
         public override void RecordOriginValue(ModifierTarget target)
         {
             if (target.TargetObject is TMP_Text tmpText)
@@ -36,6 +45,9 @@ namespace StateControl.Runtime
             }
         }
         
+        /// <summary>
+        /// 添加Field。
+        /// </summary>
         public override void AddField(VisualElement root, Action onValueChanged, ModifierTarget target)
         {
 #if UNITY_EDITOR
@@ -98,6 +110,9 @@ namespace StateControl.Runtime
 #endif
         }
 
+        /// <summary>
+        /// 创建当前实例的副本。
+        /// </summary>
         public override BaseModifier Clone()
         {
             return new TMPTextAlignmentModifier

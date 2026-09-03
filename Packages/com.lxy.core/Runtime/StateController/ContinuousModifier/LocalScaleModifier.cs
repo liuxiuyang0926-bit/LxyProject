@@ -10,12 +10,27 @@ namespace StateControl.Runtime.ContinuousModifier
     [Serializable]
     public class LocalScaleModifier : IContinuousModifier
     {
+        /// <summary>
+        /// 公开的目标数据。
+        /// </summary>
         public RectTransform Target;
+        /// <summary>
+        /// 公开的From数据。
+        /// </summary>
         public Vector3 From;
+        /// <summary>
+        /// 公开的To数据。
+        /// </summary>
         public Vector3 To;
 
+        /// <summary>
+        /// 向调用方提供Modifier类型。
+        /// </summary>
         public ContinuousModifierTypeEnum ModifierType => ContinuousModifierTypeEnum.LocalScale;
 
+        /// <summary>
+        /// 执行应用相关逻辑。
+        /// </summary>
         public void Apply(float progress)
         {
             if (Target == null)
@@ -24,6 +39,9 @@ namespace StateControl.Runtime.ContinuousModifier
             Target.localScale = newScale;
         }
 
+        /// <summary>
+        /// 添加Field。
+        /// </summary>
         public void AddField(VisualElement root)
         {
 #if UNITY_EDITOR

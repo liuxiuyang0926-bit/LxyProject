@@ -7,12 +7,24 @@ namespace Game.Battle.Core
 
         private ulong value;
 
+        /// <summary>
+        /// 向调用方提供值。
+        /// </summary>
         public ulong Value => value == 0 ? OffsetBasis : value;
 
+        /// <summary>
+        /// 执行添加相关逻辑。
+        /// </summary>
         public void Add(bool item) => Add(item ? 1 : 0);
 
+        /// <summary>
+        /// 执行添加相关逻辑。
+        /// </summary>
         public void Add(int item) => Add(unchecked((uint)item));
 
+        /// <summary>
+        /// 执行添加相关逻辑。
+        /// </summary>
         public void Add(uint item)
         {
             EnsureInitialized();
@@ -22,8 +34,14 @@ namespace Game.Battle.Core
             AddByte((byte)(item >> 24));
         }
 
+        /// <summary>
+        /// 执行添加相关逻辑。
+        /// </summary>
         public void Add(long item) => Add(unchecked((ulong)item));
 
+        /// <summary>
+        /// 执行添加相关逻辑。
+        /// </summary>
         public void Add(ulong item)
         {
             EnsureInitialized();
@@ -33,6 +51,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 确保Initialized。
+        /// </summary>
         private void EnsureInitialized()
         {
             if (value == 0)
@@ -41,6 +62,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 添加Byte。
+        /// </summary>
         private void AddByte(byte item)
         {
             value ^= item;

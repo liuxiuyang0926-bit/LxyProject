@@ -5,6 +5,9 @@ namespace LuaObjectBind.Handlers
     [FieldBindHandler]
     public class SliderHandler : AFieldBindHandler<Slider>
     {
+        /// <summary>
+        /// 将浮点值写入滑块组件。
+        /// </summary>
         protected override void HandleFloat(Slider comp, FieldBindEnum type, float value)
         {
             switch (type)
@@ -15,6 +18,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取浮点数。
+        /// </summary>
         protected override float GetFloat(Slider comp, FieldBindEnum type)
         {
             switch (type)
@@ -26,6 +32,9 @@ namespace LuaObjectBind.Handlers
             return 0;
         }
 
+        /// <summary>
+        /// 处理布尔值。
+        /// </summary>
         protected override void HandleBool(Slider comp, FieldBindEnum type, bool value)
         {
             switch (type)
@@ -36,6 +45,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取布尔值。
+        /// </summary>
         protected override bool GetBool(Slider comp, FieldBindEnum type)
         {
             switch (type)

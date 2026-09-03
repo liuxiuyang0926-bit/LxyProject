@@ -14,14 +14,29 @@ namespace StateControl.Editor
     {
         private class StateClipboard
         {
+            /// <summary>
+            /// 公开的名称数据。
+            /// </summary>
             public string Name;
+            /// <summary>
+            /// 公开的Note数据。
+            /// </summary>
             public string Note;
         }
 
         private class StateGroupClipboard
         {
+            /// <summary>
+            /// 公开的Group名称数据。
+            /// </summary>
             public string GroupName;
+            /// <summary>
+            /// 公开的GroupNote数据。
+            /// </summary>
             public string GroupNote;
+            /// <summary>
+            /// 公开的状态数据。
+            /// </summary>
             public List<StateClipboard> States = new List<StateClipboard>();
         }
 
@@ -38,6 +53,9 @@ namespace StateControl.Editor
         private ScrollView modifierContainer;
         private VisualElement dragArea;
 
+        /// <summary>
+        /// 执行显示窗口相关逻辑。
+        /// </summary>
         [MenuItem("Window/状态编辑器")]
         public static void ShowWindow()
         {
@@ -46,6 +64,9 @@ namespace StateControl.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// 创建GUI。
+        /// </summary>
         private void CreateGUI()
         {
             var root = rootVisualElement;
@@ -212,6 +233,9 @@ namespace StateControl.Editor
         }
         
         // 使用EditorApplication.update而不是MonoBehaviour.Update
+        /// <summary>
+        /// 响应编辑器Update事件。
+        /// </summary>
         private void OnEditorUpdate()
         {
             // 检查当前控制器是否还存在
@@ -233,6 +257,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 响应UndoRedo事件。
+        /// </summary>
         private void OnUndoRedo()
         {
             // 当执行Undo/Redo时，刷新StateEditor UI
@@ -246,6 +273,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 响应SelectionChanged事件。
+        /// </summary>
         private void OnSelectionChanged()
         {
             if (Selection.activeGameObject != null)
@@ -266,6 +296,9 @@ namespace StateControl.Editor
         }
 
         // 清空UI并显示提示
+        /// <summary>
+        /// 清空UI。
+        /// </summary>
         private void ClearUI()
         {
             // 清空当前控制器引用
@@ -293,6 +326,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 刷新UI。
+        /// </summary>
         private void RefreshUI()
         {
             // 如果当前控制器为空，调用ClearUI并返回
@@ -547,6 +583,9 @@ namespace StateControl.Editor
         }
 
 
+        /// <summary>
+        /// 添加Modifier分组。
+        /// </summary>
         private void AddModifierGroup(Object targetObject, ModifierTypeEnum modifierType)
         {
             var modifierTarget = new ModifierTarget
@@ -589,6 +628,9 @@ namespace StateControl.Editor
             RefreshUI();
         }
 
+        /// <summary>
+        /// 添加ModifierRecordElement。
+        /// </summary>
         private VisualElement AddModifierRecordElement(BaseModifier modifier, ModifierRecord curRecord, ModifierTarget curTarget)
         {
             var fieldContainer = new VisualElement();
@@ -610,6 +652,9 @@ namespace StateControl.Editor
             return fieldContainer;
         }
 
+        /// <summary>
+        /// 创建分组项。
+        /// </summary>
         private VisualElement CreateGroupItem(StateGroup group, int index)
         {
             var problematicNames = StateControllerCheckUtil.GetProblematicStateGroupNames(currentController);
@@ -756,6 +801,9 @@ namespace StateControl.Editor
             return groupItem;
         }
 
+        /// <summary>
+        /// 创建状态项。
+        /// </summary>
         private VisualElement CreateStateItem(StateGroup stateGroup, State state, int index, bool isEditing)
         {
             var stateItem = new VisualElement();
@@ -859,6 +907,9 @@ namespace StateControl.Editor
             return stateItem;
         }
 
+        /// <summary>
+        /// 添加New分组。
+        /// </summary>
         private void AddNewGroup(string groupName)
         {
             if (string.IsNullOrEmpty(groupName))
@@ -880,6 +931,9 @@ namespace StateControl.Editor
             RefreshUI();
         }
         
+        /// <summary>
+        /// 添加构建结果In分组。
+        /// </summary>
         private void AddBuiltInGroup(string name)
         {
             if (Enum.TryParse(name, out BuiltInStateEnum builtInState))
@@ -899,6 +953,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 添加New状态。
+        /// </summary>
         private void AddNewState(StateGroup stateGroup ,string stateName)
         {
             if (string.IsNullOrEmpty(stateName))
@@ -913,12 +970,18 @@ namespace StateControl.Editor
             RefreshUI();
         }
 
+        /// <summary>
+        /// 响应DragUpdated事件。
+        /// </summary>
         private void OnDragUpdated(DragUpdatedEvent evt)
         {
             DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
             evt.StopPropagation();
         }
 
+        /// <summary>
+        /// 响应DragPerform事件。
+        /// </summary>
         private void OnDragPerform(DragPerformEvent evt)
         {
             Object draggedObject = DragAndDrop.objectReferences[0];
@@ -991,6 +1054,9 @@ namespace StateControl.Editor
             evt.StopPropagation();
         }
 
+        /// <summary>
+        /// 获取SupportedModifier类型。
+        /// </summary>
         private List<ModifierTypeEnum> GetSupportedModifierTypes(Type objectType)
         {
             var supportedTypes = new List<ModifierTypeEnum>();
@@ -1010,6 +1076,9 @@ namespace StateControl.Editor
             return supportedTypes.Distinct().ToList();
         }
 
+        /// <summary>
+        /// 执行Copy状态Group相关逻辑。
+        /// </summary>
         private void CopyStateGroup(StateGroup group)
         {
             var clipboard = new StateGroupClipboard
@@ -1027,6 +1096,9 @@ namespace StateControl.Editor
             ShowNotification(new GUIContent($"已复制状态组: {group.Name}"));
         }
 
+        /// <summary>
+        /// 执行Paste状态Group相关逻辑。
+        /// </summary>
         private void PasteStateGroup()
         {
             if (s_clipboard == null)
@@ -1071,6 +1143,9 @@ namespace StateControl.Editor
             ShowNotification(new GUIContent($"已粘贴状态组: {finalName}"));
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             // 取消注册Selection变化事件
@@ -1108,6 +1183,9 @@ namespace StateControl.Editor
             editingGroupNotes.Clear();
         }
         
+        /// <summary>
+        /// 在组件停用时解除运行时关联。
+        /// </summary>
         private void OnDisable()
         {
             // 在禁用窗口时也清理资源
@@ -1116,6 +1194,9 @@ namespace StateControl.Editor
         }
 
         // 添加保存方法
+        /// <summary>
+        /// 保存当前项Controller。
+        /// </summary>
         private void SaveCurrentController()
         {
             if (currentController == null)
@@ -1134,6 +1215,9 @@ namespace StateControl.Editor
             AssetDatabase.SaveAssetIfDirty(currentController);
         }
         
+        /// <summary>
+        /// 添加Toolbar。
+        /// </summary>
         private void AddToolbar()
         {
             var toolbar = new Toolbar();

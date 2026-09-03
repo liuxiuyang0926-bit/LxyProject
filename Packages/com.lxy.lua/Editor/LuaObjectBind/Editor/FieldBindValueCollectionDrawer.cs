@@ -18,6 +18,9 @@ namespace LuaObjectBind.Editor
         // 静态字典：用于存储每个ObjectBinder的ReorderableList，便于外部访问
         private static Dictionary<int, ReorderableList> _listCache = new Dictionary<int, ReorderableList>();
 
+        /// <summary>
+        /// 获取列表。
+        /// </summary>
         private ReorderableList GetList(SerializedProperty property)
         {
             // 获取缓存key（使用targetObject的instanceID + property path）
@@ -67,6 +70,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 获取属性高度。
+        /// </summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if (property.serializedObject.isEditingMultipleObjects)
@@ -80,6 +86,9 @@ namespace LuaObjectBind.Editor
             return height;
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.serializedObject.isEditingMultipleObjects)
@@ -92,6 +101,9 @@ namespace LuaObjectBind.Editor
             list.DoList(position);
         }
 
+        /// <summary>
+        /// 响应加法Element事件。
+        /// </summary>
         private void OnAddElement(Rect rect, ReorderableList list)
         {
             var bindValues = list.serializedProperty;
@@ -100,12 +112,18 @@ namespace LuaObjectBind.Editor
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 响应移除Element事件。
+        /// </summary>
         private void OnRemoveElement(ReorderableList list)
         {
             var bindValues = list.serializedProperty;
             AskRemoveVariable(bindValues, list.index);
         }
 
+        /// <summary>
+        /// 绘制Header。
+        /// </summary>
         private void DrawHeader(Rect rect)
         {
             Rect labelRect = new Rect(rect.x, rect.y, rect.width - 120, rect.height);
@@ -124,6 +142,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制Element。
+        /// </summary>
         private void DrawElement(Rect rect, int index, bool isActive, bool isFocused)
         {
             var bindValues = list.serializedProperty;
@@ -194,6 +215,9 @@ namespace LuaObjectBind.Editor
             return BindValueCollectionDrawer.ShouldShowHighlightForFieldBind(currentBinder, index);
         }
 
+        /// <summary>
+        /// 执行请求移除变量相关逻辑。
+        /// </summary>
         protected virtual void AskRemoveVariable(SerializedProperty bindValues, int index)
         {
             if (EditorUtility.DisplayDialog("删除绑定", "确定要删除这个绑定吗？", "确定", "取消"))
@@ -202,12 +226,18 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 移除Variable。
+        /// </summary>
         protected virtual void RemoveVariable(SerializedProperty bindValues, int index)
         {
             bindValues.DeleteArrayElementAtIndex(index);
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 执行复制变量相关逻辑。
+        /// </summary>
         protected virtual void DuplicateVariable(SerializedProperty bindValues, int index)
         {
             bindValues.arraySize++;
@@ -223,10 +253,19 @@ namespace LuaObjectBind.Editor
 
         struct BindEnumAndObject
         {
+            /// <summary>
+            /// 公开的绑定Enum数据。
+            /// </summary>
             public FieldBindEnum  BindEnum;
+            /// <summary>
+            /// 公开的对象值数据。
+            /// </summary>
             public GameObject ObjectValue;
         }
         
+        /// <summary>
+        /// 执行Auto绑定组件相关逻辑。
+        /// </summary>
         private void AutoBindComponents()
         {
             var bindValues = list.serializedProperty;
@@ -289,6 +328,9 @@ namespace LuaObjectBind.Editor
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 清空全部绑定。
+        /// </summary>
         private void ClearAllBindings()
         {
             var bindValues = list.serializedProperty;
@@ -296,6 +338,9 @@ namespace LuaObjectBind.Editor
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 查找绑定EnumWithPrefix。
+        /// </summary>
         private void FindBindEnumWithPrefix(Transform currentTransform, Dictionary<BindEnumAndObject, string> fieldBindEnums, ObjectBinder curObjectBinder)
         {
             // Process the current transform's GameObject if its name matches the pattern

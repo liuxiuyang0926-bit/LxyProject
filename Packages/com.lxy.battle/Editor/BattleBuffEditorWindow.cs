@@ -11,6 +11,9 @@ namespace Game.Battle.Editor
         private Vector2 scroll;
         private int selectedIndex;
 
+        /// <summary>
+        /// 执行打开相关逻辑。
+        /// </summary>
         [MenuItem("工具/战斗/Buff编辑器", false, 11)]
         private static void Open()
         {
@@ -18,12 +21,18 @@ namespace Game.Battle.Editor
                 .Show();
         }
 
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         private void OnEnable()
         {
             SetDatabase(
                 BattleConfigEditorUtility.LoadOrCreateDatabase());
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             EditorGUI.BeginChangeCheck();
@@ -62,6 +71,9 @@ namespace Game.Battle.Editor
             DrawBottomButtons(buffs);
         }
 
+        /// <summary>
+        /// 绘制增益列表。
+        /// </summary>
         private void DrawBuffList(SerializedProperty buffs)
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(210f));
@@ -89,6 +101,9 @@ namespace Game.Battle.Editor
             EditorGUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// 绘制选中项增益。
+        /// </summary>
         private void DrawSelectedBuff(SerializedProperty buffs)
         {
             EditorGUILayout.BeginVertical();
@@ -114,6 +129,9 @@ namespace Game.Battle.Editor
             EditorGUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// 绘制BottomButtons。
+        /// </summary>
         private void DrawBottomButtons(SerializedProperty buffs)
         {
             EditorGUILayout.Space(6f);
@@ -159,6 +177,9 @@ namespace Game.Battle.Editor
             EditorGUILayout.EndHorizontal();
         }
 
+        /// <summary>
+        /// 设置数据库。
+        /// </summary>
         private void SetDatabase(BattleConfigDatabase value)
         {
             database = value;

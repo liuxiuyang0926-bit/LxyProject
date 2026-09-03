@@ -10,6 +10,9 @@ namespace LxyDemo.UIFramework.Editor
 {
     public static class UIManagerValidationMenu
     {
+        /// <summary>
+        /// 校验全部设置。
+        /// </summary>
         [MenuItem(
             "Tools/UI Manager/Validate All Settings",
             priority = 100)]
@@ -67,6 +70,9 @@ namespace LxyDemo.UIFramework.Editor
                 $"{panelCount} 个 Panel。");
         }
 
+        /// <summary>
+        /// 校验配置。
+        /// </summary>
         private static void ValidateConfig(
             UIPanelConfig config,
             string settingsPath,

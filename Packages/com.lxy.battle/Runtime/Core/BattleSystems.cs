@@ -6,6 +6,9 @@ namespace Game.Battle.Core
 {
     internal sealed class BattleCommandSystem
     {
+        /// <summary>
+        /// 推进当前帧的运行逻辑。
+        /// </summary>
         public void Tick(BattleWorld world, FrameData frameData)
         {
             for (int index = 0;
@@ -16,6 +19,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 执行当前操作。
+        /// </summary>
         private static void Execute(
             BattleWorld world,
             FrameCommand command)
@@ -78,6 +84,9 @@ namespace Game.Battle.Core
 
     internal sealed class BattleMovementSystem
     {
+        /// <summary>
+        /// 推进当前帧的运行逻辑。
+        /// </summary>
         public void Tick(BattleWorld world)
         {
             for (int index = 0;
@@ -114,6 +123,9 @@ namespace Game.Battle.Core
     {
         private readonly List<int> hitTargets = new List<int>(16);
 
+        /// <summary>
+        /// 尝试Cast，并返回是否成功。
+        /// </summary>
         public static bool TryCast(
             BattleWorld world,
             int casterEntityId,
@@ -184,6 +196,9 @@ namespace Game.Battle.Core
             return true;
         }
 
+        /// <summary>
+        /// 推进当前帧的运行逻辑。
+        /// </summary>
         public void Tick(BattleWorld world)
         {
             for (int index = 0;
@@ -249,6 +264,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 执行执行操作相关逻辑。
+        /// </summary>
         private void ExecuteOperation(
             BattleWorld world,
             int casterEntityId,
@@ -287,6 +305,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 执行执行DamageBox相关逻辑。
+        /// </summary>
         private void ExecuteDamageBox(
             BattleWorld world,
             int casterEntityId,
@@ -351,6 +372,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 执行执行Displacement相关逻辑。
+        /// </summary>
         private static void ExecuteDisplacement(
             BattleWorld world,
             int casterEntityId,
@@ -371,6 +395,9 @@ namespace Game.Battle.Core
 
     internal sealed class BattleBuffSystem
     {
+        /// <summary>
+        /// 执行应用相关逻辑。
+        /// </summary>
         public void Apply(
             BattleWorld world,
             int sourceEntityId,
@@ -433,6 +460,9 @@ namespace Game.Battle.Core
                 });
         }
 
+        /// <summary>
+        /// 推进当前帧的运行逻辑。
+        /// </summary>
         public void Tick(BattleWorld world)
         {
             for (int entityIndex = 0;
@@ -500,6 +530,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 查找增益。
+        /// </summary>
         private static int FindBuff(
             BuffComponent component,
             int buffId)
@@ -520,6 +553,9 @@ namespace Game.Battle.Core
 
     internal sealed class BattleDeathSystem
     {
+        /// <summary>
+        /// 推进当前帧的运行逻辑。
+        /// </summary>
         public void Tick(BattleWorld world)
         {
             for (int index = 0;

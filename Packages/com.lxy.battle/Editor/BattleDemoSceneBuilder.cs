@@ -13,6 +13,9 @@ namespace Game.Battle.Editor
         private const string DemoScenePath =
             "Assets/Scenes/BattleDemo.unity";
 
+        /// <summary>
+        /// 创建Demo场景。
+        /// </summary>
         [MenuItem("工具/战斗/创建本地帧同步 Demo 场景", false, 20)]
         public static void CreateDemoScene()
         {
@@ -68,6 +71,9 @@ namespace Game.Battle.Editor
                 driverObject);
         }
 
+        /// <summary>
+        /// 添加场景To构建设置。
+        /// </summary>
         private static void AddSceneToBuildSettings(string scenePath)
         {
             EditorBuildSettingsScene[] scenes =

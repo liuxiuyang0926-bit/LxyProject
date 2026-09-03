@@ -6,6 +6,9 @@ namespace LuaObjectBind.Handlers
 {
     public class ImageHandler : AFieldBindHandler<Image>
     {
+        /// <summary>
+        /// 处理浮点数。
+        /// </summary>
         protected override void HandleFloat(Image comp, FieldBindEnum type, float value)
         {
             switch (type)
@@ -16,6 +19,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取浮点数。
+        /// </summary>
         protected override float GetFloat(Image comp, FieldBindEnum type)
         {
             switch (type)
@@ -27,6 +33,9 @@ namespace LuaObjectBind.Handlers
             return 0;
         }
 
+        /// <summary>
+        /// 处理Lua表。
+        /// </summary>
         protected override void HandleLuaTable(Image obj, FieldBindEnum type, LuaTable value)
         {
             switch (type)
@@ -42,6 +51,9 @@ namespace LuaObjectBind.Handlers
             }
         }
         
+        /// <summary>
+        /// 获取Lua表。
+        /// </summary>
         protected override LuaTable GetLuaTable(Image obj, FieldBindEnum type)
         {
             switch (type)
@@ -60,6 +72,9 @@ namespace LuaObjectBind.Handlers
             return null;
         }
 
+        /// <summary>
+        /// 处理字符串。
+        /// </summary>
         protected override void HandleString(Image obj, FieldBindEnum type, string value)
         {
             switch (type)
@@ -70,6 +85,9 @@ namespace LuaObjectBind.Handlers
             }
         }
         
+        /// <summary>
+        /// 获取字符串。
+        /// </summary>
         protected override string GetString(Image obj, FieldBindEnum type)
         {
             switch (type)

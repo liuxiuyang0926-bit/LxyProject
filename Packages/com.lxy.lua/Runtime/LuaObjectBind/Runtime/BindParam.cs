@@ -19,11 +19,17 @@ namespace Game
         [SerializeField]
         private List<string> BindParamList = new List<string>();
 
+        /// <summary>
+        /// 获取绑定数据。
+        /// </summary>
         public string GetBindData(string key)
         {
             return bindParams.GetValueOrDefault(key, "");
         }
 
+        /// <summary>
+        /// 获取绑定列表数据。
+        /// </summary>
         public string GetBindListData(int index)
         {
             if (BindParamList.Count >= index)

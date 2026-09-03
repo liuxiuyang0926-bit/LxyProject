@@ -4,6 +4,9 @@ namespace LuaObjectBind.Handlers
 {
     public class ScrollRectHandler : AFieldBindHandler<ScrollRect>
     {
+        /// <summary>
+        /// 处理浮点数。
+        /// </summary>
         protected override void HandleFloat(ScrollRect comp, FieldBindEnum type, float value)
         {
             switch (type)
@@ -17,6 +20,9 @@ namespace LuaObjectBind.Handlers
             }
         }
 
+        /// <summary>
+        /// 获取浮点数。
+        /// </summary>
         protected override float GetFloat(ScrollRect comp, FieldBindEnum type)
         {
             switch (type)

@@ -8,10 +8,22 @@ namespace StateControl.Runtime
     [Serializable]
     public class ModifierRecordGroup
     {
+        /// <summary>
+        /// 公开的目标数据。
+        /// </summary>
         public ModifierTarget Target;
+        /// <summary>
+        /// 公开的Records数据。
+        /// </summary>
         public List<ModifierRecord> Records = new List<ModifierRecord>();
+        /// <summary>
+        /// 公开的默认值Record数据。
+        /// </summary>
         public ModifierRecord DefaultRecord = new ModifierRecord();
 
+        /// <summary>
+        /// 执行应用相关逻辑。
+        /// </summary>
         public void Apply(StateController stateController,string stateGroupName)
         {
             ModifierRecord wantRecord = null;
@@ -29,6 +41,9 @@ namespace StateControl.Runtime
                 wantRecord.Apply(Target);
         } 
 
+        /// <summary>
+        /// 获取全部状态分组。
+        /// </summary>
         public List<string> GetAllStateGroup()
         {
             List<string> stateGroups = new List<string>();
@@ -44,6 +59,9 @@ namespace StateControl.Runtime
             return stateGroups;
         }
 
+        /// <summary>
+        /// 获取当前项Record。
+        /// </summary>
         public ModifierRecord GetCurrentRecord(StateController stateController)
         {
             var allGroup = GetAllStateGroup();
@@ -68,6 +86,9 @@ namespace StateControl.Runtime
             return DefaultRecord;
         }
 
+        /// <summary>
+        /// 执行Contain状态Group相关逻辑。
+        /// </summary>
         public bool ContainStateGroup(string name)
         {
             foreach (ModifierRecord record in Records)
@@ -79,6 +100,9 @@ namespace StateControl.Runtime
             return false;
         }
         
+        /// <summary>
+        /// 添加状态分组。
+        /// </summary>
         public void AddStateGroup(StateGroup stateGroup)
         {
             if(ContainStateGroup(stateGroup.Name))
@@ -107,12 +131,18 @@ namespace StateControl.Runtime
             Records.AddRange(newRecords);
         }
 
+        /// <summary>
+        /// 移除状态分组。
+        /// </summary>
         public void RemoveStateGroup(string groupName)
         {
             // 移除所有包含该状态组的记录 
             Records.RemoveAll(r => r.ContainsGroup(groupName));
         }
 
+        /// <summary>
+        /// 执行Rename状态Group相关逻辑。
+        /// </summary>
         public void RenameStateGroup(string oldName, string newName)
         {
             // 更新记录中的组名（不重建记录）
@@ -123,6 +153,9 @@ namespace StateControl.Runtime
         }
 
         // 添加状态到指定组
+        /// <summary>
+        /// 添加状态。
+        /// </summary>
         public void AddState(string groupName, string stateName)
         {
             // 增量生成新记录
@@ -150,6 +183,9 @@ namespace StateControl.Runtime
         }
 
         // 从指定组移除状态
+        /// <summary>
+        /// 移除状态。
+        /// </summary>
         public void RemoveState(string groupName, string stateName)
         {
             // 移除所有使用该状态的记录
@@ -158,6 +194,9 @@ namespace StateControl.Runtime
         }
 
         // 重命名指定组的状态
+        /// <summary>
+        /// 执行Rename状态相关逻辑。
+        /// </summary>
         public void RenameState(string groupName, string oldName, string newName)
         {
             // 更新所有相关记录中的状态名
@@ -168,6 +207,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 添加Modifier。
+        /// </summary>
         public void AddModifier(ModifierTypeEnum modifierType)
         {
             foreach (BaseModifier modifier in DefaultRecord.Modifiers)
@@ -205,6 +247,9 @@ namespace StateControl.Runtime
             record.Modifiers.Add(modifier);
         }
 
+        /// <summary>
+        /// 移除Modifier。
+        /// </summary>
         public void RemoveModifier(ModifierTypeEnum modifierType)
         {
             RemoveRecordModifier(DefaultRecord, modifierType);

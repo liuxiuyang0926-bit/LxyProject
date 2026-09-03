@@ -13,6 +13,9 @@ namespace Game.Resource
 {
     public readonly struct GameResourceSnapshot
     {
+        /// <summary>
+        /// 创建游戏资源快照实例。
+        /// </summary>
         internal GameResourceSnapshot(GameResourceEntry entry)
         {
             PackageName = entry.PackageName;
@@ -23,11 +26,29 @@ namespace Game.Resource
             Progress = entry.Progress;
         }
 
+        /// <summary>
+        /// 向调用方提供资源包名称。
+        /// </summary>
         public string PackageName { get; }
+        /// <summary>
+        /// 向调用方提供位置。
+        /// </summary>
         public string Location { get; }
+        /// <summary>
+        /// 向调用方提供资源类型。
+        /// </summary>
         public Type AssetType { get; }
+        /// <summary>
+        /// 当前引用的数量。
+        /// </summary>
         public int ReferenceCount { get; }
+        /// <summary>
+        /// 向调用方提供状态。
+        /// </summary>
         public EOperationStatus Status { get; }
+        /// <summary>
+        /// 当前操作的归一化进度，取值范围为 0 到 1。
+        /// </summary>
         public float Progress { get; }
     }
 
@@ -50,17 +71,32 @@ namespace Game.Resource
         private ResourcePackage defaultPackage;
         private bool isShuttingDown;
 
+        /// <summary>
+        /// 向调用方提供实例。
+        /// </summary>
         public static GameResourceManager Instance { get; private set; }
 
+        /// <summary>
+        /// 向调用方提供Default资源包。
+        /// </summary>
         public ResourcePackage DefaultPackage => defaultPackage;
 
+        /// <summary>
+        /// 向调用方提供Default资源包名称。
+        /// </summary>
         public string DefaultPackageName =>
             defaultPackage != null
                 ? defaultPackage.PackageName
                 : string.Empty;
 
+        /// <summary>
+        /// 当前Loaded资源的数量。
+        /// </summary>
         public int LoadedResourceCount => entries.Count;
 
+        /// <summary>
+        /// 当前Tracked实例的数量。
+        /// </summary>
         public int TrackedInstanceCount => instances.Count;
 
         public int TotalReferenceCount
@@ -77,6 +113,9 @@ namespace Game.Resource
             }
         }
 
+        /// <summary>
+        /// 获取Snapshots。
+        /// </summary>
         public IReadOnlyList<GameResourceSnapshot> GetSnapshots()
         {
             var result =
@@ -130,6 +169,9 @@ namespace Game.Resource
                    host.AddComponent<GameResourceManager>();
         }
 
+        /// <summary>
+        /// 初始化组件的运行时状态。
+        /// </summary>
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -220,6 +262,9 @@ namespace Game.Resource
                 true);
         }
 
+        /// <summary>
+        /// 执行实例化异步相关逻辑。
+        /// </summary>
         public GameResourceInstanceHandle InstantiateAsync(
             string location,
             Transform parent = null,
@@ -238,6 +283,9 @@ namespace Game.Resource
                 isActive);
         }
 
+        /// <summary>
+        /// 执行实例化异步相关逻辑。
+        /// </summary>
         public GameResourceInstanceHandle InstantiateAsync(
             ResourcePackage package,
             string location,
@@ -326,6 +374,9 @@ namespace Game.Resource
 #endif
         }
 
+        /// <summary>
+        /// 异步释放全部And卸载Unused资源。
+        /// </summary>
         public IEnumerator ReleaseAllAndUnloadUnusedAssetsAsync(
             string packageName = null)
         {
@@ -333,6 +384,9 @@ namespace Game.Resource
             yield return UnloadUnusedAssetsAsync(packageName);
         }
 
+        /// <summary>
+        /// 执行判断是否EntryAlive相关逻辑。
+        /// </summary>
         internal bool IsEntryAlive(GameResourceEntry entry)
         {
             return entry != null &&
@@ -342,6 +396,9 @@ namespace Game.Resource
                    ReferenceEquals(current, entry);
         }
 
+        /// <summary>
+        /// 执行释放相关逻辑。
+        /// </summary>
         internal void Release(GameResourceEntry entry)
         {
             if (!IsEntryAlive(entry))
@@ -366,6 +423,9 @@ namespace Game.Resource
             ForceReleaseEntry(entry);
         }
 
+        /// <summary>
+        /// 执行跟踪Instance相关逻辑。
+        /// </summary>
         internal void TrackInstance(
             GameResourceInstanceHandle handle,
             GameObject instance)
@@ -399,6 +459,9 @@ namespace Game.Resource
             tracker.Bind(handle);
         }
 
+        /// <summary>
+        /// 释放InstanceHandle。
+        /// </summary>
         internal void ReleaseInstanceHandle(
             GameResourceInstanceHandle handle,
             bool destroyInstance)
@@ -513,6 +576,9 @@ namespace Game.Resource
             return new GameResourceHandle<T>(this, entry);
         }
 
+        /// <summary>
+        /// 执行实例化内部相关逻辑。
+        /// </summary>
         private GameResourceInstanceHandle InstantiateInternal(
             ResourcePackage package,
             string requestedPackageName,
@@ -586,6 +652,9 @@ namespace Game.Resource
             return result;
         }
 
+        /// <summary>
+        /// 解析资源包。
+        /// </summary>
         private ResourcePackage ResolvePackage(
             string packageName,
             ResourcePackage explicitPackage)
@@ -611,6 +680,9 @@ namespace Game.Resource
 #endif
         }
 
+        /// <summary>
+        /// 解析资源包名称。
+        /// </summary>
         private static string ResolvePackageName(
             ResourcePackage package,
             string requestedPackageName)
@@ -625,6 +697,9 @@ namespace Game.Resource
                 : requestedPackageName.Trim();
         }
 
+        /// <summary>
+        /// 执行规范化Location相关逻辑。
+        /// </summary>
         private static string NormalizeLocation(string location)
         {
             if (string.IsNullOrWhiteSpace(location))
@@ -637,6 +712,9 @@ namespace Game.Resource
             return location.Trim().Replace('\\', '/');
         }
 
+        /// <summary>
+        /// 构建键。
+        /// </summary>
         private static string BuildKey(
             string packageName,
             string location,
@@ -647,6 +725,9 @@ namespace Game.Resource
                    location;
         }
 
+        /// <summary>
+        /// 执行强制释放Entry相关逻辑。
+        /// </summary>
         private void ForceReleaseEntry(GameResourceEntry entry)
         {
             if (entry == null || entry.IsReleased)
@@ -667,6 +748,9 @@ namespace Game.Resource
             entry.EditorAsset = null;
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             if (Instance != this || isShuttingDown)
@@ -693,6 +777,9 @@ namespace Game.Resource
         private GameResourceEntry entry;
         private bool isReleased;
 
+        /// <summary>
+        /// 创建游戏资源Handle实例。
+        /// </summary>
         internal GameResourceHandle(
             GameResourceManager manager,
             GameResourceEntry resourceEntry)
@@ -701,42 +788,75 @@ namespace Game.Resource
             entry = resourceEntry;
         }
 
+        /// <summary>
+        /// 指示当前对象是否有效。
+        /// </summary>
         public bool IsValid =>
             !isReleased &&
             owner != null &&
             owner.IsEntryAlive(entry);
 
+        /// <summary>
+        /// 指示当前操作是否已完成。
+        /// </summary>
         public bool IsDone => !IsValid || entry.IsDone;
 
+        /// <summary>
+        /// 当前操作的归一化进度，取值范围为 0 到 1。
+        /// </summary>
         public float Progress => IsValid ? entry.Progress : 0f;
 
+        /// <summary>
+        /// 向调用方提供状态。
+        /// </summary>
         public EOperationStatus Status =>
             IsValid ? entry.Status : EOperationStatus.None;
 
+        /// <summary>
+        /// 最近一次操作失败的错误信息；未发生错误时为 null。
+        /// </summary>
         public string Error => IsValid
             ? entry.Error
             : "资源句柄已经释放。";
 
+        /// <summary>
+        /// 当前引用的数量。
+        /// </summary>
         public int ReferenceCount => IsValid
             ? entry.ReferenceCount
             : 0;
 
+        /// <summary>
+        /// 向调用方提供资源。
+        /// </summary>
         public T Asset => IsValid
             ? entry.GetAsset<T>()
             : null;
 
+        /// <summary>
+        /// 向调用方提供当前。
+        /// </summary>
         public object Current => null;
 
+        /// <summary>
+        /// 执行MoveNext相关逻辑。
+        /// </summary>
         public bool MoveNext()
         {
             return !IsDone;
         }
 
+        /// <summary>
+        /// 执行重置相关逻辑。
+        /// </summary>
         public void Reset()
         {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// 执行释放相关逻辑。
+        /// </summary>
         public void Release()
         {
             if (isReleased)
@@ -752,11 +872,17 @@ namespace Game.Resource
             manager?.Release(resourceEntry);
         }
 
+        /// <summary>
+        /// 释放当前实例持有的资源。
+        /// </summary>
         public void Dispose()
         {
             Release();
         }
 
+        /// <summary>
+        /// 获取Yoo资源Handle。
+        /// </summary>
         internal AssetHandle GetYooAssetHandle()
         {
             return IsValid ? entry.AssetHandle : null;
@@ -779,6 +905,9 @@ namespace Game.Resource
         private bool isReleased;
         private int instanceId;
 
+        /// <summary>
+        /// 创建游戏资源InstanceHandle实例。
+        /// </summary>
         internal GameResourceInstanceHandle(
             GameResourceManager manager,
             GameResourceHandle<GameObject> resourceHandle,
@@ -793,6 +922,9 @@ namespace Game.Resource
             localError = error;
         }
 
+        /// <summary>
+        /// 指示资源是否已释放。
+        /// </summary>
         public bool IsReleased => isReleased;
 
         public bool IsDone
@@ -876,10 +1008,16 @@ namespace Game.Resource
             }
         }
 
+        /// <summary>
+        /// 向调用方提供当前。
+        /// </summary>
         public object Current => null;
 
         internal int InstanceId => instanceId;
 
+        /// <summary>
+        /// 执行MoveNext相关逻辑。
+        /// </summary>
         public bool MoveNext()
         {
             if (!IsDone)
@@ -891,11 +1029,17 @@ namespace Game.Resource
             return false;
         }
 
+        /// <summary>
+        /// 执行重置相关逻辑。
+        /// </summary>
         public void Reset()
         {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// 执行释放相关逻辑。
+        /// </summary>
         public void Release()
         {
             if (isReleased)
@@ -918,11 +1062,17 @@ namespace Game.Resource
             MarkReleased();
         }
 
+        /// <summary>
+        /// 释放当前实例持有的资源。
+        /// </summary>
         public void Dispose()
         {
             Release();
         }
 
+        /// <summary>
+        /// 尝试Finalize，并返回是否成功。
+        /// </summary>
         internal void TryFinalize()
         {
             if (isFinalized || isReleased || !IsDone)
@@ -955,6 +1105,9 @@ namespace Game.Resource
             }
         }
 
+        /// <summary>
+        /// 取消PendingInstantiation。
+        /// </summary>
         internal void CancelPendingInstantiation()
         {
             if (instantiateOperation != null &&
@@ -971,17 +1124,26 @@ namespace Game.Resource
             }
         }
 
+        /// <summary>
+        /// 获取原始值Instance。
+        /// </summary>
         internal GameObject GetRawInstance()
         {
             TryFinalize();
             return instance;
         }
 
+        /// <summary>
+        /// 设置InstanceId。
+        /// </summary>
         internal void SetInstanceId(int value)
         {
             instanceId = value;
         }
 
+        /// <summary>
+        /// 通知InstanceDestroyed。
+        /// </summary>
         internal void NotifyInstanceDestroyed()
         {
             if (isReleased)
@@ -999,6 +1161,9 @@ namespace Game.Resource
             }
         }
 
+        /// <summary>
+        /// 执行标记Released相关逻辑。
+        /// </summary>
         internal void MarkReleased()
         {
             if (isReleased)
@@ -1018,6 +1183,9 @@ namespace Game.Resource
 
     internal sealed class GameResourceEntry
     {
+        /// <summary>
+        /// 创建游戏资源Entry实例。
+        /// </summary>
         public GameResourceEntry(
             string key,
             string packageName,
@@ -1032,19 +1200,55 @@ namespace Game.Resource
             Package = package;
         }
 
+        /// <summary>
+        /// 公开的键数据。
+        /// </summary>
         public readonly string Key;
+        /// <summary>
+        /// 公开的资源包名称数据。
+        /// </summary>
         public readonly string PackageName;
+        /// <summary>
+        /// 公开的位置数据。
+        /// </summary>
         public readonly string Location;
+        /// <summary>
+        /// 公开的资源类型数据。
+        /// </summary>
         public readonly Type AssetType;
+        /// <summary>
+        /// 公开的资源包数据。
+        /// </summary>
         public readonly ResourcePackage Package;
 
+        /// <summary>
+        /// 公开的资源句柄数据。
+        /// </summary>
         public AssetHandle AssetHandle;
+        /// <summary>
+        /// 公开的Editor资源数据。
+        /// </summary>
         public Object EditorAsset;
+        /// <summary>
+        /// 公开的Editor错误数据。
+        /// </summary>
         public string EditorError;
+        /// <summary>
+        /// 公开的失败错误数据。
+        /// </summary>
         public string FailureError;
+        /// <summary>
+        /// 公开的引用数量数据。
+        /// </summary>
         public int ReferenceCount;
+        /// <summary>
+        /// 指示是否为已释放。
+        /// </summary>
         public bool IsReleased;
 
+        /// <summary>
+        /// 指示当前操作是否已完成。
+        /// </summary>
         public bool IsDone =>
             IsReleased ||
             !string.IsNullOrEmpty(FailureError) ||
@@ -1053,6 +1257,9 @@ namespace Game.Resource
             AssetHandle == null ||
             AssetHandle.IsDone;
 
+        /// <summary>
+        /// 当前操作的归一化进度，取值范围为 0 到 1。
+        /// </summary>
         public float Progress => AssetHandle != null
             ? AssetHandle.Progress
             : IsDone ? 1f : 0f;
@@ -1081,6 +1288,9 @@ namespace Game.Resource
             }
         }
 
+        /// <summary>
+        /// 最近一次操作失败的错误信息；未发生错误时为 null。
+        /// </summary>
         public string Error =>
             FailureError ??
             EditorError ??
@@ -1096,6 +1306,9 @@ namespace Game.Resource
             return AssetHandle?.GetAssetObject<T>();
         }
 
+        /// <summary>
+        /// 执行等待ForCompletion相关逻辑。
+        /// </summary>
         public void WaitForCompletion()
         {
             if (AssetHandle != null && !AssetHandle.IsDone)
@@ -1110,11 +1323,17 @@ namespace Game.Resource
     {
         private GameResourceInstanceHandle owner;
 
+        /// <summary>
+        /// 执行绑定相关逻辑。
+        /// </summary>
         public void Bind(GameResourceInstanceHandle handle)
         {
             owner = handle;
         }
 
+        /// <summary>
+        /// 解除已有绑定。
+        /// </summary>
         public void Unbind(GameResourceInstanceHandle handle)
         {
             if (ReferenceEquals(owner, handle))
@@ -1123,6 +1342,9 @@ namespace Game.Resource
             }
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             GameResourceInstanceHandle handle = owner;

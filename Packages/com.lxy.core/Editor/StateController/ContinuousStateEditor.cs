@@ -27,6 +27,9 @@ namespace StateControl.Editor
         private GroupBox modifierToolContainer;
         private ScrollView modifierContainer;
 
+        /// <summary>
+        /// 执行显示窗口相关逻辑。
+        /// </summary>
         [MenuItem("Window/连续状态编辑器")]
         public static void ShowWindow()
         {
@@ -35,6 +38,9 @@ namespace StateControl.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// 创建GUI。
+        /// </summary>
         private void CreateGUI()
         {
             modifierTypeMap.Clear();
@@ -183,6 +189,9 @@ namespace StateControl.Editor
         }
         
         // 使用EditorApplication.update而不是MonoBehaviour.Update
+        /// <summary>
+        /// 响应编辑器Update事件。
+        /// </summary>
         private void OnEditorUpdate()
         {
             // 检查当前控制器是否还存在
@@ -204,6 +213,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 响应SelectionChanged事件。
+        /// </summary>
         private void OnSelectionChanged()
         {
             if (Selection.activeGameObject != null)
@@ -219,6 +231,9 @@ namespace StateControl.Editor
         }
 
         // 清空UI并显示提示
+        /// <summary>
+        /// 清空UI。
+        /// </summary>
         private void ClearUI()
         {
             // 清空当前控制器引用
@@ -251,6 +266,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 更新UI启用状态。
+        /// </summary>
         private void UpdateUIEnabled()
         {
             bool hasSelectedGroup = currentController?.ContinuousStateGroups != null
@@ -263,6 +281,9 @@ namespace StateControl.Editor
                 modifierLabel.style.display = hasSelectedGroup ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
+        /// <summary>
+        /// 刷新UI。
+        /// </summary>
         private void RefreshUI()
         {
             // 如果当前控制器为空，调用ClearUI并返回
@@ -407,6 +428,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 更新ModifierDisplay。
+        /// </summary>
         private void UpdateModifierDisplay(ContinuousStateGroup group)
         {
             modifierContainer.Clear();
@@ -537,6 +561,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 创建分组项。
+        /// </summary>
         private VisualElement CreateGroupItem(ContinuousStateGroup group, int index)
         {
             var groupItem = new VisualElement();
@@ -611,6 +638,9 @@ namespace StateControl.Editor
             return groupItem;
         } 
 
+        /// <summary>
+        /// 添加New分组。
+        /// </summary>
         private void AddNewGroup(string name)
         {
             if (currentController == null)
@@ -638,6 +668,9 @@ namespace StateControl.Editor
             RefreshUI();
         } 
         
+        /// <summary>
+        /// 添加构建结果In分组。
+        /// </summary>
         private void AddBuiltInGroup(string name)
         {
             if (currentController == null)
@@ -667,6 +700,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 查找Continuous状态分组。
+        /// </summary>
         private ContinuousStateGroup FindContinuousStateGroup(string groupName)
         {
             if (currentController == null)
@@ -683,6 +719,9 @@ namespace StateControl.Editor
 
             return null;
         }
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             // 取消注册Selection变化事件
@@ -707,6 +746,9 @@ namespace StateControl.Editor
             editingGroupNames.Clear(); 
         }
         
+        /// <summary>
+        /// 在组件停用时解除运行时关联。
+        /// </summary>
         private void OnDisable()
         {
             // 在禁用窗口时也清理资源
@@ -714,6 +756,9 @@ namespace StateControl.Editor
         }
 
         // 添加保存方法
+        /// <summary>
+        /// 保存当前项Controller。
+        /// </summary>
         private void SaveCurrentController()
         {
             if (currentController == null)
@@ -765,6 +810,9 @@ namespace StateControl.Editor
             }
         }
         
+        /// <summary>
+        /// 添加Toolbar。
+        /// </summary>
         private void AddToolbar()
         {
             var toolbar = new Toolbar();

@@ -14,6 +14,9 @@ namespace Game.Battle.Client
             new Dictionary<int, List<FrameCommand>>();
         private int nextSequence;
 
+        /// <summary>
+        /// 排队提交移动。
+        /// </summary>
         public void QueueMove(
             int frame,
             int playerId,
@@ -31,6 +34,9 @@ namespace Game.Battle.Client
                 });
         }
 
+        /// <summary>
+        /// 排队提交停止移动。
+        /// </summary>
         public void QueueStopMove(int frame, int playerId)
         {
             Add(
@@ -43,6 +49,9 @@ namespace Game.Battle.Client
                 });
         }
 
+        /// <summary>
+        /// 排队提交技能。
+        /// </summary>
         public void QueueSkill(
             int frame,
             int playerId,
@@ -64,6 +73,9 @@ namespace Game.Battle.Client
                 });
         }
 
+        /// <summary>
+        /// 构建帧。
+        /// </summary>
         public FrameData BuildFrame(int frame)
         {
             var frameData = new FrameData(frame);
@@ -79,12 +91,18 @@ namespace Game.Battle.Client
             return frameData;
         }
 
+        /// <summary>
+        /// 执行NextSequence相关逻辑。
+        /// </summary>
         private int NextSequence()
         {
             nextSequence = checked(nextSequence + 1);
             return nextSequence;
         }
 
+        /// <summary>
+        /// 执行添加相关逻辑。
+        /// </summary>
         private void Add(int frame, FrameCommand command)
         {
             if (!pending.TryGetValue(

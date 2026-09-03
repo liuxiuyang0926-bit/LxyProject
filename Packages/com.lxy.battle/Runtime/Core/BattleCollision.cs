@@ -6,6 +6,9 @@ namespace Game.Battle.Core
 {
     public readonly struct BattleBox2
     {
+        /// <summary>
+        /// 创建战斗Box2实例。
+        /// </summary>
         public BattleBox2(
             BattleCollisionShape shape,
             FPVector2 center,
@@ -28,9 +31,21 @@ namespace Game.Battle.Core
                 : FP.NormalizeAngle(rotationDegrees);
         }
 
+        /// <summary>
+        /// 向调用方提供Shape。
+        /// </summary>
         public BattleCollisionShape Shape { get; }
+        /// <summary>
+        /// 向调用方提供Center。
+        /// </summary>
         public FPVector2 Center { get; }
+        /// <summary>
+        /// 向调用方提供HalfExtents。
+        /// </summary>
         public FPVector2 HalfExtents { get; }
+        /// <summary>
+        /// 向调用方提供旋转角度。
+        /// </summary>
         public FP RotationDegrees { get; }
     }
 
@@ -40,6 +55,9 @@ namespace Game.Battle.Core
     /// </summary>
     public static class BattleCollision
     {
+        /// <summary>
+        /// 执行判断是否重叠相关逻辑。
+        /// </summary>
         public static bool Overlaps(
             BattleBox2 left,
             BattleBox2 right)
@@ -57,6 +75,9 @@ namespace Game.Battle.Core
             return OverlapsObb(left, right);
         }
 
+        /// <summary>
+        /// 执行判断是否重叠Aabb相关逻辑。
+        /// </summary>
         public static bool OverlapsAabb(
             FPVector2 leftCenter,
             FPVector2 leftHalfExtents,
@@ -127,6 +148,9 @@ namespace Game.Battle.Core
                        rightY);
         }
 
+        /// <summary>
+        /// 执行收集目标相关逻辑。
+        /// </summary>
         internal static void CollectTargets(
             BattleWorld world,
             int sourceEntityId,
@@ -166,6 +190,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 创建实体Box。
+        /// </summary>
         internal static BattleBox2 CreateEntityBox(
             BattleWorld world,
             int entityId)
@@ -190,6 +217,9 @@ namespace Game.Battle.Core
                 rotation);
         }
 
+        /// <summary>
+        /// 校验HalfExtents。
+        /// </summary>
         private static void ValidateHalfExtents(
             FPVector2 halfExtents)
         {
@@ -202,6 +232,9 @@ namespace Game.Battle.Core
             }
         }
 
+        /// <summary>
+        /// 执行判断是否Separated相关逻辑。
+        /// </summary>
         private static bool IsSeparated(
             FPVector2 centerDelta,
             BattleBox2 left,
@@ -228,6 +261,9 @@ namespace Game.Battle.Core
             return distance > leftRadius + rightRadius;
         }
 
+        /// <summary>
+        /// 获取Axes。
+        /// </summary>
         private static void GetAxes(
             FP rotationDegrees,
             out FPVector2 xAxis,

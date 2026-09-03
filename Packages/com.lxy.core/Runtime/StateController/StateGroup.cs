@@ -7,13 +7,25 @@ namespace StateControl.Runtime
     [Serializable]
     public class StateGroup
     {
+        /// <summary>
+        /// 公开的名称数据。
+        /// </summary>
         public string Name;
 
+        /// <summary>
+        /// 公开的状态数据。
+        /// </summary>
         public List<State> States;
 
+        /// <summary>
+        /// 公开的Cur状态索引数据。
+        /// </summary>
         public int CurStateIndex = -1;
 
         // todo 保留旧的字段用于向后兼容，后面要删掉
+        /// <summary>
+        /// 公开的当前状态数据。
+        /// </summary>
         public State currentState;
         
         [NonSerialized]
@@ -45,8 +57,14 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 公开的Note数据。
+        /// </summary>
         public string Note;
 
+        /// <summary>
+        /// 查找状态。
+        /// </summary>
         public State FindState(string stateName)
         {
             if (States == null)
@@ -60,6 +78,9 @@ namespace StateControl.Runtime
             return null;
         }
         
+        /// <summary>
+        /// 应用状态。
+        /// </summary>
         public void ApplyState(string stateName)
         {
             // 查找匹配名称的状态
@@ -85,6 +106,9 @@ namespace StateControl.Runtime
             }
         }
 
+        /// <summary>
+        /// 获取Show名称。
+        /// </summary>
         public string GetShowName(bool onlyNote = false)
         {
             bool isBuiltIn = IsBuiltInStateEnum(Name, out BuiltInStateEnum builtInState);
@@ -102,6 +126,9 @@ namespace StateControl.Runtime
             return noNote ? Name : $"{Note}({Name})";
         }
         
+        /// <summary>
+        /// 执行判断是否BuiltIn状态Enum相关逻辑。
+        /// </summary>
         public static bool IsBuiltInStateEnum(string sgName, out BuiltInStateEnum builtInState)
         {
             return Enum.TryParse<BuiltInStateEnum>(sgName, out builtInState)

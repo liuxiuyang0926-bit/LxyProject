@@ -133,6 +133,9 @@ namespace StateControl.Runtime
     
     public static class EnumExtension
     {
+        /// <summary>
+        /// 获取UseModifier类型。
+        /// </summary>
         public static Type GetUseModifierType(this ModifierTypeEnum em)
         {
             Type type = em.GetType();
@@ -148,6 +151,9 @@ namespace StateControl.Runtime
             return result;
         }
         
+        /// <summary>
+        /// 获取目标类型。
+        /// </summary>
         public static Type GetTargetType(this ModifierTypeEnum em)
         {
             Type type = em.GetType();
@@ -163,6 +169,9 @@ namespace StateControl.Runtime
             return result;
         }
         
+        /// <summary>
+        /// 获取Chinese名称。
+        /// </summary>
         public static string GetChineseName(this ModifierTypeEnum em)
         {
             Type type = em.GetType();

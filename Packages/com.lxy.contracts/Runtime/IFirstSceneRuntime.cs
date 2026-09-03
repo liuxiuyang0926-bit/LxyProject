@@ -10,18 +10,30 @@ namespace Game.Contracts
     {
         bool IsInitialized { get; }
         string LastError { get; }
+        /// <summary>
+        /// 执行Initialize相关逻辑。
+        /// </summary>
         IEnumerator InitializeAsync();
     }
 
     public static class FirstSceneRuntimeBridge
     {
+        /// <summary>
+        /// 向调用方提供当前。
+        /// </summary>
         public static IFirstSceneRuntime Current { get; private set; }
 
+        /// <summary>
+        /// 注册当前实例。
+        /// </summary>
         public static void Register(IFirstSceneRuntime runtime)
         {
             Current = runtime;
         }
 
+        /// <summary>
+        /// 注销当前实例。
+        /// </summary>
         public static void Unregister(IFirstSceneRuntime runtime)
         {
             if (ReferenceEquals(Current, runtime))

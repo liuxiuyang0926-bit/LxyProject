@@ -21,19 +21,46 @@ public sealed class YooAssetLauncher : MonoBehaviour
     [Serializable]
     private sealed class GameConfigResponse
     {
+        /// <summary>
+        /// 公开的code数据。
+        /// </summary>
         public int code;
+        /// <summary>
+        /// 公开的消息数据。
+        /// </summary>
         public string message;
+        /// <summary>
+        /// 公开的数据数据。
+        /// </summary>
         public GameConfigData data;
     }
 
     [Serializable]
     private sealed class GameConfigData
     {
+        /// <summary>
+        /// 公开的版本数据。
+        /// </summary>
         public string version;
+        /// <summary>
+        /// 公开的下载地址数据。
+        /// </summary>
         public string downloadUrl;
+        /// <summary>
+        /// 公开的最小App版本数据。
+        /// </summary>
         public string minimumAppVersion;
+        /// <summary>
+        /// 公开的最小Android版本Code数据。
+        /// </summary>
         public int minimumAndroidVersionCode;
+        /// <summary>
+        /// 公开的app下载地址数据。
+        /// </summary>
         public string appDownloadUrl;
+        /// <summary>
+        /// 公开的forceUpdate消息数据。
+        /// </summary>
         public string forceUpdateMessage;
     }
 
@@ -77,6 +104,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
     public readonly struct UpdateSnapshot
     {
+        /// <summary>
+        /// 更新快照。
+        /// </summary>
         public UpdateSnapshot(
             UpdateStage stage,
             float progress,
@@ -95,12 +125,33 @@ public sealed class YooAssetLauncher : MonoBehaviour
             TotalDownloadBytes = totalDownloadBytes;
         }
 
+        /// <summary>
+        /// 当前操作所处的执行阶段。
+        /// </summary>
         public UpdateStage Stage { get; }
+        /// <summary>
+        /// 当前操作的归一化进度，取值范围为 0 到 1。
+        /// </summary>
         public float Progress { get; }
+        /// <summary>
+        /// 当前操作的状态说明文本。
+        /// </summary>
         public string Message { get; }
+        /// <summary>
+        /// 当前已完成下载的文件数量。
+        /// </summary>
         public int CurrentDownloadCount { get; }
+        /// <summary>
+        /// 本次下载所需的文件总数。
+        /// </summary>
         public int TotalDownloadCount { get; }
+        /// <summary>
+        /// 当前已下载的字节数。
+        /// </summary>
         public long CurrentDownloadBytes { get; }
+        /// <summary>
+        /// 本次下载的字节总数。
+        /// </summary>
         public long TotalDownloadBytes { get; }
     }
 
@@ -133,6 +184,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
     [SerializeField]
     private bool clearUnusedCacheAfterUpdate = true;
 
+    /// <summary>
+    /// 仅在编辑器中启用的整包强更模拟开关，用于验证强更交互流程。
+    /// </summary>
     [Header("仅编辑器：模拟客户端整包强更")]
     [SerializeField]
     private bool simulateForceUpdateInEditor;
@@ -144,35 +198,113 @@ public sealed class YooAssetLauncher : MonoBehaviour
     private string simulatedAppDownloadUrl =
         "https://example.com/download";
 
+    /// <summary>
+    /// 向调用方提供实例。
+    /// </summary>
     public static YooAssetLauncher Instance { get; private set; }
 
+    /// <summary>
+    /// 向调用方提供资源包。
+    /// </summary>
     public ResourcePackage Package { get; private set; }
 
+    /// <summary>
+    /// 指示当前对象是否已就绪。
+    /// </summary>
     public bool IsReady { get; private set; }
+    /// <summary>
+    /// 指示当前对象是否正在初始化。
+    /// </summary>
     public bool IsInitializing { get; private set; }
+    /// <summary>
+    /// 最近一次操作失败的错误信息；未发生错误时为 null。
+    /// </summary>
     public string LastError { get; private set; }
+    /// <summary>
+    /// 向调用方提供资源包名称。
+    /// </summary>
     public string PackageName => packageName;
+    /// <summary>
+    /// 向调用方提供资源包版本。
+    /// </summary>
     public string PackageVersion { get; private set; }
+    /// <summary>
+    /// 向调用方提供ActiveMode。
+    /// </summary>
     public PlayMode ActiveMode => _activeMode;
+    /// <summary>
+    /// 向调用方提供DefaultHostServer。
+    /// </summary>
     public string DefaultHostServer { get; private set; }
+    /// <summary>
+    /// 向调用方提供FallbackHostServer。
+    /// </summary>
     public string FallbackHostServer { get; private set; }
+    /// <summary>
+    /// 当前操作所处的执行阶段。
+    /// </summary>
     public UpdateStage Stage { get; private set; } =
         UpdateStage.Idle;
+    /// <summary>
+    /// 当前操作的归一化进度，取值范围为 0 到 1。
+    /// </summary>
     public float Progress { get; private set; }
+    /// <summary>
+    /// 当前操作的状态说明文本。
+    /// </summary>
     public string StatusMessage { get; private set; } =
         string.Empty;
+    /// <summary>
+    /// 当前已完成下载的文件数量。
+    /// </summary>
     public int CurrentDownloadCount { get; private set; }
+    /// <summary>
+    /// 本次下载所需的文件总数。
+    /// </summary>
     public int TotalDownloadCount { get; private set; }
+    /// <summary>
+    /// 当前已下载的字节数。
+    /// </summary>
     public long CurrentDownloadBytes { get; private set; }
+    /// <summary>
+    /// 本次下载的字节总数。
+    /// </summary>
     public long TotalDownloadBytes { get; private set; }
+    /// <summary>
+    /// 当前正在下载的文件名称。
+    /// </summary>
     public string CurrentDownloadFile { get; private set; }
+    /// <summary>
+    /// 指示下载任务是否处于暂停状态。
+    /// </summary>
     public bool IsDownloadPaused { get; private set; }
+    /// <summary>
+    /// 指示当前客户端是否必须执行整包更新。
+    /// </summary>
     public bool IsForceUpdateRequired { get; private set; }
+    /// <summary>
+    /// 向调用方提供当前App版本。
+    /// </summary>
     public string CurrentAppVersion { get; private set; }
+    /// <summary>
+    /// 向调用方提供当前Android版本Code。
+    /// </summary>
     public int CurrentAndroidVersionCode { get; private set; } = -1;
+    /// <summary>
+    /// 向调用方提供MinimumApp版本。
+    /// </summary>
     public string MinimumAppVersion { get; private set; }
+    /// <summary>
+    /// 向调用方提供MinimumAndroid版本Code。
+    /// </summary>
     public int MinimumAndroidVersionCode { get; private set; }
+    /// <summary>
+    /// 向调用方提供App下载Url。
+    /// </summary>
     public string AppDownloadUrl { get; private set; }
+    /// <summary>
+    /// 当前操作的状态说明文本。
+    /// </summary>
     public string ForceUpdateMessage { get; private set; }
 
     public event Action<UpdateSnapshot> StatusChanged;
@@ -186,6 +318,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
     private bool preventOfflineFallback;
     private GameResourceManager resourceManager;
 
+    /// <summary>
+    /// 初始化组件的运行时状态。
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -415,6 +550,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
     #region 初始化模式
 
+    /// <summary>
+    /// 初始化Offline。
+    /// </summary>
     private IEnumerator InitializeOffline(
         Action<bool> completed)
     {
@@ -453,6 +591,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         yield return PreparePackageManifest(completed);
     }
 
+    /// <summary>
+    /// 初始化主机。
+    /// </summary>
     private IEnumerator InitializeHost(
         Action<bool> completed)
     {
@@ -562,6 +703,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 执行RequestHostServers相关逻辑。
+    /// </summary>
     private IEnumerator RequestHostServers(
         Action<bool> completed)
     {
@@ -648,6 +792,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 尝试解析游戏配置，并返回是否成功。
+    /// </summary>
     private static bool TryParseGameConfig(
         string json,
         out GameConfigData config,
@@ -699,6 +846,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 尝试构建主机服务器，并返回是否成功。
+    /// </summary>
     private static bool TryBuildHostServer(
         GameConfigData config,
         RuntimePlatform platform,
@@ -750,6 +900,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 尝试应用App版本Policy，并返回是否成功。
+    /// </summary>
     private bool TryApplyAppVersionPolicy(
         GameConfigData config,
         RuntimePlatform platform,
@@ -820,6 +973,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 执行Activate强制更新相关逻辑。
+    /// </summary>
     private void ActivateForceUpdate(
         string minimumVersion,
         int minimumVersionCode,
@@ -848,6 +1004,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
             $"versionCode={MinimumAndroidVersionCode}。");
     }
 
+    /// <summary>
+    /// 尝试打开状态强制UpdatePage，并返回是否成功。
+    /// </summary>
     public bool TryOpenForceUpdatePage(out string error)
     {
         if (!IsForceUpdateRequired)
@@ -856,17 +1015,88 @@ public sealed class YooAssetLauncher : MonoBehaviour
             return false;
         }
 
-        if (!TryGetHttpUri(AppDownloadUrl, out Uri updateUri))
+        if (!TryGetOpenableHttpUri(
+                AppDownloadUrl,
+                out Uri updateUri))
         {
-            error = "整包下载地址无效。";
+            error = "整包下载地址无效。请联系运营检查 " +
+                    "gameConfig.json 的 appDownloadUrl。";
             return false;
         }
 
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (!TryOpenAndroidUpdatePage(updateUri, out error))
+        {
+            return false;
+        }
+#else
         Application.OpenURL(updateUri.AbsoluteUri);
         error = null;
+#endif
+        Debug.Log(
+            "[YooAsset] 已请求打开客户端更新页面：" +
+            updateUri.AbsoluteUri);
         return true;
     }
 
+#if UNITY_ANDROID && !UNITY_EDITOR
+    /// <summary>
+    /// 通过 Android VIEW Intent 打开整包下载页面，以便在没有可处理
+    /// HTTP 链接的应用时向启动界面返回明确错误。
+    /// </summary>
+    private static bool TryOpenAndroidUpdatePage(
+        Uri updateUri,
+        out string error)
+    {
+        try
+        {
+            using (var unityPlayer = new AndroidJavaClass(
+                       "com.unity3d.player.UnityPlayer"))
+            using (AndroidJavaObject activity =
+                   unityPlayer.GetStatic<AndroidJavaObject>(
+                       "currentActivity"))
+            using (var uriClass = new AndroidJavaClass(
+                       "android.net.Uri"))
+            using (AndroidJavaObject androidUri =
+                   uriClass.CallStatic<AndroidJavaObject>(
+                       "parse",
+                       updateUri.AbsoluteUri))
+            using (var intent = new AndroidJavaObject(
+                       "android.content.Intent",
+                       "android.intent.action.VIEW",
+                       androidUri))
+            using (AndroidJavaObject packageManager =
+                   activity.Call<AndroidJavaObject>(
+                       "getPackageManager"))
+            using (AndroidJavaObject targetActivity =
+                   intent.Call<AndroidJavaObject>(
+                       "resolveActivity",
+                       packageManager))
+            {
+                if (targetActivity == null)
+                {
+                    error = "设备没有可打开更新链接的浏览器或应用。";
+                    return false;
+                }
+
+                activity.Call("startActivity", intent);
+            }
+        }
+        catch (Exception exception)
+        {
+            error = "无法打开更新页面：" + exception.Message;
+            Debug.LogWarning("[YooAsset] " + error);
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+#endif
+
+    /// <summary>
+    /// 尝试比较版本名称，并返回是否成功。
+    /// </summary>
     private static bool TryCompareVersionNames(
         string current,
         string minimum,
@@ -914,6 +1144,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 尝试解析版本Parts，并返回是否成功。
+    /// </summary>
     private static bool TryParseVersionParts(
         string value,
         out int[] parts)
@@ -947,6 +1180,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 尝试获取Android版本代码，并返回是否成功。
+    /// </summary>
     private static bool TryGetAndroidVersionCode(
         out int versionCode,
         out string error)
@@ -994,6 +1230,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// 尝试获取HttpUri，并返回是否成功。
+    /// </summary>
     private static bool TryGetHttpUri(
         string value,
         out Uri uri)
@@ -1003,6 +1242,22 @@ public sealed class YooAssetLauncher : MonoBehaviour
                 uri.Scheme == Uri.UriSchemeHttps);
     }
 
+    /// <summary>
+    /// 校验可交给系统浏览器打开的 HttpUri。远端配置读取阶段保持
+    /// 强更状态，点击时再将格式错误明确反馈给用户。
+    /// </summary>
+    private static bool TryGetOpenableHttpUri(
+        string value,
+        out Uri uri)
+    {
+        return TryGetHttpUri(value, out uri) &&
+               uri.IsWellFormedOriginalString() &&
+               !string.IsNullOrWhiteSpace(uri.Host);
+    }
+
+    /// <summary>
+    /// 重置强制Update状态。
+    /// </summary>
     private void ResetForceUpdateState()
     {
         IsForceUpdateRequired = false;
@@ -1021,6 +1276,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
     #region 版本与清单
 
+    /// <summary>
+    /// 准备资源包清单。
+    /// </summary>
     private IEnumerator PreparePackageManifest(
         Action<bool> completed)
     {
@@ -1103,6 +1361,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         completed?.Invoke(true);
     }
 
+    /// <summary>
+    /// 校验必需项启动位置。
+    /// </summary>
     private bool ValidateRequiredStartupLocations(
         out string error)
     {
@@ -1138,6 +1399,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
     #region 下载
 
+    /// <summary>
+    /// 执行下载远端资源相关逻辑。
+    /// </summary>
     private IEnumerator DownloadRemoteResources(
         Action<bool> completed)
     {
@@ -1227,6 +1491,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         completed?.Invoke(true);
     }
 
+    /// <summary>
+    /// 暂停下载。
+    /// </summary>
     public bool PauseDownload()
     {
         if (activeDownloader == null ||
@@ -1245,6 +1512,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 恢复下载。
+    /// </summary>
     public bool ResumeDownload()
     {
         if (activeDownloader == null ||
@@ -1263,6 +1533,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 取消下载。
+    /// </summary>
     public bool CancelDownload()
     {
         if (activeDownloader == null ||
@@ -1281,6 +1554,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 响应下载进度Changed事件。
+    /// </summary>
     private void OnDownloadProgressChanged(
         DownloadProgressChangedEventArgs args)
     {
@@ -1302,6 +1578,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
             () => DownloadProgressChanged?.Invoke(args));
     }
 
+    /// <summary>
+    /// 响应下载错误事件。
+    /// </summary>
     private void OnDownloadError(DownloadErrorEventArgs args)
     {
         SafeInvoke(() => DownloadError?.Invoke(args));
@@ -1310,12 +1589,18 @@ public sealed class YooAssetLauncher : MonoBehaviour
             args.ErrorInfo);
     }
 
+    /// <summary>
+    /// 响应下载文件Started事件。
+    /// </summary>
     private void OnDownloadFileStarted(
         DownloadFileStartedEventArgs args)
     {
         CurrentDownloadFile = args.FileName;
     }
 
+    /// <summary>
+    /// 清空Unused缓存。
+    /// </summary>
     private IEnumerator ClearUnusedCache()
     {
         SetStage(
@@ -1343,6 +1628,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
     #region Offline 降级
 
+    /// <summary>
+    /// 执行切换转换为Offline相关逻辑。
+    /// </summary>
     private IEnumerator SwitchToOffline(
         Action<bool> completed)
     {
@@ -1387,6 +1675,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
 
     #endregion
 
+    /// <summary>
+    /// 设置阶段。
+    /// </summary>
     private void SetStage(
         UpdateStage stage,
         float progress,
@@ -1407,6 +1698,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         SafeInvoke(() => StatusChanged?.Invoke(snapshot));
     }
 
+    /// <summary>
+    /// 重置下载Statistics。
+    /// </summary>
     private void ResetDownloadStatistics()
     {
         activeDownloader = null;
@@ -1418,6 +1712,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         CurrentDownloadFile = null;
     }
 
+    /// <summary>
+    /// 执行安全调用相关逻辑。
+    /// </summary>
     private static void SafeInvoke(Action callback)
     {
         if (callback == null)
@@ -1435,6 +1732,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 释放持有的资源并解除事件订阅。
+    /// </summary>
     private void OnDestroy()
     {
         if (Instance == this)
@@ -1443,6 +1743,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 执行标记失败Initialization相关逻辑。
+    /// </summary>
     private void FailInitialization(string message)
     {
         LastError = message;
@@ -1457,6 +1760,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         Debug.LogError("[YooAsset] " + message);
     }
 
+    /// <summary>
+    /// 格式化字节数。
+    /// </summary>
     private static string FormatBytes(long bytes)
     {
         const long kb = 1024;
@@ -1490,6 +1796,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
         private readonly string _defaultHostServer;
         private readonly string _fallbackHostServer;
 
+        /// <summary>
+        /// 创建远端服务实例。
+        /// </summary>
         public RemoteServices(
             string defaultHostServer,
             string fallbackHostServer)
@@ -1501,6 +1810,9 @@ public sealed class YooAssetLauncher : MonoBehaviour
                 fallbackHostServer.TrimEnd('/');
         }
 
+        /// <summary>
+        /// 获取远端地址列表。
+        /// </summary>
         public IReadOnlyList<string> GetRemoteUrls(
             string fileName)
         {

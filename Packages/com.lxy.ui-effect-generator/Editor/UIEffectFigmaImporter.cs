@@ -9,8 +9,17 @@ namespace Lxy.UIEffectGenerator.Editor
 {
     internal sealed class UIEffectFigmaCropAsset
     {
+        /// <summary>
+        /// 向调用方提供Node路径。
+        /// </summary>
         public string NodePath { get; set; }
+        /// <summary>
+        /// 向调用方提供运行时资源路径。
+        /// </summary>
         public string RuntimeAssetPath { get; set; }
+        /// <summary>
+        /// 向调用方提供Png字节数。
+        /// </summary>
         public byte[] PngBytes { get; set; }
     }
 
@@ -32,11 +41,20 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 公开的Crop资源Marker数据。
+        /// </summary>
         public const string CropResourceMarker = "figma://crop";
 
+        /// <summary>
+        /// 公开的引用Crop资源Marker数据。
+        /// </summary>
         public const string ReferenceCropResourceMarker =
             "reference://crop";
 
+        /// <summary>
+        /// 尝试解析Node地址，并返回是否成功。
+        /// </summary>
         public static bool TryParseNodeUrl(
             string url,
             out string fileKey,
@@ -118,6 +136,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 解析面板Id。
+        /// </summary>
         public static string ResolvePanelId(
             string requestedPanelId,
             string frameName)
@@ -135,6 +156,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return UIEffectEditorUtility.SanitizeTypeName(value);
         }
 
+        /// <summary>
+        /// 获取引用资源路径。
+        /// </summary>
         public static string GetReferenceAssetPath(string panelId)
         {
             UIEffectProjectDefaults defaults =
@@ -145,6 +169,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    GetSafeAssetSegment(panelId) + "_Figma.png";
         }
 
+        /// <summary>
+        /// 获取最大值Depth。
+        /// </summary>
         public static int GetMaxDepth(UIEffectSchema schema)
         {
             if (schema == null)
@@ -166,6 +193,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return maximum;
         }
 
+        /// <summary>
+        /// 确保MinimumVisualNode。
+        /// </summary>
         public static bool EnsureMinimumVisualNode(UIEffectSchema schema)
         {
             if (schema == null)
@@ -190,6 +220,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行标记ImplicitLeafCrop节点相关逻辑。
+        /// </summary>
         public static int MarkImplicitLeafCropNodes(UIEffectSchema schema)
         {
             if (schema == null)
@@ -201,6 +234,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 schema.children ?? new List<UIEffectNode>());
         }
 
+        /// <summary>
+        /// 执行标记ImplicitLeafCrop节点相关逻辑。
+        /// </summary>
         private static int MarkImplicitLeafCropNodes(
             IReadOnlyList<UIEffectNode> siblings)
         {
@@ -226,6 +262,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return markedCount;
         }
 
+        /// <summary>
+        /// 执行判断能否推断LeafCrop相关逻辑。
+        /// </summary>
         private static bool CanInferLeafCrop(
             UIEffectNode node,
             IReadOnlyList<UIEffectNode> siblings,
@@ -261,6 +300,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return true;
         }
 
+        /// <summary>
+        /// 执行RectanglesOverlap相关逻辑。
+        /// </summary>
         private static bool RectanglesOverlap(
             UIEffectNode first,
             UIEffectNode second)
@@ -271,6 +313,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    first.y + first.height > second.y;
         }
 
+        /// <summary>
+        /// 获取NodeDepth。
+        /// </summary>
         private static int GetNodeDepth(UIEffectNode node, int depth)
         {
             if (node == null || node.children == null ||
@@ -366,6 +411,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return assets;
         }
 
+        /// <summary>
+        /// 执行收集Crop资源相关逻辑。
+        /// </summary>
         private static void CollectCropAssets(
             UIEffectNode node,
             float parentX,
@@ -492,6 +540,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行判断是否ReferenceCrop资源相关逻辑。
+        /// </summary>
         public static bool IsReferenceCropResource(string resource)
         {
             return string.Equals(
@@ -500,6 +551,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 执行判断是否Crop资源Marker相关逻辑。
+        /// </summary>
         private static bool IsCropResourceMarker(string resource)
         {
             return string.Equals(
@@ -509,6 +563,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    IsReferenceCropResource(resource);
         }
 
+        /// <summary>
+        /// 执行判断是否Supported文件类型相关逻辑。
+        /// </summary>
         private static bool IsSupportedFileType(string value)
         {
             return string.Equals(
@@ -525,12 +582,18 @@ namespace Lxy.UIEffectGenerator.Editor
                        StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 获取Safe资源Segment。
+        /// </summary>
         private static string GetSafeAssetSegment(string value)
         {
             string safe = UIEffectEditorUtility.SanitizeTypeName(value);
             return safe.Length == 0 ? "UIFigma" : safe;
         }
 
+        /// <summary>
+        /// 获取Stable哈希。
+        /// </summary>
         private static string GetStableHash(string value)
         {
             unchecked

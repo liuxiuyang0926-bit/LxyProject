@@ -10,6 +10,9 @@ namespace StateControl.Editor
     {
         private SerializedObject serializedController;
 
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         private void OnEnable()
         {
             serializedController = new SerializedObject(target);
@@ -18,12 +21,18 @@ namespace StateControl.Editor
             Undo.undoRedoPerformed += OnUndoRedo;
         }
 
+        /// <summary>
+        /// 在组件停用时解除运行时关联。
+        /// </summary>
         private void OnDisable()
         {
             // 取消注册Undo事件
             Undo.undoRedoPerformed -= OnUndoRedo;
         }
 
+        /// <summary>
+        /// 响应UndoRedo事件。
+        /// </summary>
         private void OnUndoRedo()
         {
             // 当执行Undo/Redo时，重新同步SerializedObject并刷新Inspector
@@ -42,6 +51,9 @@ namespace StateControl.Editor
             Repaint();
         }
 
+        /// <summary>
+        /// 响应检查器GUI事件。
+        /// </summary>
         public override void OnInspectorGUI()
         {
             serializedController.Update();

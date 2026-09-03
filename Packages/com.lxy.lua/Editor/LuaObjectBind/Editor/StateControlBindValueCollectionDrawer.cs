@@ -13,6 +13,9 @@ namespace LuaObjectBind.Editor
 
         private ReorderableList list;
 
+        /// <summary>
+        /// 获取列表。
+        /// </summary>
         private ReorderableList GetList(SerializedProperty property)
         {
             if (list == null)
@@ -31,6 +34,9 @@ namespace LuaObjectBind.Editor
             return list;
         }
 
+        /// <summary>
+        /// 获取属性高度。
+        /// </summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if (property.serializedObject.isEditingMultipleObjects)
@@ -44,6 +50,9 @@ namespace LuaObjectBind.Editor
             return height;
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.serializedObject.isEditingMultipleObjects)
@@ -56,6 +65,9 @@ namespace LuaObjectBind.Editor
             list.DoList(position);
         }
 
+        /// <summary>
+        /// 响应加法Element事件。
+        /// </summary>
         private void OnAddElement(Rect rect, ReorderableList list)
         {
             var bindValues = list.serializedProperty;
@@ -64,12 +76,18 @@ namespace LuaObjectBind.Editor
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 响应移除Element事件。
+        /// </summary>
         private void OnRemoveElement(ReorderableList list)
         {
             var bindValues = list.serializedProperty;
             AskRemoveVariable(bindValues, list.index);
         }
 
+        /// <summary>
+        /// 绘制Header。
+        /// </summary>
         private void DrawHeader(Rect rect)
         {
             Rect labelRect = new Rect(rect.x, rect.y, rect.width - 240, rect.height);
@@ -87,6 +105,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制Element。
+        /// </summary>
         private void DrawElement(Rect rect, int index, bool isActive, bool isFocused)
         {
             var bindValues = list.serializedProperty;
@@ -116,6 +137,9 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 执行请求移除变量相关逻辑。
+        /// </summary>
         protected virtual void AskRemoveVariable(SerializedProperty bindValues, int index)
         {
             if (EditorUtility.DisplayDialog("删除绑定", "确定要删除这个绑定吗？", "确定", "取消"))
@@ -124,12 +148,18 @@ namespace LuaObjectBind.Editor
             }
         }
 
+        /// <summary>
+        /// 移除Variable。
+        /// </summary>
         protected virtual void RemoveVariable(SerializedProperty bindValues, int index)
         {
             bindValues.DeleteArrayElementAtIndex(index);
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 执行复制变量相关逻辑。
+        /// </summary>
         protected virtual void DuplicateVariable(SerializedProperty bindValues, int index)
         {
             bindValues.arraySize++;
@@ -143,6 +173,9 @@ namespace LuaObjectBind.Editor
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 清空全部绑定。
+        /// </summary>
         private void ClearAllBindings()
         {
             var bindValues = list.serializedProperty;
@@ -150,6 +183,9 @@ namespace LuaObjectBind.Editor
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 执行Auto绑定状态Controllers相关逻辑。
+        /// </summary>
         private void AutoBindStateControllers()
         {
             var bindValues = list.serializedProperty;
@@ -194,6 +230,9 @@ namespace LuaObjectBind.Editor
             bindValues.serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// 查找状态Controllers。
+        /// </summary>
         private void FindStateControllers(Transform currentTransform, Dictionary<string, StateControlBinding> stateControlBindings, ObjectBinder curObjectBinder, Transform rootTransform)
         {
             // 检查当前节点是否是Prefab资源的一部分
@@ -269,7 +308,13 @@ namespace LuaObjectBind.Editor
 
         private struct StateControlBinding
         {
+            /// <summary>
+            /// 公开的Controller数据。
+            /// </summary>
             public StateControl.Runtime.StateController Controller;
+            /// <summary>
+            /// 公开的状态Group名称数据。
+            /// </summary>
             public string StateGroupName;
         }
     }

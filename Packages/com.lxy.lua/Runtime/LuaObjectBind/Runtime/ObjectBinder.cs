@@ -37,28 +37,52 @@ namespace LuaObjectBind
     public sealed class UIScriptGenerationSettings
     {
         [Tooltip("创建工具写入的默认脚本类型，可在 Prefab 上手动修改。")]
+        /// <summary>
+        /// 公开的脚本类型数据。
+        /// </summary>
         public UIObjectBinderScriptType scriptType =
             UIObjectBinderScriptType.Lua;
 
         [Tooltip("UIManager 打开、关闭界面时使用的唯一 ID。")]
+        /// <summary>
+        /// 公开的面板标识数据。
+        /// </summary>
         public string panelId;
 
         [Tooltip("C# 业务 View 类名；Base 类会自动使用“类名 + Base”。")]
+        /// <summary>
+        /// 公开的csharp类型名称数据。
+        /// </summary>
         public string csharpClassName;
 
         [Tooltip("C# 命名空间。")]
+        /// <summary>
+        /// 公开的csharpNamespace数据。
+        /// </summary>
         public string csharpNamespace = "LxyDemo.GameUI";
 
         [Tooltip("C# Main/Base 脚本输出目录，必须位于 Assets 下。")]
+        /// <summary>
+        /// 公开的csharp输出Folder数据。
+        /// </summary>
         public string csharpOutputFolder = "Assets/Scripts/GameUI";
 
         [Tooltip("Lua require 路径，例如 UI.Login.UILogin。")]
+        /// <summary>
+        /// 公开的Lua模块名称数据。
+        /// </summary>
         public string luaModuleName;
 
         [Tooltip("Lua 脚本最终输出目录，相对于项目根目录。")]
+        /// <summary>
+        /// 公开的Lua输出Folder数据。
+        /// </summary>
         public string luaOutputFolder = "Lua/UI";
 
         [Tooltip("C# UIManager 使用的挂载层级；Lua 层级仍以 UIDefine 为准。")]
+        /// <summary>
+        /// 公开的ui层级数据。
+        /// </summary>
         public UIObjectBinderLayer uiLayer =
             UIObjectBinderLayer.Auto;
     }
@@ -66,18 +90,39 @@ namespace LuaObjectBind
     public class ObjectBinder : MonoBehaviour
     {
         [Header("UI Script Generation")]
+        /// <summary>
+        /// 公开的ui脚本Generation数据。
+        /// </summary>
         public UIScriptGenerationSettings uiScriptGeneration =
             new UIScriptGenerationSettings();
         
+        /// <summary>
+        /// 公开的Lua数据。
+        /// </summary>
         public LuaFileReference lua = new LuaFileReference();
+        /// <summary>
+        /// 公开的绑定值数据。
+        /// </summary>
         public BindValueCollection bindValues =
             new BindValueCollection();
+        /// <summary>
+        /// 公开的字段绑定值数据。
+        /// </summary>
         public FieldBindValueCollection fieldBindValues =
             new FieldBindValueCollection();
+        /// <summary>
+        /// 公开的路径绑定值数据。
+        /// </summary>
         public PathBindValueCollection pathBindValues =
             new PathBindValueCollection();
+        /// <summary>
+        /// 公开的static文本绑定值数据。
+        /// </summary>
         public StaticTextBindValueCollection staticTextBindValues =
             new StaticTextBindValueCollection();
+        /// <summary>
+        /// 公开的状态Control绑定值数据。
+        /// </summary>
         public StateControlBindValueCollection stateControlBindValues =
             new StateControlBindValueCollection();
         private WeakReference<Object>[] _bindObjects;
@@ -89,6 +134,9 @@ namespace LuaObjectBind
         // 当前Binder绑定的静态对象，Prefab内部的ObjectBinder对象
 
         // string, Object(ObjectBinder类型)
+        /// <summary>
+        /// 公开的binderElements数据。
+        /// </summary>
         public BinderElementCollection binderElements =
             new BinderElementCollection();
 
@@ -96,6 +144,9 @@ namespace LuaObjectBind
         /// 标记为引导节点的 bindValue key 列表，用于引导系统运行时查找
         /// </summary>
         [HideInInspector]
+        /// <summary>
+        /// 公开的guideNode键集合数据。
+        /// </summary>
         public List<string> guideNodeKeys = new List<string>();
 
         private WeakReference<Object>[] _binderElementObjects;
@@ -113,8 +164,14 @@ namespace LuaObjectBind
         }
 
         // 对应LuaEnv中的table
+        /// <summary>
+        /// 向调用方提供BindedTable。
+        /// </summary>
         public LuaTable BindedTable { get; private set; }
         private const string WIDGET_TABLE_NAME = "Widget";
+        /// <summary>
+        /// 初始化当前实例。
+        /// </summary>
         public void Init(LuaTable table)
         {
             if (bindValues == null || fieldBindValues == null || pathBindValues == null || stateControlBindValues == null)
@@ -273,6 +330,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 获取对象。
+        /// </summary>
         public static Object GetObject(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -289,6 +349,9 @@ namespace LuaObjectBind
         }
 
         // 获取当前ObjectBind的静态Logic对象
+        /// <summary>
+        /// 获取BinderLogicElement。
+        /// </summary>
         public static ObjectBinder GetBinderLogicElement(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -303,6 +366,9 @@ namespace LuaObjectBind
             return null;
         }
 
+        /// <summary>
+        /// 获取路径。
+        /// </summary>
         public static string GetPath(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -316,6 +382,9 @@ namespace LuaObjectBind
             return pathBindValue.GetValue<string>();
         }
 
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         private void OnEnable()
         {
             if (BindedTable != null)
@@ -328,6 +397,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 在组件停用时解除运行时关联。
+        /// </summary>
         private void OnDisable()
         {
             if (BindedTable != null)
@@ -340,6 +412,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 执行释放相关逻辑。
+        /// </summary>
         public void Release()
         {
             _bindObjects = null;
@@ -356,11 +431,17 @@ namespace LuaObjectBind
             BindedTable = null;
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         public void OnDestroy()
         {
             Release();
         }
 
+        /// <summary>
+        /// 获取Field绑定Enum。
+        /// </summary>
         public static FieldBindEnum GetFieldBindEnum(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -369,6 +450,9 @@ namespace LuaObjectBind
             return binder._fieldBindTypes[keyId];
         }
 
+        /// <summary>
+        /// 获取Field绑定类型Enum。
+        /// </summary>
         public static FieldBindTypeEnum GetFieldBindTypeEnum(int binderId, int keyId)
         {
             FieldBindEnum fieldBindEnum = GetFieldBindEnum(binderId, keyId);
@@ -377,6 +461,9 @@ namespace LuaObjectBind
 
         //todo 以后有时间写个代码生成器
         #region 各种类的Get
+        /// <summary>
+        /// 获取值。
+        /// </summary>
         [LuaRawFunction]
         public static int GetValue(IntPtr L)
         {
@@ -418,6 +505,9 @@ namespace LuaObjectBind
             return 1;
         }
 
+        /// <summary>
+        /// 获取字符串。
+        /// </summary>
         public static string GetString(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -431,6 +521,9 @@ namespace LuaObjectBind
             return String.Empty;
         }
 
+        /// <summary>
+        /// 获取布尔值。
+        /// </summary>
         public static bool GetBool(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -444,6 +537,9 @@ namespace LuaObjectBind
             return false;
         }
 
+        /// <summary>
+        /// 获取整数。
+        /// </summary>
         public static int GetInt(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -457,6 +553,9 @@ namespace LuaObjectBind
             return 0;
         }
 
+        /// <summary>
+        /// 获取浮点数。
+        /// </summary>
         public static float GetFloat(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -470,6 +569,9 @@ namespace LuaObjectBind
             return 0;
         }
 
+        /// <summary>
+        /// 获取Vector2。
+        /// </summary>
         public static Vector2 GetVector2(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -483,6 +585,9 @@ namespace LuaObjectBind
             return Vector2.zero;
         }
 
+        /// <summary>
+        /// 获取Vector3。
+        /// </summary>
         public static Vector3 GetVector3(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -499,6 +604,9 @@ namespace LuaObjectBind
         #endregion
 
         #region Handle
+        /// <summary>
+        /// 设置值。
+        /// </summary>
         [LuaRawFunction]
         public static int SetValue(IntPtr L)
         {
@@ -549,6 +657,9 @@ namespace LuaObjectBind
             return 1;
         }
 
+        /// <summary>
+        /// 处理字符串。
+        /// </summary>
         public static void HandleString(int binderId, int keyId, string value)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -561,6 +672,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 处理布尔值。
+        /// </summary>
         public static void HandleBool(int binderId, int keyId, bool value)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -573,6 +687,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 处理整数。
+        /// </summary>
         public static void HandleInt(int binderId, int keyId, int value)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -585,6 +702,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 处理浮点数。
+        /// </summary>
         public static void HandleFloat(int binderId, int keyId, float value)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -597,6 +717,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 处理Vector2。
+        /// </summary>
         public static void HandleVector2(int binderId, int keyId, Vector2 value)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -609,6 +732,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 处理Vector3。
+        /// </summary>
         public static void HandleVector3(int binderId, int keyId, Vector3 value)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -625,6 +751,9 @@ namespace LuaObjectBind
         
         #region StateControl
 
+        /// <summary>
+        /// 获取状态Controller。
+        /// </summary>
         public static StateControl.Runtime.StateController GetStateController(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -638,6 +767,9 @@ namespace LuaObjectBind
             return null;
         }
 
+        /// <summary>
+        /// 获取状态分组名称。
+        /// </summary>
         public static string GetStateGroupName(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -647,6 +779,9 @@ namespace LuaObjectBind
             return binder._stateGroupNames[keyId];
         }
 
+        /// <summary>
+        /// 执行变更状态相关逻辑。
+        /// </summary>
         public static void ChangeState(int binderId, int keyId, int stateIndex)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -663,6 +798,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 执行变更状态By名称相关逻辑。
+        /// </summary>
         public static void ChangeStateByName(int binderId, int keyId, string stateName)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -679,6 +817,9 @@ namespace LuaObjectBind
             }
         }
 
+        /// <summary>
+        /// 获取状态值。
+        /// </summary>
         public static int GetStateValue(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -698,6 +839,9 @@ namespace LuaObjectBind
 
         #endregion
         
+        /// <summary>
+        /// 获取Lua表。
+        /// </summary>
         public static object GetLuaTable(int binderId, int keyId)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;
@@ -711,6 +855,9 @@ namespace LuaObjectBind
             return null;
         }
 
+        /// <summary>
+        /// 处理Lua表。
+        /// </summary>
         public static void HandleLuaTable(int binderId, int keyId, LuaTable value)
         {
             ObjectBinder binder = ObjectRefManager.GetObject(binderId) as ObjectBinder;

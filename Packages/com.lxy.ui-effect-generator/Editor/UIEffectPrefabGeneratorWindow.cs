@@ -104,42 +104,99 @@ namespace Lxy.UIEffectGenerator.Editor
         [Serializable]
         private sealed class UIEffectCodexResponse
         {
+            /// <summary>
+            /// 公开的schemaJson数据。
+            /// </summary>
             public string schemaJson = string.Empty;
+            /// <summary>
+            /// 公开的summary数据。
+            /// </summary>
             public string summary = string.Empty;
         }
 
         [Serializable]
         private sealed class UIEffectFullFidelityResponse
         {
+            /// <summary>
+            /// 公开的schemaJson数据。
+            /// </summary>
             public string schemaJson = string.Empty;
+            /// <summary>
+            /// 公开的summary数据。
+            /// </summary>
             public string summary = string.Empty;
         }
 
         private sealed class CodexSpriteCatalog
         {
+            /// <summary>
+            /// 公开的清单数据。
+            /// </summary>
             public string Manifest = string.Empty;
+            /// <summary>
+            /// 公开的图片路径数据。
+            /// </summary>
             public string[] ImagePaths = Array.Empty<string>();
+            /// <summary>
+            /// 公开的Sprite数量数据。
+            /// </summary>
             public int SpriteCount;
+            /// <summary>
+            /// 公开的OmittedSprite数量数据。
+            /// </summary>
             public int OmittedSpriteCount;
         }
 
         private sealed class CodexSpriteCatalogEntry
         {
+            /// <summary>
+            /// 公开的Sprite数据。
+            /// </summary>
             public Sprite Sprite;
+            /// <summary>
+            /// 公开的资源数据。
+            /// </summary>
             public string Resource = string.Empty;
+            /// <summary>
+            /// 公开的源数据宽度数据。
+            /// </summary>
             public float SourceWidth;
+            /// <summary>
+            /// 公开的源数据高度数据。
+            /// </summary>
             public float SourceHeight;
+            /// <summary>
+            /// 公开的源数据Border数据。
+            /// </summary>
             public Vector4 SourceBorder;
         }
 
         [Serializable]
         private sealed class UIEffectFigmaMcpResponse
         {
+            /// <summary>
+            /// 公开的mcp成功数据。
+            /// </summary>
             public bool mcpSucceeded;
+            /// <summary>
+            /// 公开的mcp错误数据。
+            /// </summary>
             public string mcpError = string.Empty;
+            /// <summary>
+            /// 公开的帧名称数据。
+            /// </summary>
             public string frameName = string.Empty;
+            /// <summary>
+            /// 公开的schemaJson数据。
+            /// </summary>
             public string schemaJson = string.Empty;
+            /// <summary>
+            /// 公开的引用图片地址数据。
+            /// </summary>
             public string referenceImageUrl = string.Empty;
+            /// <summary>
+            /// 公开的summary数据。
+            /// </summary>
             public string summary = string.Empty;
         }
 
@@ -148,6 +205,9 @@ namespace Lxy.UIEffectGenerator.Editor
 
         private bool IsBusy => requestInProgress || IsCodexRunning;
 
+        /// <summary>
+        /// 执行打开相关逻辑。
+        /// </summary>
         [MenuItem("工具/UI工具/根据效果图生成Prefab")]
         private static void Open()
         {
@@ -157,18 +217,27 @@ namespace Lxy.UIEffectGenerator.Editor
             window.Show();
         }
 
+        /// <summary>
+        /// 打开English。
+        /// </summary>
         [MenuItem("Tools/UI Tools/Generate Prefab From Design")]
         private static void OpenEnglish()
         {
             Open();
         }
 
+        /// <summary>
+        /// 获取ProjectDefaults。
+        /// </summary>
         private static UIEffectProjectDefaults GetProjectDefaults()
         {
             return UIEffectProjectAdapterRegistry.Active.CreateDefaults() ??
                    new UIEffectProjectDefaults();
         }
 
+        /// <summary>
+        /// 获取默认值资源Search根节点。
+        /// </summary>
         private static string GetDefaultResourceSearchRoot()
         {
             string path = GetProjectDefaults().resourceSearchRoot;
@@ -177,6 +246,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : "Assets";
         }
 
+        /// <summary>
+        /// 应用ProjectDefaults。
+        /// </summary>
         private void ApplyProjectDefaults()
         {
             UIEffectProjectDefaults defaults = GetProjectDefaults();
@@ -211,6 +283,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 在组件启用时建立运行时关联。
+        /// </summary>
         private void OnEnable()
         {
             ApplyProjectDefaults();
@@ -265,6 +340,9 @@ namespace Lxy.UIEffectGenerator.Editor
             ScheduleResourceRescan("打开效果图生成 UI 编辑器");
         }
 
+        /// <summary>
+        /// 获取字符串Preference。
+        /// </summary>
         private static string GetStringPreference(
             string key,
             string legacyKey,
@@ -275,6 +353,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : EditorPrefs.GetString(legacyKey, fallback);
         }
 
+        /// <summary>
+        /// 获取整数Preference。
+        /// </summary>
         private static int GetIntPreference(
             string key,
             string legacyKey,
@@ -285,6 +366,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : EditorPrefs.GetInt(legacyKey, fallback);
         }
 
+        /// <summary>
+        /// 获取布尔值Preference。
+        /// </summary>
         private static bool GetBoolPreference(
             string key,
             string legacyKey,
@@ -295,6 +379,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : EditorPrefs.GetBool(legacyKey, fallback);
         }
 
+        /// <summary>
+        /// 在组件停用时解除运行时关联。
+        /// </summary>
         private void OnDisable()
         {
             EditorApplication.update -= PollCodexRunner;
@@ -306,6 +393,9 @@ namespace Lxy.UIEffectGenerator.Editor
             DeleteCodexOutputFile();
         }
 
+        /// <summary>
+        /// 绘制编辑器窗口界面。
+        /// </summary>
         private void OnGUI()
         {
             scrollPosition = EditorGUILayout.BeginScrollView(
@@ -320,6 +410,9 @@ namespace Lxy.UIEffectGenerator.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        /// <summary>
+        /// 绘制Introduction。
+        /// </summary>
         private void DrawIntroduction()
         {
             EditorGUILayout.HelpBox(
@@ -332,6 +425,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 MessageType.Info);
         }
 
+        /// <summary>
+        /// 绘制引用Section。
+        /// </summary>
         private void DrawReferenceSection()
         {
             EditorGUILayout.LabelField(
@@ -372,6 +468,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制FigmaFields。
+        /// </summary>
         private void DrawFigmaFields()
         {
             sourceUrl = EditorGUILayout.TextField(
@@ -397,6 +496,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制结构定义Section。
+        /// </summary>
         private void DrawSchemaSection()
         {
             EditorGUILayout.LabelField(
@@ -569,6 +671,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 绘制GenerationSection。
+        /// </summary>
         private void DrawGenerationSection()
         {
             EditorGUILayout.LabelField(
@@ -682,6 +787,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行BeginFullFidelityGeneration相关逻辑。
+        /// </summary>
         private void BeginFullFidelityGeneration()
         {
             if (referenceImage == null)
@@ -847,6 +955,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 创建Codex图片Inputs。
+        /// </summary>
         private static string[] CreateCodexImageInputs(
             string sourcePath,
             string temporaryFolder,
@@ -935,6 +1046,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 创建Codex精灵图目录。
+        /// </summary>
         private static CodexSpriteCatalog CreateCodexSpriteCatalog(
             string referenceAssetPath,
             string temporaryFolder,
@@ -1137,6 +1251,9 @@ namespace Lxy.UIEffectGenerator.Editor
             };
         }
 
+        /// <summary>
+        /// 执行写入Codex精灵图目录Page相关逻辑。
+        /// </summary>
         private static void WriteCodexSpriteCatalogPage(
             List<CodexSpriteCatalogEntry> entries,
             string outputPath,
@@ -1249,6 +1366,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行写入CodexJpeg相关逻辑。
+        /// </summary>
         private static void WriteCodexJpeg(
             Texture2D source,
             RectInt sourceRegion,
@@ -1337,6 +1457,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行BeginCodexAnalysis相关逻辑。
+        /// </summary>
         private void BeginCodexAnalysis()
         {
             if (referenceImage == null)
@@ -1485,6 +1608,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 尝试ReuseMatching结构定义，并返回是否成功。
+        /// </summary>
         private bool TryReuseMatchingSchema(
             string schemaAssetPath,
             string safePanelId,
@@ -1583,6 +1709,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行PollCodex执行器相关逻辑。
+        /// </summary>
         private void PollCodexRunner()
         {
             if (codexRunner == null)
@@ -1623,6 +1752,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 处理Codex结果。
+        /// </summary>
         private void HandleCodexResult(UIEffectCodexRunResult result)
         {
             try
@@ -1776,6 +1908,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 处理FullFidelity结果。
+        /// </summary>
         private void HandleFullFidelityResult(
             UIEffectCodexRunResult result)
         {
@@ -1908,6 +2043,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 构建FullFidelityPrompt。
+        /// </summary>
         private string BuildFullFidelityPrompt(
             string safePanelId,
             string referenceAssetPath,
@@ -1988,6 +2126,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "是转义后的完整单行 UISchema JSON 字符串；summary 只写一句完成说明。";
         }
 
+        /// <summary>
+        /// 构建FullFidelity输出结构定义。
+        /// </summary>
         private static string BuildFullFidelityOutputSchema()
         {
             return
@@ -2002,6 +2143,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "}\n";
         }
 
+        /// <summary>
+        /// 构建CodexPrompt。
+        /// </summary>
         private string BuildCodexPrompt(
             string safePanelId,
             string referenceAssetPath,
@@ -2122,6 +2266,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "\"summary\":\"中文摘要\"}。不要输出 Markdown、代码块或解释。";
         }
 
+        /// <summary>
+        /// 构建Codex输出结构定义。
+        /// </summary>
         private static string BuildCodexOutputSchema()
         {
             return
@@ -2142,6 +2289,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "}\n";
         }
 
+        /// <summary>
+        /// 构建FigmaMcpPrompt。
+        /// </summary>
         private static string BuildFigmaMcpPrompt(
             string fileKey,
             string nodeId,
@@ -2204,6 +2354,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "referenceImageUrl、summary；不要输出 Markdown、代码块或解释。";
         }
 
+        /// <summary>
+        /// 构建FigmaMcp输出结构定义。
+        /// </summary>
         private static string BuildFigmaMcpOutputSchema()
         {
             return
@@ -2224,6 +2377,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "}\n";
         }
 
+        /// <summary>
+        /// 获取Short错误。
+        /// </summary>
         private static string GetShortError(string value)
         {
             string text = (value ?? string.Empty).Trim();
@@ -2233,6 +2389,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : "…" + text.Substring(text.Length - maximumLength);
         }
 
+        /// <summary>
+        /// 解析GeneratedAi结构定义。
+        /// </summary>
         private static UIEffectSchema ParseGeneratedAiSchema(
             string schemaJson,
             string source)
@@ -2268,6 +2427,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return schema;
         }
 
+        /// <summary>
+        /// 尝试ExtractSafeHttps地址，并返回是否成功。
+        /// </summary>
         private static bool TryExtractSafeHttpsUrl(
             string value,
             out Uri uri)
@@ -2313,6 +2475,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return false;
         }
 
+        /// <summary>
+        /// 尝试创建SafeHttpsUri，并返回是否成功。
+        /// </summary>
         private static bool TryCreateSafeHttpsUri(
             string value,
             out Uri uri)
@@ -2336,6 +2501,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return false;
         }
 
+        /// <summary>
+        /// 执行判断是否WrappedUrlTerminator相关逻辑。
+        /// </summary>
         private static bool IsWrappedUrlTerminator(char character)
         {
             return char.IsWhiteSpace(character) ||
@@ -2348,6 +2516,9 @@ namespace Lxy.UIEffectGenerator.Editor
                    character == '}';
         }
 
+        /// <summary>
+        /// 执行LooksLikeMcpFailure文本相关逻辑。
+        /// </summary>
         private static bool LooksLikeMcpFailureText(string value)
         {
             string text = (value ?? string.Empty).Trim();
@@ -2375,6 +2546,9 @@ namespace Lxy.UIEffectGenerator.Editor
                     StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
+        /// <summary>
+        /// 执行DescribeReference图片值相关逻辑。
+        /// </summary>
         private static string DescribeReferenceImageValue(string value)
         {
             string text = (value ?? string.Empty).Trim();
@@ -2402,6 +2576,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : "非 URL 文本";
         }
 
+        /// <summary>
+        /// 执行规范化AiJson相关逻辑。
+        /// </summary>
         private static string NormalizeAiJson(string value)
         {
             string text = (value ?? string.Empty).Trim();
@@ -2470,6 +2647,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return text;
         }
 
+        /// <summary>
+        /// 解析本地Ai响应。
+        /// </summary>
         private static UIEffectCodexResponse ParseLocalAiResponse(
             string rawOutput)
         {
@@ -2505,6 +2685,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 GetShortError(json));
         }
 
+        /// <summary>
+        /// 解析FigmaAi响应。
+        /// </summary>
         private static UIEffectFigmaMcpResponse ParseFigmaAiResponse(
             string rawOutput)
         {
@@ -2529,6 +2712,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 GetShortError(json));
         }
 
+        /// <summary>
+        /// 执行ThrowIfPlanModeResponse相关逻辑。
+        /// </summary>
         private static void ThrowIfPlanModeResponse(string value)
         {
             string text = value ?? string.Empty;
@@ -2552,6 +2738,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 "返回内容开头：" + GetShortError(text));
         }
 
+        /// <summary>
+        /// 执行DeleteCodex输出文件相关逻辑。
+        /// </summary>
         private void DeleteCodexOutputFile()
         {
             string path = pendingCodexOutputPath;
@@ -2589,6 +2778,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行DeleteCodex图片Inputs相关逻辑。
+        /// </summary>
         private void DeleteCodexImageInputs()
         {
             if (pendingCodexImageInputs.Count == 0)
@@ -2628,6 +2820,9 @@ namespace Lxy.UIEffectGenerator.Editor
             pendingCodexImageInputs.Clear();
         }
 
+        /// <summary>
+        /// 执行BeginFigmaImportAndGenerate相关逻辑。
+        /// </summary>
         private void BeginFigmaImportAndGenerate()
         {
             if (!UIEffectFigmaImporter.TryParseNodeUrl(
@@ -2706,6 +2901,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行ImportLocalReference相关逻辑。
+        /// </summary>
         private void ImportLocalReference()
         {
             string path = EditorUtility.OpenFilePanel(
@@ -2728,6 +2926,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 处理FigmaMcp结果。
+        /// </summary>
         private void HandleFigmaMcpResult(
             UIEffectCodexRunResult result)
         {
@@ -2888,6 +3089,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行CompleteFigmaMcpImport相关逻辑。
+        /// </summary>
         private void CompleteFigmaMcpImport(
             byte[] screenshotBytes,
             UIEffectSchema schema,
@@ -2975,6 +3179,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行写入Imported图片相关逻辑。
+        /// </summary>
         private static void WriteImportedImage(
             string assetPath,
             byte[] bytes,
@@ -3000,6 +3207,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行写入BytesIfChanged相关逻辑。
+        /// </summary>
         private static void WriteBytesIfChanged(
             string absolutePath,
             byte[] bytes)
@@ -3017,6 +3227,9 @@ namespace Lxy.UIEffectGenerator.Editor
             File.WriteAllBytes(absolutePath, bytes);
         }
 
+        /// <summary>
+        /// 执行ComputeReference图片哈希相关逻辑。
+        /// </summary>
         private static string ComputeReferenceImageHash(
             string assetPath)
         {
@@ -3039,6 +3252,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行规范化项目资源路径相关逻辑。
+        /// </summary>
         private static string NormalizeProjectAssetPath(string path)
         {
             return string.IsNullOrWhiteSpace(path)
@@ -3046,6 +3262,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 : path.Trim().Replace('\\', '/').TrimEnd('/');
         }
 
+        /// <summary>
+        /// 执行BeginFigmaScreenshot下载相关逻辑。
+        /// </summary>
         private void BeginFigmaScreenshotDownload(
             string url,
             Action<byte[]> onSuccess)
@@ -3053,6 +3272,9 @@ namespace Lxy.UIEffectGenerator.Editor
             BeginNodeScreenshotDownload(url, onSuccess);
         }
 
+        /// <summary>
+        /// 执行Begin节点Screenshot下载相关逻辑。
+        /// </summary>
         private void BeginNodeScreenshotDownload(
             string url,
             Action<byte[]> onSuccess)
@@ -3125,6 +3347,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Poll节点Screenshot下载相关逻辑。
+        /// </summary>
         private void PollNodeScreenshotDownload()
         {
             Process process = figmaNodeDownloadProcess;
@@ -3180,6 +3405,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 取消Node下载。
+        /// </summary>
         private void CancelNodeDownload()
         {
             EditorApplication.update -= PollNodeScreenshotDownload;
@@ -3201,6 +3429,9 @@ namespace Lxy.UIEffectGenerator.Editor
             figmaNodeDownloadSuccess = null;
         }
 
+        /// <summary>
+        /// 执行引用流程参数相关逻辑。
+        /// </summary>
         private static string QuoteProcessArgument(string value)
         {
             value ??= string.Empty;
@@ -3239,6 +3470,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return builder.ToString();
         }
 
+        /// <summary>
+        /// 保存引用图片。
+        /// </summary>
         private void SaveReferenceImage(
             byte[] sourceBytes,
             string sourceName)
@@ -3271,6 +3505,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 创建Starter结构定义。
+        /// </summary>
         private void CreateStarterSchema()
         {
             if (referenceImage == null)
@@ -3351,6 +3588,9 @@ namespace Lxy.UIEffectGenerator.Editor
             requestStatus = "基础 UISchema 已创建：" + assetPath;
         }
 
+        /// <summary>
+        /// 创建Generation选项。
+        /// </summary>
         private UIEffectPrefabGenerationOptions CreateGenerationOptions()
         {
             string resolvedPanelId = GetSafePanelId();
@@ -3372,6 +3612,9 @@ namespace Lxy.UIEffectGenerator.Editor
             };
         }
 
+        /// <summary>
+        /// 校验运行时TemplateProjection。
+        /// </summary>
         private static void ValidateRuntimeTemplateProjection(
             Transform generated,
             List<UIEffectNode> schemaNodes)
@@ -3388,6 +3631,9 @@ namespace Lxy.UIEffectGenerator.Editor
             ValidateRuntimeTemplateProjection(schemaNodes, prefabNames);
         }
 
+        /// <summary>
+        /// 校验运行时TemplateProjection。
+        /// </summary>
         private static void ValidateRuntimeTemplateProjection(
             List<UIEffectNode> schemaNodes,
             string[] prefabNames)
@@ -3436,6 +3682,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Generate预制体相关逻辑。
+        /// </summary>
         private void GeneratePrefab()
         {
             try
@@ -3482,6 +3731,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 校验生成选中项结构定义。
+        /// </summary>
         [MenuItem(
             "Assets/UI工具/根据选中的UISchema生成Prefab",
             true)]
@@ -3495,6 +3747,9 @@ namespace Lxy.UIEffectGenerator.Editor
                            StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// 执行GenerateSelected结构定义相关逻辑。
+        /// </summary>
         [MenuItem("Assets/UI工具/根据选中的UISchema生成Prefab")]
         private static void GenerateSelectedSchema()
         {
@@ -3526,12 +3781,18 @@ namespace Lxy.UIEffectGenerator.Editor
             EditorGUIUtility.PingObject(Selection.activeObject);
         }
 
+        /// <summary>
+        /// 校验Optimize选中项结构定义。
+        /// </summary>
         [MenuItem("Assets/UI工具/压缩选中的UISchema（低Token）", true)]
         private static bool ValidateOptimizeSelectedSchema()
         {
             return ValidateGenerateSelectedSchema();
         }
 
+        /// <summary>
+        /// 执行优化Selected结构定义相关逻辑。
+        /// </summary>
         [MenuItem("Assets/UI工具/压缩选中的UISchema（低Token）")]
         private static void OptimizeSelectedSchema()
         {
@@ -3544,6 +3805,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 Selection.activeObject);
         }
 
+        /// <summary>
+        /// 执行优化项目SchemasMenu相关逻辑。
+        /// </summary>
         [MenuItem("工具/UI工具/压缩所有UISchema（低Token）")]
         private static void OptimizeProjectSchemasMenu()
         {
@@ -3557,6 +3821,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行优化项目Schemas相关逻辑。
+        /// </summary>
         public static void OptimizeProjectSchemas()
         {
             int optimizedFiles = 0;
@@ -3585,6 +3852,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 $"UISchema，共合并重复节点 {collapsedNodes} 个。");
         }
 
+        /// <summary>
+        /// 执行优化结构定义资源相关逻辑。
+        /// </summary>
         private static void OptimizeSchemaAsset(
             string assetPath,
             out int collapsedNodes)
@@ -3611,6 +3881,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 ImportAssetOptions.ForceUpdate);
         }
 
+        /// <summary>
+        /// 设置资源根节点目录。
+        /// </summary>
         private void SetResourceRootFolder(DefaultAsset folder)
         {
             if (folder == null)
@@ -3644,6 +3917,9 @@ namespace Lxy.UIEffectGenerator.Editor
             ScheduleResourceRescan("资源目录已更改");
         }
 
+        /// <summary>
+        /// 执行调度资源Rescan相关逻辑。
+        /// </summary>
         private void ScheduleResourceRescan(string reason)
         {
             if (resourceRescanScheduled ||
@@ -3662,6 +3938,9 @@ namespace Lxy.UIEffectGenerator.Editor
             EditorApplication.delayCall += RebuildResourceCache;
         }
 
+        /// <summary>
+        /// 执行重建资源缓存相关逻辑。
+        /// </summary>
         private void RebuildResourceCache()
         {
             EditorApplication.delayCall -= RebuildResourceCache;
@@ -3707,6 +3986,9 @@ namespace Lxy.UIEffectGenerator.Editor
             Repaint();
         }
 
+        /// <summary>
+        /// 获取Safe面板Id。
+        /// </summary>
         private string GetSafePanelId()
         {
             string value = string.IsNullOrWhiteSpace(panelId)
@@ -3715,6 +3997,9 @@ namespace Lxy.UIEffectGenerator.Editor
             return UIEffectEditorUtility.SanitizeTypeName(value);
         }
 
+        /// <summary>
+        /// 解析SearchRoots。
+        /// </summary>
         private static string[] ParseSearchRoots(string value)
         {
             return (value ?? string.Empty)
@@ -3726,6 +4011,9 @@ namespace Lxy.UIEffectGenerator.Editor
                 .ToArray();
         }
 
+        /// <summary>
+        /// 确保资源目录。
+        /// </summary>
         private static void EnsureAssetFolder(string assetFolder)
         {
             string normalized = assetFolder
@@ -3752,6 +4040,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行配置Reference图片Importer相关逻辑。
+        /// </summary>
         private static void ConfigureReferenceImageImporter(
             string assetPath)
         {
@@ -3772,6 +4063,9 @@ namespace Lxy.UIEffectGenerator.Editor
             importer.SaveAndReimport();
         }
 
+        /// <summary>
+        /// 获取引用源数据尺寸。
+        /// </summary>
         private static void GetReferenceSourceSize(
             string assetPath,
             Texture2D fallback,
@@ -3801,6 +4095,9 @@ namespace Lxy.UIEffectGenerator.Editor
             }
         }
 
+        /// <summary>
+        /// 执行配置Figma精灵图Importer相关逻辑。
+        /// </summary>
         private static void ConfigureFigmaSpriteImporter(
             string assetPath)
         {

@@ -19,6 +19,8 @@ namespace Game.Main
 
         private Slider progressSlider;
 
+        private Image followImage;
+
         private TextMeshProUGUI statusText;
 
         private TextMeshProUGUI progressText;
@@ -63,6 +65,9 @@ namespace Game.Main
             return true;
         }
 
+        /// <summary>
+        /// 执行绑定相关逻辑。
+        /// </summary>
         private void Bind(YooAssetLauncher value)
         {
             if (launcher == value)
@@ -81,10 +86,15 @@ namespace Game.Main
             ResetView();
         }
 
+        /// <summary>
+        /// 尝试解析绑定，并返回是否成功。
+        /// </summary>
         private bool TryResolveBindings(out string error)
         {
             progressSlider = FindPathComponent<Slider>(
                 "bottom/Slider");
+            followImage = FindPathComponent<Image>(
+                "bottom/Slider/Handle Slide Area/Handle/img_follow");
             statusText = FindPathComponent<TextMeshProUGUI>(
                 "bottom/StatusText");
             progressText = FindPathComponent<TextMeshProUGUI>(
@@ -94,6 +104,7 @@ namespace Game.Main
             backgroundImage = FindPathComponent<Image>("bg");
 
             if (progressSlider != null &&
+                followImage != null &&
                 statusText != null &&
                 progressText != null &&
                 sizeText != null &&
@@ -107,6 +118,13 @@ namespace Game.Main
             if (progressSlider == null)
             {
                 missing.Add("bottom/Slider(Slider)");
+            }
+
+            if (followImage == null)
+            {
+                missing.Add(
+                    "bottom/Slider/Handle Slide Area/Handle/" +
+                    "img_follow(Image)");
             }
 
             if (statusText == null)
@@ -161,6 +179,9 @@ namespace Game.Main
             yield return backgroundCarousel.PrepareAsync(package);
         }
 
+        /// <summary>
+        /// 执行显示Starting游戏相关逻辑。
+        /// </summary>
         public void ShowStartingGame(string message)
         {
             SetSliderValue(1f);
@@ -170,6 +191,15 @@ namespace Game.Main
                     : message);
             SetText(progressText, "下载进度 100%");
             SetText(sizeText, BuildCompletedSummary());
+        }
+
+        /// <summary>
+        /// 在首个业务界面完成绘制后隐藏启动界面。对象保留在启动器下，
+        /// 以便场景切换期间始终有可见内容覆盖背景。
+        /// </summary>
+        public void HideAfterStartup()
+        {
+            gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -219,6 +249,9 @@ namespace Game.Main
             readyAnimationFinished = true;
         }
 
+        /// <summary>
+        /// 执行显示Failure相关逻辑。
+        /// </summary>
         public void ShowFailure(string message)
         {
             SetText(statusText, "资源更新失败");
@@ -237,6 +270,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 执行显示强制更新相关逻辑。
+        /// </summary>
         public void ShowForceUpdate(
             string message,
             string currentVersion,
@@ -270,6 +306,9 @@ namespace Game.Main
             SetText(sizeText, "更新完成后请重新启动游戏");
         }
 
+        /// <summary>
+        /// 重置视图。
+        /// </summary>
         private void ResetView()
         {
             lastCurrentBytes = 0;
@@ -283,6 +322,9 @@ namespace Game.Main
             SetText(sizeText, "正在获取资源信息...");
         }
 
+        /// <summary>
+        /// 响应状态Changed事件。
+        /// </summary>
         private void OnStatusChanged(
             YooAssetLauncher.UpdateSnapshot snapshot)
         {
@@ -332,6 +374,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 响应下载错误事件。
+        /// </summary>
         private void OnDownloadError(DownloadErrorEventArgs args)
         {
             SetText(statusText, "资源下载异常，正在重试");
@@ -341,6 +386,9 @@ namespace Game.Main
                     : args.ErrorInfo);
         }
 
+        /// <summary>
+        /// 获取状态消息。
+        /// </summary>
         private string GetStatusMessage(
             YooAssetLauncher.UpdateSnapshot snapshot)
         {
@@ -372,6 +420,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 计算下载进度。
+        /// </summary>
         private float CalculateDownloadProgress()
         {
             if (lastTotalBytes > 0)
@@ -390,6 +441,9 @@ namespace Game.Main
             return 0f;
         }
 
+        /// <summary>
+        /// 构建下载Summary。
+        /// </summary>
         private string BuildDownloadSummary()
         {
             return $"{FormatBytes(lastCurrentBytes)} / " +
@@ -397,6 +451,9 @@ namespace Game.Main
                    $"{lastCurrentCount} / {lastTotalCount} 个文件";
         }
 
+        /// <summary>
+        /// 构建完成结果Summary。
+        /// </summary>
         private string BuildCompletedSummary()
         {
             if (lastTotalBytes <= 0 && lastTotalCount <= 0)
@@ -409,15 +466,36 @@ namespace Game.Main
             return BuildDownloadSummary();
         }
 
+        /// <summary>
+        /// 设置滑块值。
+        /// </summary>
         private void SetSliderValue(float value)
         {
             if (progressSlider != null)
             {
+                float normalizedValue = Mathf.Clamp01(value);
                 progressSlider.SetValueWithoutNotify(
-                    Mathf.Clamp01(value));
+                    normalizedValue);
+                SetFollowImageVisible(normalizedValue > 0f);
             }
         }
 
+        /// <summary>
+        /// 仅在进度条实际开始推进后显示跟随图片，避免初始零进度
+        /// 时提前露出视觉元素。
+        /// </summary>
+        private void SetFollowImageVisible(bool visible)
+        {
+            if (followImage != null &&
+                followImage.gameObject.activeSelf != visible)
+            {
+                followImage.gameObject.SetActive(visible);
+            }
+        }
+
+        /// <summary>
+        /// 设置文本。
+        /// </summary>
         private static void SetText(TMP_Text target, string value)
         {
             if (target != null)
@@ -426,6 +504,9 @@ namespace Game.Main
             }
         }
 
+        /// <summary>
+        /// 格式化字节数。
+        /// </summary>
         private static string FormatBytes(long bytes)
         {
             const long kb = 1024;
@@ -450,6 +531,9 @@ namespace Game.Main
             return $"{bytes} B";
         }
 
+        /// <summary>
+        /// 确保强制Update面板。
+        /// </summary>
         private void EnsureForceUpdatePanel()
         {
             if (forceUpdatePanel != null)
@@ -529,6 +613,9 @@ namespace Game.Main
                 (RectTransform)forceUpdateButtonText.transform);
         }
 
+        /// <summary>
+        /// 创建文本。
+        /// </summary>
         private TextMeshProUGUI CreateText(
             string objectName,
             Transform parent,
@@ -563,6 +650,9 @@ namespace Game.Main
             return text;
         }
 
+        /// <summary>
+        /// 创建Ui对象。
+        /// </summary>
         private static GameObject CreateUiObject(
             string objectName,
             Transform parent,
@@ -577,6 +667,9 @@ namespace Game.Main
             return result;
         }
 
+        /// <summary>
+        /// 执行Stretch转换为Parent相关逻辑。
+        /// </summary>
         private static void StretchToParent(RectTransform target)
         {
             target.anchorMin = Vector2.zero;
@@ -586,6 +679,9 @@ namespace Game.Main
             target.sizeDelta = Vector2.zero;
         }
 
+        /// <summary>
+        /// 确保启动事件System。
+        /// </summary>
         private void EnsureStartupEventSystem()
         {
             if (EventSystem.current != null)
@@ -600,6 +696,9 @@ namespace Game.Main
             eventSystemObject.transform.SetParent(transform, false);
         }
 
+        /// <summary>
+        /// 响应强制Update按钮Clicked事件。
+        /// </summary>
         private void OnForceUpdateButtonClicked()
         {
             string error = null;
@@ -617,6 +716,9 @@ namespace Game.Main
                     : error);
         }
 
+        /// <summary>
+        /// 构建强制Update版本Description。
+        /// </summary>
         private static string BuildForceUpdateVersionDescription(
             string currentVersion,
             string minimumVersion,
@@ -641,6 +743,9 @@ namespace Game.Main
             return description;
         }
 
+        /// <summary>
+        /// 解除已有绑定。
+        /// </summary>
         private void Unbind()
         {
             if (launcher == null)
@@ -653,6 +758,9 @@ namespace Game.Main
             launcher = null;
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             if (forceUpdateButton != null)

@@ -14,20 +14,65 @@ namespace LxyDemo.UIFramework
     {
         private sealed class UIPanelRecord
         {
+            /// <summary>
+            /// 公开的配置数据。
+            /// </summary>
             public UIPanelConfig Config;
+            /// <summary>
+            /// 公开的Logic数据。
+            /// </summary>
             public UIPanelLogic Logic;
+            /// <summary>
+            /// 公开的状态数据。
+            /// </summary>
             public UIPanelState State;
+            /// <summary>
+            /// 公开的请求标识数据。
+            /// </summary>
             public long RequestId;
+            /// <summary>
+            /// 指示User数据。
+            /// </summary>
             public object UserData;
+            /// <summary>
+            /// 公开的ShowWhen已加载数据。
+            /// </summary>
             public bool ShowWhenLoaded;
+            /// <summary>
+            /// 公开的PendingClose目标数据。
+            /// </summary>
             public string PendingCloseTarget;
+            /// <summary>
+            /// 公开的PendingCloseImmediate数据。
+            /// </summary>
             public bool PendingCloseImmediate;
+            /// <summary>
+            /// 公开的CloseForceDestroy数据。
+            /// </summary>
             public bool CloseForceDestroy;
+            /// <summary>
+            /// 公开的CloseSkip动画数据。
+            /// </summary>
             public bool CloseSkipAnimation;
+            /// <summary>
+            /// 公开的Resolved层级数据。
+            /// </summary>
             public UILayer ResolvedLayer;
+            /// <summary>
+            /// 公开的Backdrop数据。
+            /// </summary>
             public GameObject Backdrop;
+            /// <summary>
+            /// 公开的实例句柄数据。
+            /// </summary>
             public GameResourceInstanceHandle InstanceHandle;
+            /// <summary>
+            /// 公开的实例数据。
+            /// </summary>
             public GameObject Instance;
+            /// <summary>
+            /// 指示是否为加载中。
+            /// </summary>
             public bool IsLoading;
             public readonly List<UIAsyncOperation<UIPanelLogic>>
                 Waiters =
@@ -97,9 +142,21 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 指示当前对象是否已初始化。
+        /// </summary>
         public bool IsInitialized => isInitialized;
+        /// <summary>
+        /// 向调用方提供层级Root。
+        /// </summary>
         public UILayerRoot LayerRoot => EnsureLayerRoot();
+        /// <summary>
+        /// 当前栈的数量。
+        /// </summary>
         public int StackCount => stackRecords.Count;
+        /// <summary>
+        /// 向调用方提供Top面板标识。
+        /// </summary>
         public string TopPanelId =>
             stackCoordinator.GetTop(stackRecords)?.Config.Id;
         public IUIBackdropService BackdropService
@@ -115,6 +172,9 @@ namespace LxyDemo.UIFramework
             UIPanelState> PanelStateChanged;
         public event Action<string, Exception> PanelLoadFailed;
 
+        /// <summary>
+        /// 重置Statics。
+        /// </summary>
         [RuntimeInitializeOnLoadMethod(
             RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
@@ -123,6 +183,9 @@ namespace LxyDemo.UIFramework
             applicationIsQuitting = false;
         }
 
+        /// <summary>
+        /// 初始化组件的运行时状态。
+        /// </summary>
         private void Awake()
         {
             if (instance != null && instance != this)
@@ -135,11 +198,17 @@ namespace LxyDemo.UIFramework
             DontDestroyOnLoad(gameObject);
         }
 
+        /// <summary>
+        /// 响应ApplicationQuit事件。
+        /// </summary>
         private void OnApplicationQuit()
         {
             applicationIsQuitting = true;
         }
 
+        /// <summary>
+        /// 释放持有的资源并解除事件订阅。
+        /// </summary>
         private void OnDestroy()
         {
             if (instance != this)
@@ -151,6 +220,9 @@ namespace LxyDemo.UIFramework
             instance = null;
         }
 
+        /// <summary>
+        /// 初始化当前实例。
+        /// </summary>
         public void Initialize(
             UIManagerSettings managerSettings = null,
             UILayerRoot uiLayerRoot = null)
@@ -218,6 +290,9 @@ namespace LxyDemo.UIFramework
             isInitialized = true;
         }
 
+        /// <summary>
+        /// 注册当前实例。
+        /// </summary>
         public void Register(
             UIPanelConfig config,
             Func<UIPanelLogic> logicFactory = null)
@@ -250,6 +325,9 @@ namespace LxyDemo.UIFramework
             Register(config, () => new TLogic());
         }
 
+        /// <summary>
+        /// 注册本地预制体。
+        /// </summary>
         public void RegisterLocalPrefab(
             GameObject prefab,
             UIPanelConfig config = null,
@@ -322,6 +400,9 @@ namespace LxyDemo.UIFramework
             localPrefabs[config.Id] = prefab;
         }
 
+        /// <summary>
+        /// 注销当前实例。
+        /// </summary>
         public bool Unregister(string panelId)
         {
             if (panelRecords.TryGetValue(
@@ -337,6 +418,9 @@ namespace LxyDemo.UIFramework
             return configs.Remove(panelId);
         }
 
+        /// <summary>
+        /// 异步打开面板。
+        /// </summary>
         public UIAsyncOperation<UIPanelLogic> OpenPanelAsync(
             string panelId,
             object userData = null)
@@ -395,6 +479,9 @@ namespace LxyDemo.UIFramework
             return typedOperation;
         }
 
+        /// <summary>
+        /// 打开面板。
+        /// </summary>
         public void OpenPanel(
             string panelId,
             object userData,
@@ -410,6 +497,9 @@ namespace LxyDemo.UIFramework
             };
         }
 
+        /// <summary>
+        /// 执行预加载面板异步相关逻辑。
+        /// </summary>
         public UIAsyncOperation<UIPanelLogic> PreloadPanelAsync(
             string panelId)
         {
@@ -434,6 +524,9 @@ namespace LxyDemo.UIFramework
             return operation;
         }
 
+        /// <summary>
+        /// 执行预加载Panels异步相关逻辑。
+        /// </summary>
         public UIAsyncOperation<bool> PreloadPanelsAsync(
             IEnumerable<string> panelIds,
             float timeoutPerPanelSeconds = 30f)
@@ -456,6 +549,9 @@ namespace LxyDemo.UIFramework
             return operation;
         }
 
+        /// <summary>
+        /// 关闭面板。
+        /// </summary>
         public bool ClosePanel(
             string panelId,
             bool forceDestroy = false,
@@ -478,6 +574,9 @@ namespace LxyDemo.UIFramework
             return true;
         }
 
+        /// <summary>
+        /// 关闭Top面板。
+        /// </summary>
         public bool CloseTopPanel(
             bool forceDestroy = false,
             bool skipAnimation = false)
@@ -491,6 +590,9 @@ namespace LxyDemo.UIFramework
                        skipAnimation);
         }
 
+        /// <summary>
+        /// 关闭全部面板。
+        /// </summary>
         public void CloseAllPanels(
             bool forceDestroy = true,
             bool includePersistentPanels = true)
@@ -519,6 +621,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行判断是否面板打开相关逻辑。
+        /// </summary>
         public bool IsPanelOpen(string panelId)
         {
             return panelRecords.TryGetValue(
@@ -528,6 +633,9 @@ namespace LxyDemo.UIFramework
                    record.Logic.IsVisible;
         }
 
+        /// <summary>
+        /// 执行判断是否面板Loaded相关逻辑。
+        /// </summary>
         public bool IsPanelLoaded(string panelId)
         {
             return panelRecords.TryGetValue(
@@ -537,6 +645,9 @@ namespace LxyDemo.UIFramework
                    record.Logic.IsLoaded;
         }
 
+        /// <summary>
+        /// 执行判断是否Top面板相关逻辑。
+        /// </summary>
         public bool IsTopPanel(string panelId)
         {
             return string.Equals(
@@ -545,6 +656,9 @@ namespace LxyDemo.UIFramework
                 StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// 获取面板Logic。
+        /// </summary>
         public UIPanelLogic GetPanelLogic(string panelId)
         {
             return panelRecords.TryGetValue(
@@ -561,6 +675,9 @@ namespace LxyDemo.UIFramework
             return GetPanelLogic(panelId) as TLogic;
         }
 
+        /// <summary>
+        /// 获取面板状态。
+        /// </summary>
         public UIPanelState GetPanelState(string panelId)
         {
             return panelRecords.TryGetValue(
@@ -585,6 +702,9 @@ namespace LxyDemo.UIFramework
             return result;
         }
 
+        /// <summary>
+        /// 保存Navigation栈。
+        /// </summary>
         public void SaveNavigationStack(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -658,6 +778,9 @@ namespace LxyDemo.UIFramework
             return operation;
         }
 
+        /// <summary>
+        /// 清空SavedNavigation栈。
+        /// </summary>
         public void ClearSavedNavigationStack(string key)
         {
             if (!string.IsNullOrWhiteSpace(key))
@@ -698,11 +821,17 @@ namespace LxyDemo.UIFramework
             return result;
         }
 
+        /// <summary>
+        /// 执行关闭相关逻辑。
+        /// </summary>
         public void Shutdown()
         {
             ShutdownInternal();
         }
 
+        /// <summary>
+        /// 打开面板Internal。
+        /// </summary>
         private void OpenPanelInternal(
             UIPanelConfig config,
             object userData,
@@ -769,6 +898,9 @@ namespace LxyDemo.UIFramework
                 wantsVisible);
         }
 
+        /// <summary>
+        /// 创建LogicAnd开始加载。
+        /// </summary>
         private void CreateLogicAndBeginLoad(
             UIPanelRecord record,
             object userData,
@@ -823,6 +955,9 @@ namespace LxyDemo.UIFramework
             BeginPanelLoad(record);
         }
 
+        /// <summary>
+        /// 执行Begin面板加载相关逻辑。
+        /// </summary>
         private void BeginPanelLoad(UIPanelRecord record)
         {
             record.RequestId = ++nextRequestId;
@@ -878,6 +1013,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 加载面板Routine。
+        /// </summary>
         private IEnumerator LoadPanelRoutine(
             UIPanelRecord record,
             long requestId)
@@ -1013,6 +1151,9 @@ namespace LxyDemo.UIFramework
                 record.CloseSkipAnimation);
         }
 
+        /// <summary>
+        /// 执行预加载PanelsRoutine相关逻辑。
+        /// </summary>
         private IEnumerator PreloadPanelsRoutine(
             List<string> panelIds,
             float timeoutPerPanelSeconds,
@@ -1059,6 +1200,9 @@ namespace LxyDemo.UIFramework
             operation.Succeed(true);
         }
 
+        /// <summary>
+        /// 处理面板Push。
+        /// </summary>
         private void HandlePanelPush(
             UIPanelRecord record,
             object userData)
@@ -1085,6 +1229,9 @@ namespace LxyDemo.UIFramework
                 false);
         }
 
+        /// <summary>
+        /// 执行内部关闭面板相关逻辑。
+        /// </summary>
         private void InternalClosePanel(
             UIPanelRecord record,
             bool forceDestroy,
@@ -1142,6 +1289,9 @@ namespace LxyDemo.UIFramework
                 skipAnimation);
         }
 
+        /// <summary>
+        /// 设置Pending关闭。
+        /// </summary>
         private void SetPendingClose(
             UIPanelRecord record,
             string targetPanelId,
@@ -1212,6 +1362,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 清空Pending关闭。
+        /// </summary>
         private void ClearPendingClose(UIPanelRecord record)
         {
             record.PendingCloseTarget = null;
@@ -1220,6 +1373,9 @@ namespace LxyDemo.UIFramework
             record.CloseSkipAnimation = false;
         }
 
+        /// <summary>
+        /// 执行流程PanelsWaitingFor相关逻辑。
+        /// </summary>
         private void ProcessPanelsWaitingFor(string targetPanelId)
         {
             var waitingRecords = new List<UIPanelRecord>();
@@ -1252,6 +1408,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行显示面板相关逻辑。
+        /// </summary>
         private void ShowPanel(
             UIPanelRecord record,
             object userData)
@@ -1283,6 +1442,9 @@ namespace LxyDemo.UIFramework
             ProcessPanelsWaitingFor(record.Config.Id);
         }
 
+        /// <summary>
+        /// 执行隐藏Loaded预加载相关逻辑。
+        /// </summary>
         private void HideLoadedPreload(UIPanelRecord record)
         {
             ReleaseBackdrop(record);
@@ -1294,6 +1456,9 @@ namespace LxyDemo.UIFramework
             Transition(record, UIPanelState.Hidden, "preloaded");
         }
 
+        /// <summary>
+        /// 执行隐藏面板相关逻辑。
+        /// </summary>
         private void HidePanel(
             UIPanelRecord record,
             bool skipAnimation)
@@ -1322,6 +1487,9 @@ namespace LxyDemo.UIFramework
             Transition(record, UIPanelState.Hidden, "hide");
         }
 
+        /// <summary>
+        /// 执行销毁面板相关逻辑。
+        /// </summary>
         private void DestroyPanel(UIPanelRecord record)
         {
             record.RequestId = ++nextRequestId;
@@ -1358,6 +1526,9 @@ namespace LxyDemo.UIFramework
                 true);
         }
 
+        /// <summary>
+        /// 应用关闭Policy。
+        /// </summary>
         private void ApplyClosePolicy(
             UIPanelRecord record,
             bool forceDestroy,
@@ -1380,6 +1551,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 处理面板Failure。
+        /// </summary>
         private void HandlePanelFailure(
             UIPanelRecord record,
             Exception error)
@@ -1426,6 +1600,9 @@ namespace LxyDemo.UIFramework
                     : null);
         }
 
+        /// <summary>
+        /// 解析PendingAfterFailure。
+        /// </summary>
         private void ResolvePendingAfterFailure(
             string failedPanelId,
             UIStackEntry newTop)
@@ -1476,6 +1653,9 @@ namespace LxyDemo.UIFramework
                 newTop.UserData);
         }
 
+        /// <summary>
+        /// 解析面板层级。
+        /// </summary>
         private static UILayer ResolvePanelLayer(
             UIPanelRecord record,
             GameObject panelObject)
@@ -1504,6 +1684,9 @@ namespace LxyDemo.UIFramework
                 : record.Config.EffectiveLayer;
         }
 
+        /// <summary>
+        /// 获取Record层级。
+        /// </summary>
         private static UILayer GetRecordLayer(
             UIPanelRecord record)
         {
@@ -1512,6 +1695,9 @@ namespace LxyDemo.UIFramework
                 : record.ResolvedLayer;
         }
 
+        /// <summary>
+        /// 关闭可见状态PopupsExcept调试。
+        /// </summary>
         private void CloseVisiblePopupsExceptDebug()
         {
             var popupIds = new List<string>();
@@ -1532,6 +1718,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 创建BackdropIfNeeded。
+        /// </summary>
         private void CreateBackdropIfNeeded(UIPanelRecord record)
         {
             ReleaseBackdrop(record);
@@ -1549,6 +1738,9 @@ namespace LxyDemo.UIFramework
                 () => ClosePanel(panelId));
         }
 
+        /// <summary>
+        /// 释放Backdrop。
+        /// </summary>
         private void ReleaseBackdrop(UIPanelRecord record)
         {
             if (record.Backdrop != null)
@@ -1558,6 +1750,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行CompleteWaiters相关逻辑。
+        /// </summary>
         private void CompleteWaiters(
             UIPanelRecord record,
             bool success,
@@ -1589,6 +1784,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 设置Waiter进度。
+        /// </summary>
         private static void SetWaiterProgress(
             UIPanelRecord record,
             float progress)
@@ -1610,6 +1808,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 获取Or创建Record。
+        /// </summary>
         private UIPanelRecord GetOrCreateRecord(
             UIPanelConfig config)
         {
@@ -1684,6 +1885,9 @@ namespace LxyDemo.UIFramework
             };
         }
 
+        /// <summary>
+        /// 释放面板资源。
+        /// </summary>
         private static void ReleasePanelResources(
             UIPanelRecord record)
         {
@@ -1701,6 +1905,9 @@ namespace LxyDemo.UIFramework
             record.IsLoading = false;
         }
 
+        /// <summary>
+        /// 释放Detached加载。
+        /// </summary>
         private static void ReleaseDetachedLoad(
             GameResourceInstanceHandle instanceHandle,
             GameObject localInstance)
@@ -1715,6 +1922,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 清空RecordForRecreate。
+        /// </summary>
         private void ClearRecordForRecreate(UIPanelRecord record)
         {
             record.RequestId = ++nextRequestId;
@@ -1727,6 +1937,9 @@ namespace LxyDemo.UIFramework
             ClearPendingClose(record);
         }
 
+        /// <summary>
+        /// 尝试获取配置，并返回是否成功。
+        /// </summary>
         private bool TryGetConfig(
             string panelId,
             out UIPanelConfig config,
@@ -1764,6 +1977,9 @@ namespace LxyDemo.UIFramework
             return true;
         }
 
+        /// <summary>
+        /// 执行切换相关逻辑。
+        /// </summary>
         private void Transition(
             UIPanelRecord record,
             UIPanelState nextState,
@@ -1803,6 +2019,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行判断是否切换Allowed相关逻辑。
+        /// </summary>
         private static bool IsTransitionAllowed(
             UIPanelState previous,
             UIPanelState next)
@@ -1845,6 +2064,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 响应激活项场景Changed事件。
+        /// </summary>
         private void OnActiveSceneChanged(
             Scene previousScene,
             Scene nextScene)
@@ -1881,6 +2103,9 @@ namespace LxyDemo.UIFramework
             RepairPendingTargets();
         }
 
+        /// <summary>
+        /// 执行修复Pending目标相关逻辑。
+        /// </summary>
         private void RepairPendingTargets()
         {
             foreach (UIPanelRecord record in panelRecords.Values)
@@ -1910,6 +2135,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 确保层级根节点。
+        /// </summary>
         private UILayerRoot EnsureLayerRoot()
         {
             if (layerRoot == null)
@@ -1922,6 +2150,9 @@ namespace LxyDemo.UIFramework
             return layerRoot;
         }
 
+        /// <summary>
+        /// 确保Initialized。
+        /// </summary>
         private void EnsureInitialized()
         {
             if (!isInitialized)
@@ -1930,6 +2161,9 @@ namespace LxyDemo.UIFramework
             }
         }
 
+        /// <summary>
+        /// 执行关闭内部相关逻辑。
+        /// </summary>
         private void ShutdownInternal()
         {
             if (isShuttingDown)
@@ -1971,6 +2205,9 @@ namespace LxyDemo.UIFramework
             isShuttingDown = false;
         }
 
+        /// <summary>
+        /// 执行判断是否记录Alive相关逻辑。
+        /// </summary>
         private static bool IsRecordAlive(UIPanelRecord record)
         {
             return record != null &&
@@ -1989,6 +2226,9 @@ namespace LxyDemo.UIFramework
                 panelId);
         }
 
+        /// <summary>
+        /// 执行LogVerbose相关逻辑。
+        /// </summary>
         private void LogVerbose(string message)
         {
             if (verboseLogging)

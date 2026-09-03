@@ -8,6 +8,9 @@ namespace StateControl.Editor
 {
     public static class RefactorUtil
     {
+        /// <summary>
+        /// 执行Refactor修饰器相关逻辑。
+        /// </summary>
         [MenuItem("Assets/StateControl/重构prefab的StateController的Modifier", false, 19)]
         public static void RefactorModifier()
         {
@@ -22,6 +25,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Refactor状态相关逻辑。
+        /// </summary>
         [MenuItem("Assets/StateControl/重构prefab的StateController的State", false, 19)]
         public static void RefactorState()
         {
@@ -37,6 +43,9 @@ namespace StateControl.Editor
         }
 
 
+        /// <summary>
+        /// 执行Refactor状态相关逻辑。
+        /// </summary>
         static void RefactorState(GameObject selectedPrefab)
         {
             var controllers = selectedPrefab.GetComponentsInChildren<StateControl.Runtime.StateController>(true);
@@ -64,6 +73,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 执行Refactor修饰器相关逻辑。
+        /// </summary>
         static void RefactorModifier(GameObject selectedPrefab)
         {
             // 获取所有StateController组件
@@ -104,6 +116,9 @@ namespace StateControl.Editor
             }
         }
 
+        /// <summary>
+        /// 执行RefactorAll相关逻辑。
+        /// </summary>
         [MenuItem("Assets/StateControl/重构所有prefab", false, 19)]
         public static void RefactorAll()
         {

@@ -6,6 +6,9 @@ using LuaObjectBind;
 
 public class ObjectBinderPrefabSaveChecker
 {
+    /// <summary>
+    /// 获取Lost绑定Msg。
+    /// </summary>
     public static string GetLostBindMsg(ObjectBinder binder)
     {
         if (binder == null || binder.gameObject == null)
