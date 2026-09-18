@@ -1268,7 +1268,8 @@ namespace LxyDemo.UIFramework.Editor
         /// 执行Auto收集对象Bindings相关逻辑。
         /// </summary>
         public static int AutoCollectObjectBindings(
-            ObjectBinder objectBinder)
+            ObjectBinder objectBinder,
+            Predicate<GameObject> canBind = null)
         {
             if (objectBinder == null)
             {
@@ -1299,7 +1300,8 @@ namespace LxyDemo.UIFramework.Editor
                     true);
             foreach (Transform transform in transforms)
             {
-                if (transform == objectBinder.transform)
+                if (transform == objectBinder.transform ||
+                    (canBind != null && !canBind(transform.gameObject)))
                 {
                     continue;
                 }
@@ -2387,7 +2389,7 @@ namespace LxyDemo.UIFramework.Editor
             Type targetType = null;
             bool bindGameObject = false;
 
-            if (lowerName.StartsWith("btn_"))
+            if (lowerName.StartsWith("btn_") || lowerName.StartsWith("bnt_"))
             {
                 targetType = typeof(Button);
                 bindEvent = true;

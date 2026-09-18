@@ -133,7 +133,13 @@ namespace LxyDemo.UIFramework.Editor
 
             ObjectBinder objectBinder =
                 prefabRoot.GetComponent<ObjectBinder>();
-            CSharpUIGenerator.AutoCollectObjectBindings(objectBinder);
+            Transform generated = prefabRoot.transform.Find("Generated");
+            var bindingObjects = options.GeneratedBindingObjects == null
+                ? null
+                : new HashSet<GameObject>(options.GeneratedBindingObjects);
+            CSharpUIGenerator.AutoCollectObjectBindings(objectBinder, gameObject =>
+                bindingObjects == null || generated == null ||
+                !gameObject.transform.IsChildOf(generated) || bindingObjects.Contains(gameObject));
         }
 
         /// <summary>

@@ -19,7 +19,7 @@ namespace LxyDemo.UIFramework.Editor
 
             EditorGUILayout.Space();
             EditorGUILayout.HelpBox(
-                "命名前缀自动绑定：btn_、tgl_、slider_、input_、" +
+                "命名前缀自动绑定：Bnt_ / btn_、tgl_、slider_、input_、" +
                 "dropdown_、img_、txt_、tmp_、scroll_、cg_、" +
                 "rt_、tf_、go_。",
                 MessageType.Info);

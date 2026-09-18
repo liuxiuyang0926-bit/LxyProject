@@ -726,31 +726,60 @@ namespace Lxy.UIEffectGenerator.Editor
             string nodeType,
             string nodeName)
         {
-            string cleanName = UIEffectEditorUtility.SanitizeTypeName(nodeName);
+            return GetGeneratedNodeName(nodeType, nodeName, true);
+        }
+
+        internal static string GetGeneratedNodeName(UIEffectNode node)
+        {
+            return GetGeneratedNodeName(node.type, node.name, ShouldBindNode(node));
+        }
+
+        private static readonly string[] VisualNamePrefixes = { "Bnt_", "Btn_", "Img_", "Txt_", "Tmp_" };
+
+        private static string GetGeneratedNodeName(string nodeType, string nodeName, bool bind)
+        {
             string prefix;
             switch ((nodeType ?? string.Empty).ToLowerInvariant())
             {
                 case "image":
-                    prefix = "img_";
+                    prefix = "Img_";
                     break;
                 case "text":
-                    prefix = "txt_";
+                    prefix = "Txt_";
                     break;
                 case "button":
-                    prefix = "btn_";
+                    prefix = "Bnt_";
                     break;
                 case "toggle":
-                    prefix = "tgl_";
+                    prefix = bind ? "tgl_" : string.Empty;
                     break;
                 case "scrollrect":
-                    prefix = "scroll_";
+                    prefix = bind ? "scroll_" : string.Empty;
                     break;
                 default:
-                    prefix = "rt_";
+                    prefix = bind ? "rt_" : string.Empty;
                     break;
             }
 
-            return prefix + cleanName;
+            // Normalize existing visual prefixes before sanitizing (which removes underscores).
+            // This also handles Image <-> Text conversions made by resource matching.
+            string cleanName = (nodeName ?? string.Empty).Trim();
+            if (prefix == "Img_" || prefix == "Txt_" || prefix == "Bnt_")
+            {
+                bool stripped;
+                do
+                {
+                    stripped = false;
+                    foreach (string existingPrefix in VisualNamePrefixes)
+                    {
+                        if (!cleanName.StartsWith(existingPrefix, StringComparison.OrdinalIgnoreCase)) continue;
+                        cleanName = cleanName.Substring(existingPrefix.Length);
+                        stripped = true;
+                        break;
+                    }
+                } while (stripped);
+            }
+            return prefix + UIEffectEditorUtility.SanitizeTypeName(cleanName);
         }
 
         /// <summary>

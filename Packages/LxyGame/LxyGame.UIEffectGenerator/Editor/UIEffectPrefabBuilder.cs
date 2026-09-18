@@ -60,6 +60,12 @@ namespace Lxy.UIEffectGenerator.Editor
         /// 公开的资源SearchRoots数据。
         /// </summary>
         public string[] resourceSearchRoots = Array.Empty<string>();
+
+        /// <summary>
+        /// 本次 Generated 子树中允许绑定的对象，仅在 AfterBuildGeneratedTree 回调期间有效。
+        /// 适配器应使用此集合区分组件命名与 Schema 的 binding 策略。
+        /// </summary>
+        public IReadOnlyCollection<GameObject> GeneratedBindingObjects { get; internal set; }
     }
 
     public sealed class UIEffectPrefabGenerationResult
@@ -341,6 +347,7 @@ namespace Lxy.UIEffectGenerator.Editor
 
                 var bindingNames = new HashSet<string>(
                     StringComparer.OrdinalIgnoreCase);
+                var bindingObjects = new HashSet<GameObject>();
                 for (int index = 0;
                      index < schema.children.Count;
                      index++)
@@ -352,10 +359,19 @@ namespace Lxy.UIEffectGenerator.Editor
                         schema.designHeight,
                         resolver,
                         bindingNames,
+                        bindingObjects,
                         schema.name);
                 }
 
-                projectAdapter.AfterBuildGeneratedTree(root, options);
+                options.GeneratedBindingObjects = bindingObjects;
+                try
+                {
+                    projectAdapter.AfterBuildGeneratedTree(root, options);
+                }
+                finally
+                {
+                    options.GeneratedBindingObjects = null;
+                }
 
                 GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(
                     root,
@@ -791,6 +807,7 @@ namespace Lxy.UIEffectGenerator.Editor
             float parentHeight,
             UIEffectResourceResolver resolver,
             HashSet<string> bindingNames,
+            HashSet<GameObject> bindingObjects,
             string nodePath)
         {
             string bindingName = GetBindingName(node);
@@ -871,6 +888,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 node,
                 parentWidth,
                 parentHeight);
+            if (ShouldBind(node)) bindingObjects.Add(rect.gameObject);
 
             string currentPath = nodePath + "/" + node.name;
             for (int index = 0;
@@ -884,6 +902,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     childParentHeight,
                     resolver,
                     bindingNames,
+                    bindingObjects,
                     currentPath);
             }
 
@@ -1124,7 +1143,7 @@ namespace Lxy.UIEffectGenerator.Editor
             background.raycastTarget = node.raycastTarget;
 
             RectTransform viewport = CreateRectTransform(
-                "Viewport",
+                "Img_Viewport",
                 rect);
             StretchToParent(viewport);
             Image viewportImage =
@@ -1243,7 +1262,7 @@ namespace Lxy.UIEffectGenerator.Editor
             UIEffectNode source,
             string label)
         {
-            RectTransform rect = CreateRectTransform("Label", parent);
+            RectTransform rect = CreateRectTransform("Txt_Label", parent);
             StretchToParent(rect);
             TextMeshProUGUI text =
                 rect.gameObject.AddComponent<TextMeshProUGUI>();
@@ -1533,37 +1552,7 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private static string GetBindingName(UIEffectNode node)
         {
-            string cleanName = UIEffectEditorUtility.SanitizeTypeName(
-                node.name);
-            if (!ShouldBind(node))
-            {
-                return cleanName;
-            }
-
-            string prefix;
-            switch (node.type.ToLowerInvariant())
-            {
-                case "image":
-                    prefix = "img_";
-                    break;
-                case "text":
-                    prefix = "txt_";
-                    break;
-                case "button":
-                    prefix = "btn_";
-                    break;
-                case "toggle":
-                    prefix = "tgl_";
-                    break;
-                case "scrollrect":
-                    prefix = "scroll_";
-                    break;
-                default:
-                    prefix = "rt_";
-                    break;
-            }
-
-            return prefix + cleanName;
+            return UIEffectSchemaUtility.GetGeneratedNodeName(node);
         }
 
         /// <summary>
