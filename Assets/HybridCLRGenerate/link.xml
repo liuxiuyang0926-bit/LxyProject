@@ -9,6 +9,7 @@
   <assembly fullname="Game.Contracts">
     <type fullname="Game.Contracts.FirstSceneRuntimeBridge" preserve="all" />
     <type fullname="Game.Contracts.IFirstSceneRuntime" preserve="all" />
+    <type fullname="Game.Contracts.ISceneRuntime" preserve="all" />
   </assembly>
   <assembly fullname="Game.Resource">
     <type fullname="Game.Resource.GameResourceHandle`1" preserve="all" />
@@ -44,6 +45,7 @@
   <assembly fullname="UnityEngine.CoreModule">
     <type fullname="UnityEngine.AddComponentMenu" preserve="all" />
     <type fullname="UnityEngine.Application" preserve="all" />
+    <type fullname="UnityEngine.AsyncOperation" preserve="all" />
     <type fullname="UnityEngine.Behaviour" preserve="all" />
     <type fullname="UnityEngine.Color" preserve="all" />
     <type fullname="UnityEngine.Component" preserve="all" />
@@ -58,6 +60,7 @@
     <type fullname="UnityEngine.Events.UnityEvent" preserve="all" />
     <type fullname="UnityEngine.GameObject" preserve="all" />
     <type fullname="UnityEngine.HeaderAttribute" preserve="all" />
+    <type fullname="UnityEngine.HideFlags" preserve="all" />
     <type fullname="UnityEngine.HideInInspector" preserve="all" />
     <type fullname="UnityEngine.KeyCode" preserve="all" />
     <type fullname="UnityEngine.LayerMask" preserve="all" />
@@ -79,6 +82,7 @@
     <type fullname="UnityEngine.Resources" preserve="all" />
     <type fullname="UnityEngine.RuntimeInitializeLoadType" preserve="all" />
     <type fullname="UnityEngine.RuntimeInitializeOnLoadMethodAttribute" preserve="all" />
+    <type fullname="UnityEngine.SceneManagement.LoadSceneMode" preserve="all" />
     <type fullname="UnityEngine.SceneManagement.Scene" preserve="all" />
     <type fullname="UnityEngine.SceneManagement.SceneManager" preserve="all" />
     <type fullname="UnityEngine.ScriptableObject" preserve="all" />
@@ -141,13 +145,16 @@
   <assembly fullname="XLua.Runtime">
     <type fullname="XLua.LuaBase" preserve="all" />
     <type fullname="XLua.LuaDLL.Lua" preserve="all" />
+    <type fullname="XLua.LuaDLL.lua_CSFunction" preserve="all" />
     <type fullname="XLua.LuaEnv" preserve="all" />
     <type fullname="XLua.LuaEnv/CustomLoader" preserve="all" />
     <type fullname="XLua.LuaFunction" preserve="all" />
     <type fullname="XLua.LuaRawFunctionAttribute" preserve="all" />
     <type fullname="XLua.LuaTable" preserve="all" />
+    <type fullname="XLua.MonoPInvokeCallbackAttribute" preserve="all" />
     <type fullname="XLua.ObjectTranslator" preserve="all" />
     <type fullname="XLua.ObjectTranslatorPool" preserve="all" />
+    <type fullname="XLua.Utils" preserve="all" />
   </assembly>
   <assembly fullname="YooAsset">
     <type fullname="YooAsset.EOperationStatus" preserve="all" />

@@ -2,7 +2,6 @@
   "name": "XLua.Runtime",
   "rootNamespace": "XLua",
   "references": [
-    "Game.Scene",
     "Unity.UGUI"
   ],
   "includePlatforms": [],

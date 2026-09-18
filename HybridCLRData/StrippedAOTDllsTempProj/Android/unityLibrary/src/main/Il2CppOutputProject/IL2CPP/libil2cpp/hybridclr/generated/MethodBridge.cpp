@@ -101517,9 +101517,159 @@ const NativeAdjustThunkMethodInfo hybridclr::interpreter::g_adjustThunkStub[] =
 	{nullptr, nullptr},
 };
 
+int32_t DEFAULT_CALL __ReversePInvokeMethod_0(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(0);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_1(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(1);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_2(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(2);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_3(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(3);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_4(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(4);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_5(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(5);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_6(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(6);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_7(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(7);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_8(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(8);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_9(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(9);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_10(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(10);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_11(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(11);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_12(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(12);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_13(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(13);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
+int32_t DEFAULT_CALL __ReversePInvokeMethod_14(intptr_t __arg0)
+{
+    il2cpp::vm::ScopedThreadAttacher _vmThreadHelper;
+    const MethodInfo* method = InterpreterModule::GetMethodInfoByReversePInvokeWrapperIndex(14);
+    typedef int32_t (*Callback)(intptr_t, const MethodInfo*);
+    return ((Callback)(method->methodPointerCallByInterp))(__arg0, method);
+}
+        
+
 const ReversePInvokeMethodData hybridclr::interpreter::g_reversePInvokeMethodStub[]
 {
 
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_0},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_1},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_2},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_3},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_4},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_5},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_6},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_7},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_8},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_9},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_10},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_11},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_12},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_13},
+	{"Ai4i", (Il2CppMethodPointer)__ReversePInvokeMethod_14},
 
     {nullptr, nullptr},
 };

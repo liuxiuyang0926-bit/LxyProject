@@ -27,7 +27,6 @@ IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_DOTween_Modules_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Game_Contracts_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Game_Main_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Game_Resource_CodeGenModule;
-IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Game_Scene_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_HybridCLR_Runtime_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Mono_Security_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_Sirenix_OdinInspector_Attributes_CodeGenModule;
@@ -71,7 +70,7 @@ IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_YooAsset_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g___Generated_CodeGenModule;
 IL2CPP_EXTERN_C_CONST Il2CppCodeGenModule g_mscorlib_CodeGenModule;
 IL2CPP_EXTERN_C const Il2CppCodeGenModule* g_CodeGenModules[];
-const Il2CppCodeGenModule* g_CodeGenModules[50] = 
+const Il2CppCodeGenModule* g_CodeGenModules[49] = 
 {
 	(&g_DOTweenPro_CodeGenModule),
 	(&g_DOTweenPro_Scripts_CodeGenModule),
@@ -80,7 +79,6 @@ const Il2CppCodeGenModule* g_CodeGenModules[50] =
 	(&g_Game_Contracts_CodeGenModule),
 	(&g_Game_Main_CodeGenModule),
 	(&g_Game_Resource_CodeGenModule),
-	(&g_Game_Scene_CodeGenModule),
 	(&g_HybridCLR_Runtime_CodeGenModule),
 	(&g_Mono_Security_CodeGenModule),
 	(&g_Sirenix_OdinInspector_Attributes_CodeGenModule),
@@ -127,22 +125,22 @@ const Il2CppCodeGenModule* g_CodeGenModules[50] =
 IL2CPP_EXTERN_C const Il2CppCodeRegistration g_CodeRegistration;
 const Il2CppCodeRegistration g_CodeRegistration = 
 {
-	986,
+	971,
 	g_ReversePInvokeWrapperPointers,
 	45918,
 	g_Il2CppGenericMethodPointers,
 	g_Il2CppGenericAdjustorThunks,
-	9294,
+	9293,
 	g_Il2CppInvokerPointers,
 	1921,
 	g_UnresolvedVirtualMethodPointers,
 	g_UnresolvedInstanceMethodPointers,
 	g_UnresolvedStaticMethodPointers,
-	494,
+	493,
 	g_Il2CppInteropData,
 	0,
 	NULL,
-	50,
+	49,
 	g_CodeGenModules,
 };
 IL2CPP_EXTERN_C_CONST Il2CppMetadataRegistration g_MetadataRegistration;

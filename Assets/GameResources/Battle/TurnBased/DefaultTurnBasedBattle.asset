@@ -1,0 +1,216 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d55180e0aa8f7c24192bfc1072d216c5, type: 3}
+  m_Name: DefaultTurnBasedBattle
+  m_EditorClassIdentifier: 
+  displayName: "\u56DE\u5408\u5236\u6218\u6597"
+  logicVersion: 1.0.0
+  runtimeDataVersion: 1
+  randomSeed: 20260907
+  units:
+  - unitId: 1
+    configId: 101
+    displayName: "\u5173\u7FBD"
+    camp: 1
+    control: 0
+    position: 1
+    maxHp: 1200
+    attack: 190
+    defense: 30
+    speed: 110
+    critRate: 2200
+    critDamage: 16500
+    hitRate: 10000
+    dodgeRate: 500
+    energy: 100
+    skillIds: 9d8a01003d110300
+    viewPrefab: {fileID: 2961242989278074795, guid: e72ff562c27ca6141b6da5145dc3146a, type: 3}
+    viewPosition: {x: -3.25, y: -1.25, z: 0}
+    viewScale: {x: 0.9, y: 0.9, z: 0.9}
+    flipX: 0
+    idleAnimation: idle_1
+    hitAnimation: hit_1
+    deathAnimation: die_1
+    victoryAnimation: win_1
+  - unitId: 2
+    configId: 202
+    displayName: "\u9524\u5C06"
+    camp: 2
+    control: 1
+    position: 10
+    maxHp: 1050
+    attack: 155
+    defense: 25
+    speed: 90
+    critRate: 1200
+    critDamage: 15000
+    hitRate: 10000
+    dodgeRate: 0
+    energy: 100
+    skillIds: 9d8a0100
+    viewPrefab: {fileID: 5391192878589951990, guid: 974c4156d5b1fe94faab5293b865307d, type: 3}
+    viewPosition: {x: 3.25, y: -1.25, z: 0}
+    viewScale: {x: 1, y: 1, z: 1}
+    flipX: 1
+    idleAnimation: idle_1
+    hitAnimation: hit_1
+    deathAnimation: die_1
+    victoryAnimation: win_1
+  skills:
+  - id: 1001
+    displayName: "\u666E\u901A\u653B\u51FB"
+    costAttribute: 10
+    cost: 0
+    targetMode: 0
+    activeCommand: 1
+    ruleIds: 01000000
+    animationName: attack_1
+    presentationDuration: 0.65
+    buttonColor: {r: 0.16, g: 0.48, b: 0.76, a: 1}
+  - id: 1002
+    displayName: "\u9752\u9F99\u65A9"
+    costAttribute: 10
+    cost: 0
+    targetMode: 0
+    activeCommand: 1
+    ruleIds: 02000000
+    animationName: skill_1
+    presentationDuration: 0.9
+    buttonColor: {r: 0.72, g: 0.42, b: 0.12, a: 1}
+  generatedSkillAssets:
+  - {fileID: 11400000, guid: 70f6a0f24532e234a854db02bd28b022, type: 2}
+  - {fileID: 11400000, guid: cbc3c011e7f688c4bb1a261982ceeb82, type: 2}
+  rules:
+  - operationName: "\u89C4\u5219"
+    executionGroup: "\u4E3B\u6D41\u7A0B"
+    executionMode: 0
+    id: 1
+    trigger: 4
+    phase: 1
+    priority: 0
+    ownerMustBeAlive: 1
+    conditions: []
+    actions:
+    - operationName: "\u903B\u8F91\u64CD\u4F5C"
+      executionGroup: "\u4E3B\u6D41\u7A0B"
+      executionMode: 0
+      type: 0
+      target:
+        type: 3
+        count: 0
+        includeDead: 0
+        configIdFilter: 0
+      value:
+        source: 1
+        constant: 0
+        attribute: 2
+        referenceId: 0
+        scaleBasisPoint: 10000
+        useDynamicScale: 0
+        dynamicScale:
+          source: 12
+          constant: 10000
+          attribute: 0
+          referenceId: 0
+        offset: 0
+        hasMinimum: 1
+        minimum: 1
+        hasMaximum: 0
+        maximum: 0
+      attribute: 0
+      useDynamicReference: 0
+      referenceValue:
+        source: 0
+        constant: 0
+        attribute: 0
+        referenceId: 0
+        scaleBasisPoint: 10000
+        useDynamicScale: 0
+        dynamicScale:
+          source: 12
+          constant: 10000
+          attribute: 0
+          referenceId: 0
+        offset: 0
+        hasMinimum: 0
+        minimum: 0
+        hasMaximum: 0
+        maximum: 0
+      referenceId: 0
+      flags: 3
+  - operationName: "\u89C4\u5219"
+    executionGroup: "\u4E3B\u6D41\u7A0B"
+    executionMode: 0
+    id: 2
+    trigger: 4
+    phase: 1
+    priority: 0
+    ownerMustBeAlive: 1
+    conditions: []
+    actions:
+    - operationName: "\u903B\u8F91\u64CD\u4F5C"
+      executionGroup: "\u4E3B\u6D41\u7A0B"
+      executionMode: 0
+      type: 0
+      target:
+        type: 3
+        count: 0
+        includeDead: 0
+        configIdFilter: 0
+      value:
+        source: 1
+        constant: 0
+        attribute: 2
+        referenceId: 0
+        scaleBasisPoint: 13500
+        useDynamicScale: 0
+        dynamicScale:
+          source: 12
+          constant: 10000
+          attribute: 0
+          referenceId: 0
+        offset: 10
+        hasMinimum: 1
+        minimum: 1
+        hasMaximum: 0
+        maximum: 0
+      attribute: 0
+      useDynamicReference: 0
+      referenceValue:
+        source: 0
+        constant: 0
+        attribute: 0
+        referenceId: 0
+        scaleBasisPoint: 10000
+        useDynamicScale: 0
+        dynamicScale:
+          source: 12
+          constant: 10000
+          attribute: 0
+          referenceId: 0
+        offset: 0
+        hasMinimum: 0
+        minimum: 0
+        hasMaximum: 0
+        maximum: 0
+      referenceId: 0
+      flags: 3
+  buffs: []
+  presentation:
+    battleStartDuration: 0.45
+    turnBannerDuration: 0.25
+    hitDuration: 0.38
+    deathDuration: 0.8
+    aiThinkingDuration: 0.55
+    commandGapDuration: 0.2
+    attackerAccent: {r: 0.15, g: 0.75, b: 1, a: 1}
+    defenderAccent: {r: 1, g: 0.32, b: 0.25, a: 1}

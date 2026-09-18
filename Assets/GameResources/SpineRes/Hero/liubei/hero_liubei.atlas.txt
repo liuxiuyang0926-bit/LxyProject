@@ -1,0 +1,258 @@
+
+hero_liubei.png
+size: 1024,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+15
+  rotate: false
+  xy: 668, 134
+  size: 79, 53
+  orig: 80, 53
+  offset: 1, 0
+  index: -1
+aa1
+  rotate: true
+  xy: 150, 129
+  size: 139, 247
+  orig: 139, 247
+  offset: 0, 0
+  index: -1
+aa2
+  rotate: false
+  xy: 166, 3
+  size: 61, 32
+  orig: 61, 32
+  offset: 0, 0
+  index: -1
+aa3
+  rotate: true
+  xy: 150, 37
+  size: 90, 238
+  orig: 90, 239
+  offset: 0, 1
+  index: -1
+cc
+  rotate: false
+  xy: 766, 314
+  size: 137, 78
+  orig: 138, 78
+  offset: 0, 0
+  index: -1
+cc1
+  rotate: true
+  xy: 606, 342
+  size: 168, 97
+  orig: 168, 97
+  offset: 0, 0
+  index: -1
+hjjdb_R_shou1
+  rotate: false
+  xy: 819, 85
+  size: 63, 69
+  orig: 63, 69
+  offset: 0, 0
+  index: -1
+kk1
+  rotate: false
+  xy: 570, 291
+  size: 61, 39
+  orig: 62, 39
+  offset: 1, 0
+  index: -1
+liubei_L_dabi
+  rotate: true
+  xy: 788, 238
+  size: 74, 133
+  orig: 74, 133
+  offset: 0, 0
+  index: -1
+liubei_L_jiao
+  rotate: false
+  xy: 103, 6
+  size: 61, 22
+  orig: 61, 22
+  offset: 0, 0
+  index: -1
+liubei_L_shou
+  rotate: true
+  xy: 881, 166
+  size: 70, 58
+  orig: 70, 58
+  offset: 0, 0
+  index: -1
+liubei_L_xiaobi1
+  rotate: false
+  xy: 579, 189
+  size: 207, 100
+  orig: 207, 100
+  offset: 0, 0
+  index: -1
+liubei_R_dabi
+  rotate: true
+  xy: 863, 429
+  size: 81, 129
+  orig: 81, 129
+  offset: 0, 0
+  index: -1
+liubei_R_jiao
+  rotate: false
+  xy: 278, 13
+  size: 57, 22
+  orig: 57, 22
+  offset: 0, 0
+  index: -1
+liubei_R_shou1
+  rotate: false
+  xy: 586, 2
+  size: 40, 44
+  orig: 40, 44
+  offset: 0, 0
+  index: -1
+liubei_R_shou3
+  rotate: true
+  xy: 229, 7
+  size: 28, 47
+  orig: 28, 47
+  offset: 0, 0
+  index: -1
+liubei_R_wuqi
+  rotate: false
+  xy: 586, 48
+  size: 231, 80
+  orig: 231, 80
+  offset: 0, 0
+  index: -1
+liubei_R_xiaobi
+  rotate: true
+  xy: 579, 130
+  size: 57, 87
+  orig: 57, 88
+  offset: 0, 1
+  index: -1
+liubei_R_xiaobizz
+  rotate: true
+  xy: 766, 394
+  size: 116, 95
+  orig: 116, 117
+  offset: 0, 22
+  index: -1
+liubei_jianbing
+  rotate: false
+  xy: 477, 295
+  size: 91, 35
+  orig: 94, 35
+  offset: 2, 0
+  index: -1
+liubei_lian
+  rotate: true
+  xy: 399, 146
+  size: 140, 178
+  orig: 140, 178
+  offset: 0, 0
+  index: -1
+liubei_lian4
+  rotate: true
+  xy: 399, 146
+  size: 140, 178
+  orig: 140, 178
+  offset: 0, 0
+  index: -1
+liubei_lian2
+  rotate: false
+  xy: 180, 328
+  size: 140, 182
+  orig: 140, 183
+  offset: 0, 1
+  index: -1
+liubei_lian3
+  rotate: false
+  xy: 464, 332
+  size: 140, 178
+  orig: 140, 178
+  offset: 0, 0
+  index: -1
+liubei_lian5
+  rotate: false
+  xy: 322, 328
+  size: 140, 182
+  orig: 140, 183
+  offset: 0, 1
+  index: -1
+liubei_shangshen
+  rotate: true
+  xy: 2, 270
+  size: 240, 176
+  orig: 240, 176
+  offset: 0, 0
+  index: -1
+liubei_toufa2
+  rotate: true
+  xy: 337, 2
+  size: 33, 37
+  orig: 33, 37
+  offset: 0, 0
+  index: -1
+liubei_toujin1
+  rotate: false
+  xy: 356, 288
+  size: 119, 38
+  orig: 119, 38
+  offset: 0, 0
+  index: -1
+liubei_toujin2
+  rotate: false
+  xy: 180, 290
+  size: 174, 36
+  orig: 174, 36
+  offset: 0, 0
+  index: -1
+liubei_wuqi1
+  rotate: true
+  xy: 705, 309
+  size: 201, 59
+  orig: 201, 59
+  offset: 0, 0
+  index: -1
+liubei_xiabai1
+  rotate: false
+  xy: 390, 5
+  size: 194, 122
+  orig: 195, 122
+  offset: 0, 0
+  index: -1
+liubei_xiabai2
+  rotate: true
+  xy: 2, 30
+  size: 238, 146
+  orig: 238, 146
+  offset: 0, 0
+  index: -1
+nongmin_R_shouzhang
+  rotate: true
+  xy: 905, 342
+  size: 85, 77
+  orig: 85, 77
+  offset: 0, 0
+  index: -1
+sfda
+  rotate: false
+  xy: 749, 143
+  size: 66, 44
+  orig: 66, 46
+  offset: 0, 0
+  index: -1
+ss
+  rotate: false
+  xy: 817, 156
+  size: 62, 80
+  orig: 62, 80
+  offset: 0, 0
+  index: -1
+ss1
+  rotate: false
+  xy: 2, 7
+  size: 99, 21
+  orig: 99, 21
+  offset: 0, 0
+  index: -1

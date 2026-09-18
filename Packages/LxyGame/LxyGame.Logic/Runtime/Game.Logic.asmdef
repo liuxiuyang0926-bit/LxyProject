@@ -1,0 +1,23 @@
+{
+  "name": "Game.Logic",
+  "rootNamespace": "Game.Logic",
+  "references": [
+    "Game.Contracts",
+    "Game.Resource",
+    "Luban.Runtime",
+    "XLua.Runtime",
+    "YooAsset",
+    "DOTweenPro.Scripts",
+    "Unity.TextMeshPro",
+    "Unity.UGUI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

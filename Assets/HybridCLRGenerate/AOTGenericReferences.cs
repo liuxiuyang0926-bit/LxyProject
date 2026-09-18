@@ -40,7 +40,11 @@ public class AOTGenericReferences : UnityEngine.MonoBehaviour
 	// System.Action<System.IntPtr,uint>
 	// System.Action<System.IntPtr,ulong>
 	// System.Action<System.IntPtr,ushort>
+	// System.Action<System.IntPtr>
+	// System.Action<byte,object>
+	// System.Action<float>
 	// System.Action<int>
+	// System.Action<object,float>
 	// System.Action<object,int,int>
 	// System.Action<object,object>
 	// System.Action<object>

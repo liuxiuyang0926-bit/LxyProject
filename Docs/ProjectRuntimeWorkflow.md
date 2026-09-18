@@ -4,15 +4,15 @@
 
 ## 1. 全局链路
 
-项目的稳定启动壳由 `Game.Contracts`、`Game.Resource`、`Game.Scene`、`Game.Main` 组成；它们编入 Player/AOT，**不能直接引用**热更新程序集中的具体业务类型。热更新业务通过 `IFirstSceneRuntime` 契约反向接入启动壳。
+项目的稳定启动壳由 `Game.Contracts`、`Game.Resource`、`Game.Main` 组成；它们编入 Player/AOT，**不能直接引用**热更新程序集中的具体业务类型。全部游戏逻辑统一位于 `Game.Logic`，并通过稳定契约反向接入启动壳。
 
 ```text
 Build Settings: Start
   └─ GameMain（常驻）
        ├─ YooAssetLauncher：配置、版本、清单、Mandatory 下载、缓存清理
        ├─ HybridCLRLoader：AOT 元数据 → 热更新 DLL
-       └─ GameSceneManager：切换到 Login
-            └─ 动态创建 Game.UI / UIStartup（IFirstSceneRuntime）
+       └─ 动态创建 Game.Logic 场景服务：切换到 Login
+            └─ 动态创建 Game.Logic / UIStartup（IFirstSceneRuntime）
                  ├─ UICanvasRoot
                  ├─ UIManager（C# UI）
                  └─ LuaUIRuntime（可选）→ Main.lua
@@ -24,17 +24,17 @@ Build Settings: Start
 
 ### 2.1 Start 场景与 GameMain
 
-`GameMain`（`Packages/com.lxy.main/Runtime/GameMain.cs`）以较早执行顺序创建或取得 `YooAssetLauncher`、`HybridCLRLoader`，并创建一个位于 `Resources/UI/UISlider` 的启动下载界面。随后严格按下面顺序执行；任一阶段失败均停止，显示错误或整包强更页面。
+`GameMain`（`Packages/LxyGame/LxyGame.Main/Runtime/GameMain.cs`）以较早执行顺序创建或取得 `YooAssetLauncher`、`HybridCLRLoader`，并创建一个位于 `Resources/UI/UISlider` 的启动下载界面。随后严格按下面顺序执行；任一阶段失败均停止，显示错误或整包强更页面。
 
 | 顺序 | 阶段 | 责任与完成条件 |
 | --- | --- | --- |
 | 1 | `UpdatingResources` | `YooAssetLauncher.InitializeAsync` 成功，当前 `DefaultPackage` 的启动资源可用。 |
 | 2 | `StartingHotUpdateRuntime` | `HybridCLRLoader.LoadAndStart` 成功，补充元数据和全部配置的热更新 DLL 已加载。 |
-| 3 | `LoadingFirstScene` | `GameSceneManager.LoadSceneAsync("Login")` 单场景切换完成。 |
-| 4 | `StartingUIAndLua` | 从已加载的 `Game.UI` 动态创建 `LxyDemo.UIFramework.UIStartup`，并等待其 `IFirstSceneRuntime.InitializeAsync()` 成功。 |
+| 3 | `LoadingFirstScene` | 从已加载的 `Game.Logic` 创建 `GameSceneManager`，完成 `LoadSceneAsync("Login")` 单场景切换。 |
+| 4 | `StartingUIAndLua` | 从已加载的 `Game.Logic` 动态创建 `LxyDemo.UIFramework.UIStartup`，并等待其 `IFirstSceneRuntime.InitializeAsync()` 成功。 |
 | 5 | `Ready` | 游戏可进入登录业务流程。 |
 
-关键约束：**在 HybridCLR 阶段完成前，不能加载包含热更新 `MonoBehaviour` 的场景或 Prefab。** 因此 `Login` 保持为内置场景，首场景 UI 启动器由反射从 `Game.UI` 中动态添加，而不是序列化在旧 APK 的场景里。
+关键约束：**在 HybridCLR 阶段完成前，不能加载包含热更新 `MonoBehaviour` 的场景或 Prefab。** 因此 `Login` 保持为内置场景，场景服务和首场景 UI 启动器由反射从 `Game.Logic` 中动态添加，而不是序列化在旧 APK 的场景里。
 
 ### 2.2 YooAsset 初始化与更新
 
@@ -87,15 +87,15 @@ Player Host 模式
 
 1. 对 `aotMetadataDlls` 中每个 DLL，以 `RuntimeApi.LoadMetadataForAOTAssembly(..., HomologousImageMode.SuperSet)` 加载补充元数据。
 2. 依清单顺序读取 `hotUpdateDlls` 的 `.bytes` 并执行 `Assembly.Load`。
-3. 将已加载程序集交给 `GameMain`，由它寻找 `Game.UI` 的 `UIStartup`。
+3. 将已加载程序集交给 `GameMain`，由它寻找 `Game.Logic` 的场景服务和 `UIStartup`。
 
 当前 `HybridCLRSettings.asset` 的热更新程序集顺序为：
 
 ```text
-Game.Common → Game.Lua → Game.UI → Game.Battle → Assembly-CSharp
+Game.Logic
 ```
 
-`HybridCLRAssetSynchronizer` 会在构建时验证其中的关键依赖顺序（`Common → Lua → UI → Assembly-CSharp`，且 `Battle → Assembly-CSharp`），并将该顺序写入运行时清单。AOT 元数据清单与热更新 DLL 清单彼此独立；补充元数据不是 AOT 代码替代品。
+`HybridCLRAssetSynchronizer` 会将这个唯一的业务 DLL 写入运行时清单。AOT 元数据清单与热更新 DLL 清单彼此独立；补充元数据不是 AOT 代码替代品。
 
 编辑器内不会重复 `Assembly.Load`，而是读取同一份清单，并确认对应 asmdef 已被 Unity 加载。因此，**Editor 能运行不代表目标 Player 的下载、IL2CPP 或 HybridCLR 产物正确。**
 
@@ -103,7 +103,7 @@ Game.Common → Game.Lua → Game.UI → Game.Battle → Assembly-CSharp
 
 `GameSceneManager` 用 `LoadSceneMode.Single` 加载 `Login`；加载完成且旧场景对象释放后，默认调用 `GameResourceManager.UnloadUnusedAssetsAsync()` 回收引用数为零的内存资源。
 
-随后 `GameMain` 从 `Game.UI` 中动态创建 `UIStartup`，它会：
+随后 `GameMain` 从 `Game.Logic` 中动态创建 `UIStartup`，它会：
 
 1. 复用已就绪的 `YooAssetLauncher`；从 Login 场景直接 Play 时才自行创建一个，方便编辑器调试。
 2. 通过 `GameResourceManager.InstantiateAsync` 加载 `Assets/GameResources/Prefabs/UICanvasRoot.prefab`。
@@ -133,8 +133,8 @@ Lua 在 Player 中经由 YooAsset 按 `Assets/GameResources/Lua/{模块路径}.b
 ```text
 Assets/GameResources/HybridCLR/AOT/mscorlib.dll.bytes
   → Location: mscorlib.dll
-Assets/GameResources/HybridCLR/HotUpdate/Game.UI.dll.bytes
-  → Location: Game.UI.dll
+Assets/GameResources/HybridCLR/HotUpdate/Game.Logic.dll.bytes
+  → Location: Game.Logic.dll
 Assets/GameResources/HybridCLR/HybridCLRAssemblyManifest.bytes
   → Location: HybridCLRAssemblyManifest
 ```
@@ -188,7 +188,7 @@ GameObject instance = instanceHandle.Result;
 
 1. Unity 切换到最终目标平台（Android 或 iPhone）。
 2. 修改代码/资源/Collector 后，确认 asmdef 依赖仍满足 AOT 不依赖热更具体类型的约束。
-3. 若改动热更新 C#，执行 `工具/HybridCLR/生成全部并同步到 YooAsset`；它会生成 HybridCLR 产物、同步 AOT 元数据与热更新 `.dll.bytes`，并重写程序集清单。仅同步已有产物时可用 `同步现有产物到 YooAsset`。
+3. 若改动热更新 C#，执行 `工具/HybridCLR/生成全部并同步到 YooAsset`；它会生成 HybridCLR 产物、同步 AOT 元数据与热更新 `.dll.bytes`，并重写程序集清单。
 4. 执行 `工具/YooAsset/应用首包与全量强更策略`，再执行验证菜单；处理所有未分类资源、标签或地址冲突。
 5. 用 `ScriptableBuildPipeline` 构建 `DefaultPackage`，使用**新的、不可变** Package Version。`ClearAndCopyByTags` 会将 Builtin Bundle 和 Manifest 写入 StreamingAssets。
 6. 向 CDN 上传该版本目录下的完整清单/Catalog、hash/version 文件及所有被引用 Bundle；不得用新内容覆盖已发布版本。
@@ -216,15 +216,14 @@ GameObject instance = instanceHandle.Result;
 
 | 主题 | 文件 |
 | --- | --- |
-| 启动编排 | `Packages/com.lxy.main/Runtime/GameMain.cs` |
-| YooAsset 生命周期 | `Packages/com.lxy.resource/Runtime/YooAssetLauncher.cs` |
-| 资源句柄与引用计数 | `Packages/com.lxy.resource/Runtime/GameResourceManager.cs` |
-| HybridCLR 加载 | `Packages/com.lxy.main/Runtime/HybridCLRLoader.cs` |
-| 生成与同步工具 | `Packages/com.lxy.main/Editor/HybridCLRAssetSynchronizer.cs` |
-| 首场景 UI 运行时 | `Packages/com.lxy.ui/Runtime/UI/UIStartup.cs` |
-| 场景切换 | `Packages/com.lxy.scene/Runtime/GameSceneManager.cs` |
-| AOT/热更共同配置 | `Packages/com.lxy.contracts/Runtime/GameRuntimeConfig.cs` |
+| 启动编排 | `Packages/LxyGame/LxyGame.Main/Runtime/GameMain.cs` |
+| YooAsset 生命周期 | `Packages/LxyGame/LxyGame.Resources/Runtime/YooAssetLauncher.cs` |
+| 资源句柄与引用计数 | `Packages/LxyGame/LxyGame.Resources/Runtime/GameResourceManager.cs` |
+| HybridCLR 加载 | `Packages/LxyGame/LxyGame.Main/Runtime/HybridCLRLoader.cs` |
+| 生成与同步工具 | `Packages/LxyGame/LxyGame.Main/Editor/HybridCLRAssetSynchronizer.cs` |
+| 首场景 UI 运行时 | `Packages/LxyGame/LxyGame.Logic/Runtime/UI/Base/UIStartup.cs` |
+| 场景切换 | `Packages/LxyGame/LxyGame.Logic/Runtime/Scene/GameSceneManager.cs` |
+| AOT/热更共同配置 | `Packages/LxyGame/LxyGame.Contracts/Runtime/GameRuntimeConfig.cs` |
 | HybridCLR 实时设置 | `ProjectSettings/HybridCLRSettings.asset` |
 | YooAsset Collector | `Assets/BundleCollectorSetting.asset` |
 | 首包/全量强更构建策略 | `Assets/Editor/YooAssetContentPolicy.cs` |
-

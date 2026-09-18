@@ -222,6 +222,7 @@ GameObject:
   - component: {fileID: 3693955227390336327}
   - component: {fileID: 7907368392787650534}
   - component: {fileID: 3398961404044627876}
+  - component: {fileID: 7755450354563832290}
   m_Layer: 5
   m_Name: btn_login
   m_TagString: Untagged
@@ -331,6 +332,21 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7755450354563832290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7273406111460292421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d64c0dd894397484bbadf2e5b8e24fc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  button: {fileID: 3398961404044627876}
+  targetSceneName: Battle
+  disableWhileLoading: 1
 --- !u!1 &8939448980054566987
 GameObject:
   m_ObjectHideFlags: 0
@@ -396,7 +412,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u8BF7\u8F93\u5165\u8D26\u53F7"
+  m_text: "\u8FDB\u5165\u6218\u6597"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8a876e1acb1077c438fe8fc5b86a5247, type: 2}
   m_sharedMaterial: {fileID: 8891967958448545013, guid: 8a876e1acb1077c438fe8fc5b86a5247, type: 2}

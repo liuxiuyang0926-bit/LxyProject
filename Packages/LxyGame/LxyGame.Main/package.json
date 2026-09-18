@@ -1,0 +1,16 @@
+{
+  "name": "com.lxy.main",
+  "version": "1.0.0",
+  "displayName": "LxyGame.Main",
+  "description": "AOT application bootstrap and HybridCLR hot-update assembly loader.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.code-philosophy.hybridclr": "8.13.0",
+    "com.lxy.contracts": "1.0.0",
+    "com.lxy.resource": "1.0.0",
+    "com.tuyoogame.yooasset": "3.0.5"
+  },
+  "author": {
+    "name": "Lxy"
+  }
+}

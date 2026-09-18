@@ -37312,7 +37312,7 @@ static const int32_t s_InvokerIndices[12396] =
 };
 static const Il2CppTokenIndexMethodTuple s_reversePInvokeIndices[2] = 
 {
-	{ 0x0600138D, 18,  (void**)&OSSpecificSynchronizationContext_InvocationEntry_mF93C3CF6DBEC86E377576D840CAF517CB6E4D7E3_RuntimeMethod_var, 0 },
+	{ 0x0600138D, 3,  (void**)&OSSpecificSynchronizationContext_InvocationEntry_mF93C3CF6DBEC86E377576D840CAF517CB6E4D7E3_RuntimeMethod_var, 0 },
 	{ 0x06002C55, 0,  (void**)&CultureInfo_OnCultureInfoChangedInAppX_m407BCFC1029A4485B7B063BC2F3601968C3BE577_RuntimeMethod_var, 0 },
 };
 static const Il2CppTokenRangePair s_rgctxIndices[250] = 

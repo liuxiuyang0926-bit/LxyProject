@@ -8,10 +8,6 @@
     "mscorlib.dll"
   ],
   "hotUpdateDlls": [
-    "Game.Common.dll",
-    "Game.Lua.dll",
-    "Game.UI.dll",
-    "Game.Battle.dll",
-    "Assembly-CSharp.dll"
+    "Game.Logic.dll"
   ]
 }

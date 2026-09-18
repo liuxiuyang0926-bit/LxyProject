@@ -1,0 +1,24 @@
+{
+  "name": "Game.Logic.Editor",
+  "rootNamespace": "LxyDemo.GameLogic.Editor",
+  "references": [
+    "Game.Logic",
+    "Luban.Runtime",
+    "XLua.Runtime",
+    "Lxy.UIEffectGenerator.Editor",
+    "YooAsset.Editor",
+    "Unity.UGUI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

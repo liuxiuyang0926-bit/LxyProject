@@ -1,0 +1,319 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75825e1c61f0e644bac758aa44f014fa, type: 3}
+  m_Name: skill_101021
+  m_EditorClassIdentifier: 
+  expressionId: skill_101021
+  logicSource: {fileID: 11400000, guid: c4a6a1025eddda842b8d362c85aa93b2, type: 2}
+  framesPerSecond: 30
+  autoDuration: 1
+  durationFrames: 88
+  description: "\u53C2\u8003 skill_101021.lua\uFF1A0\u5E27 attack_1\uFF1B11~28\u5E27\u7A81\u8FDB\uFF1B48\u5E27\u4F24\u5BB3\u3001\u53D7\u51FB\u3001\u7EA2\u95EA\u548C\u6162\u901F\u5E76\u884C\uFF1B61~81\u5E27\u5F52\u4F4D\uFF1B\u603B\u65F6\u957F\u7EA688\u5E27\u3002Lua\u6570\u503C\u8D44\u6E90ID\u6309\u5B57\u7B26\u4E32Key\u4FDD\u7559\u3002"
+  tracks:
+  - trackName: "\u653B\u51FB\u52A8\u4F5C\u3001\u7279\u6548\u4E0E\u58F0\u97F3"
+    parallelGroup: "\u5173\u7FBD\u666E\u653B\u4E3B\u5E76\u884C\u7EC4"
+    executionMode: 1
+    operations:
+    - operationName: "\u64AD\u653E attack_1"
+      logicOutputKey: 
+      type: 0
+      subject: 0
+      startFrame: 0
+      durationFrames: 0
+      previewTargetSlot: 10
+      resourceKey: attack_1
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u65BD\u6CD5\u58F0\u97F3 29003221"
+      logicOutputKey: 
+      type: 4
+      subject: 0
+      startFrame: 0
+      durationFrames: 0
+      previewTargetSlot: 10
+      resourceKey: 29003221
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u5173\u7FBD\u666E\u653B\u7279\u6548 1010211"
+      logicOutputKey: 
+      type: 3
+      subject: 0
+      startFrame: 0
+      durationFrames: 15
+      previewTargetSlot: 10
+      resourceKey: 1010211
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u547D\u4E2D\u77AC\u95F4\u8868\u73B0\u6162\u901F"
+      logicOutputKey: 
+      type: 22
+      subject: 0
+      startFrame: 48
+      durationFrames: 2
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 0.2
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+  - trackName: "\u653B\u51FB\u65B9\u4F4D\u79FB\u4E0E\u663E\u9690"
+    parallelGroup: "\u5173\u7FBD\u666E\u653B\u4E3B\u5E76\u884C\u7EC4"
+    executionMode: 0
+    operations:
+    - operationName: "\u9690\u85CF\u653B\u51FB\u65B9\u8840\u6761"
+      logicOutputKey: 
+      type: 18
+      subject: 0
+      startFrame: 11
+      durationFrames: 0
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 0
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u9690\u85CF\u653B\u51FB\u65B9\u9634\u5F71"
+      logicOutputKey: 
+      type: 34
+      subject: 0
+      startFrame: 11
+      durationFrames: 0
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 0
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "11~28\u5E27\u7A81\u8FDB\u5230\u903B\u8F91\u76EE\u6807"
+      logicOutputKey: 
+      type: 1
+      subject: 0
+      startFrame: 11
+      durationFrames: 17
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: -3, y: 0, z: -1}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "61~81\u5E27\u8FD4\u56DE\u539F\u7AD9\u4F4D"
+      logicOutputKey: 
+      type: 2
+      subject: 0
+      startFrame: 61
+      durationFrames: 20
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u6062\u590D\u653B\u51FB\u65B9\u8840\u6761"
+      logicOutputKey: 
+      type: 18
+      subject: 0
+      startFrame: 81
+      durationFrames: 0
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u6062\u590D\u653B\u51FB\u65B9\u9634\u5F71"
+      logicOutputKey: 
+      type: 34
+      subject: 0
+      startFrame: 81
+      durationFrames: 0
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+  - trackName: "\u53D7\u51FB\u65B9\u4F24\u5BB3\u8868\u73B0"
+    parallelGroup: "\u5173\u7FBD\u666E\u653B\u4E3B\u5E76\u884C\u7EC4"
+    executionMode: 1
+    operations:
+    - operationName: "\u4F24\u5BB3\u4E0E\u98D8\u5B57"
+      logicOutputKey: damage_result
+      type: 5
+      subject: 1
+      startFrame: 48
+      durationFrames: 9
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "hit_1 \u4E0E\u901A\u7528\u949D\u5668\u53D7\u51FB"
+      logicOutputKey: damage_result
+      type: 33
+      subject: 1
+      startFrame: 48
+      durationFrames: 8
+      previewTargetSlot: 10
+      resourceKey: hit_1
+      secondaryResourceKey: 9001
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 0.25, b: 0.15, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u901A\u7528\u949D\u5668\u547D\u4E2D\u58F0\u97F3 3"
+      logicOutputKey: damage_result
+      type: 4
+      subject: 1
+      startFrame: 48
+      durationFrames: 0
+      previewTargetSlot: 10
+      resourceKey: 3
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u76EE\u6807\u7EA2\u95EA"
+      logicOutputKey: damage_result
+      type: 6
+      subject: 1
+      startFrame: 48
+      durationFrames: 3
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 0, b: 0, a: 0.9}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+    - operationName: "\u903B\u8F91\u6B7B\u4EA1\u68C0\u67E5"
+      logicOutputKey: damage_result
+      type: 7
+      subject: 1
+      startFrame: 48
+      durationFrames: 40
+      previewTargetSlot: 10
+      resourceKey: 
+      secondaryResourceKey: 
+      anchorKey: 
+      anchor: 2
+      offset: {x: 0, y: 0, z: 0}
+      targetOffset: {x: 0, y: 0, z: 0}
+      color: {r: 1, g: 1, b: 1, a: 1}
+      intensity: 1
+      state: 1
+      loop: 0
+      option: 0
+      frequency: 8
+  clips: []

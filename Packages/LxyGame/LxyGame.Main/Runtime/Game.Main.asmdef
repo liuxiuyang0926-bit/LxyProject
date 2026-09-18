@@ -1,0 +1,21 @@
+{
+    "name": "Game.Main",
+    "rootNamespace": "Game.Main",
+    "references": [
+        "Game.Contracts",
+        "Game.Resource",
+        "HybridCLR.Runtime",
+        "Unity.TextMeshPro",
+        "Unity.UGUI",
+        "YooAsset"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

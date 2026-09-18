@@ -56,7 +56,7 @@ extern void FirstSceneRuntimeBridge_get_Current_mCDEF2F4E0C3DD6A56FC9473AEF59B72
 extern void FirstSceneRuntimeBridge_set_Current_m7A0871F0EBE35A79166868EDE4BA88644A4EBCBF (void);
 extern void FirstSceneRuntimeBridge_Register_mF127FA65A1AF65996BD7688D264B6ADD33B09485 (void);
 extern void FirstSceneRuntimeBridge_Unregister_m2326B50D28D65C284AC33D73342DA31AC174462B (void);
-static Il2CppMethodPointer s_methodPointers[47] = 
+static Il2CppMethodPointer s_methodPointers[52] = 
 {
 	UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m9A7B395773A5B9A5FF077B50358B2C1A659DB179,
 	UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m70FB4E468EC2D9B8A06ED8205B931FDE645D70F6,
@@ -105,6 +105,11 @@ static Il2CppMethodPointer s_methodPointers[47] =
 	FirstSceneRuntimeBridge_set_Current_m7A0871F0EBE35A79166868EDE4BA88644A4EBCBF,
 	FirstSceneRuntimeBridge_Register_mF127FA65A1AF65996BD7688D264B6ADD33B09485,
 	FirstSceneRuntimeBridge_Unregister_m2326B50D28D65C284AC33D73342DA31AC174462B,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 };
 extern void HotUpdateStartupProgress__ctor_m2FB28C9D6536E4FAF560EAE4F830449C237DEDE9_AdjustorThunk (void);
 extern void HotUpdateStartupProgress_get_Stage_m1DA6E845703ABBDF1F6530627E30FFD57A4EDF10_AdjustorThunk (void);
@@ -117,7 +122,7 @@ static Il2CppTokenAdjustorThunkPair s_adjustorThunks[4] =
 	{ 0x0600000B, HotUpdateStartupProgress_get_Progress_mE97C1D8D979FA24FA65588D94ADE884839116986_AdjustorThunk },
 	{ 0x0600000C, HotUpdateStartupProgress_get_Message_mF0FFB58CA131F3762586D659C2D12A796208F840_AdjustorThunk },
 };
-static const int32_t s_InvokerIndices[47] = 
+static const int32_t s_InvokerIndices[52] = 
 {
 	9285,
 	6256,
@@ -166,12 +171,17 @@ static const int32_t s_InvokerIndices[47] =
 	9125,
 	9125,
 	9125,
+	0,
+	0,
+	0,
+	0,
+	0,
 };
 IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Game_Contracts_CodeGenModule;
 const Il2CppCodeGenModule g_Game_Contracts_CodeGenModule = 
 {
 	"Game.Contracts.dll",
-	47,
+	52,
 	s_methodPointers,
 	4,
 	s_adjustorThunks,

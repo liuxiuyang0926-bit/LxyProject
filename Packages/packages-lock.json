@@ -13,90 +13,57 @@
       "dependencies": {},
       "hash": "ca7f87b6a72f3739f99a5ad0c957c7aae0cbd922"
     },
-    "com.lxy.battle": {
-      "version": "file:com.lxy.battle",
+    "com.code-philosophy.luban": {
+      "version": "https://github.com/focus-creative-games/luban_unity.git",
       "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {},
+      "hash": "061314200e2f03307c4d90b448e1de7b85431905"
     },
     "com.lxy.contracts": {
-      "version": "file:com.lxy.contracts",
+      "version": "file:LxyGame/LxyGame.Contracts",
       "depth": 0,
-      "source": "embedded",
+      "source": "local",
       "dependencies": {}
     },
-    "com.lxy.core": {
-      "version": "file:com.lxy.core",
+    "com.lxy.logic": {
+      "version": "file:LxyGame/LxyGame.Logic",
       "depth": 0,
-      "source": "embedded",
+      "source": "local",
       "dependencies": {
-        "com.unity.textmeshpro": "3.0.7",
-        "com.unity.ugui": "1.0.0"
-      }
-    },
-    "com.lxy.launcher-icon": {
-      "version": "file:com.lxy.launcher-icon",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "com.lxy.lua": {
-      "version": "file:com.lxy.lua",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.lxy.core": "1.0.0",
-        "com.unity.textmeshpro": "3.0.7",
-        "com.unity.ugui": "1.0.0"
-      }
-    },
-    "com.lxy.main": {
-      "version": "file:com.lxy.main",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.code-philosophy.hybridclr": "8.13.0",
+        "com.code-philosophy.luban": "1.2.0",
         "com.lxy.contracts": "1.0.0",
         "com.lxy.resource": "1.0.0",
-        "com.lxy.scene": "1.0.0",
-        "com.tuyoogame.yooasset": "3.0.5"
-      }
-    },
-    "com.lxy.resource": {
-      "version": "file:com.lxy.resource",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.lxy.contracts": "1.0.0",
-        "com.tuyoogame.yooasset": "3.0.5"
-      }
-    },
-    "com.lxy.scene": {
-      "version": "file:com.lxy.scene",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.lxy.resource": "1.0.0"
-      }
-    },
-    "com.lxy.ui": {
-      "version": "file:com.lxy.ui",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.lxy.ui-effect-generator": "1.0.0",
-        "com.lxy.contracts": "1.0.0",
-        "com.lxy.lua": "1.0.0",
-        "com.lxy.resource": "1.0.0",
+        "com.lxy.ui-effect-generator": "1.0.1",
         "com.tuyoogame.yooasset": "3.0.5",
         "com.unity.textmeshpro": "3.0.7",
         "com.unity.ugui": "1.0.0"
       }
     },
-    "com.lxy.ui-effect-generator": {
-      "version": "file:com.lxy.ui-effect-generator",
+    "com.lxy.main": {
+      "version": "file:LxyGame/LxyGame.Main",
       "depth": 0,
-      "source": "embedded",
+      "source": "local",
+      "dependencies": {
+        "com.code-philosophy.hybridclr": "8.13.0",
+        "com.lxy.contracts": "1.0.0",
+        "com.lxy.resource": "1.0.0",
+        "com.tuyoogame.yooasset": "3.0.5"
+      }
+    },
+    "com.lxy.resource": {
+      "version": "file:LxyGame/LxyGame.Resources",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.lxy.contracts": "1.0.0",
+        "com.tuyoogame.yooasset": "3.0.5"
+      }
+    },
+    "com.lxy.ui-effect-generator": {
+      "version": "file:LxyGame/LxyGame.UIEffectGenerator",
+      "depth": 0,
+      "source": "local",
       "dependencies": {
         "com.unity.textmeshpro": "3.0.7",
         "com.unity.ugui": "1.0.0"

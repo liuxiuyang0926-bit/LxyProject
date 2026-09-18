@@ -1,0 +1,19 @@
+{
+  "name": "com.lxy.logic",
+  "version": "1.0.0",
+  "displayName": "LxyGame.Logic",
+  "description": "Unified hot-update gameplay runtime: UI, scene flow, Lua bindings, deterministic battle, and shared game logic.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.code-philosophy.luban": "1.2.0",
+    "com.lxy.contracts": "1.0.0",
+    "com.lxy.resource": "1.0.0",
+    "com.lxy.ui-effect-generator": "1.0.1",
+    "com.tuyoogame.yooasset": "3.0.5",
+    "com.unity.textmeshpro": "3.0.7",
+    "com.unity.ugui": "1.0.0"
+  },
+  "author": {
+    "name": "Lxy"
+  }
+}

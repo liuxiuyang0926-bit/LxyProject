@@ -18,7 +18,7 @@ MonoBehaviour:
     totalFrames: 12
     cooldownFrames: 20
     frameOperations:
-    - frame: 4
+    - frame: 0
       operationType: 0
       hitShape: 0
       damage: 100

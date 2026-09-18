@@ -106,6 +106,11 @@ namespace LxyDemo.EditorTools
                 YooAssetContentTags.Builtin);
         }
 
+        internal static void ApplyBuildSettingsForAutomation()
+        {
+            ApplyBuildSettingsSilently();
+        }
+
         private static void ValidateGroup(
             BundleCollectorPackage package,
             string groupName,
