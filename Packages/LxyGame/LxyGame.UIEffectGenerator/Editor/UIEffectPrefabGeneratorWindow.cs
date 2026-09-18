@@ -261,6 +261,7 @@ namespace Lxy.UIEffectGenerator.Editor
         private void OnEnable()
         {
             ApplyProjectDefaults();
+            LoadDefaultFontPreference();
             codexCommand = GetStringPreference(
                 CodexCommandEditorPrefsKey,
                 LegacyEditorPrefsPrefix + "CodexCommand",
@@ -659,6 +660,7 @@ namespace Lxy.UIEffectGenerator.Editor
             prefabFolder = EditorGUILayout.TextField(
                 "Prefab 目录",
                 prefabFolder);
+            DrawDefaultFont();
             int resourceModeIndex = resourceMatchMode ==
                                     UIEffectResourceMatchMode.ColorBlocks
                 ? 1
@@ -768,6 +770,7 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private void BeginFullFidelityGeneration()
         {
+            if (!CheckTextEnvironment()) return;
             if (referenceImage == null)
             {
                 requestStatus = "请先导入或选择效果图。";
@@ -1117,6 +1120,7 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private void BeginCodexAnalysis()
         {
+            if (!CheckTextEnvironment()) return;
             if (referenceImage == null)
             {
                 requestStatus = "请先导入或选择效果图。";
@@ -1766,7 +1770,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 "Container/Image/Text/Button/Toggle/ToggleGroup/ScrollRect。节点可写 " +
                 "name,type,semantic,x,y,width,height,text,fontSize,characterSpacing," +
                 "alignment,bold,color,intentionalColor," +
-                (structureOnly ? string.Empty : "resource,resourceCandidates,resourcePolicy,font,fontMaterial,") +
+                (structureOnly ? string.Empty : "resource,resourceCandidates,resourcePolicy,") +
                 "lineSpacing,noWrap,isOn,allowSwitchOff,scrollDirection," +
                 "preserveAspect,sliced," +
                 "raycastTarget,mayMerge,mayLayer,mayUseFullCanvasSprite,textMode," +
@@ -1806,7 +1810,8 @@ namespace Lxy.UIEffectGenerator.Editor
                 "visualKind=ArtText；疑似两层写 mayLayer=true。疑似已经烘焙进父" +
                 "Sprite 的短排名/数字写 textMode=PossiblyBaked。真正可编辑文本保持" +
                 "Text，不得为了静态相似度烘焙进背景。\n" +
-                (structureOnly ? string.Empty : "字体或字体材质只允许使用 manifest 明确提供的路径。") +
+                "本轮没有提供字体或字体材质清单，禁止输出 font/fontMaterial，禁止猜测任何字体路径；" +
+                "Unity 会使用当前项目选择的默认 TMP 字体。" +
                 "单行文字写 " +
                 "noWrap=true；多行保留原始换行，可用 lineSpacing 调整。勿用缩小字号" +
                 "掩盖错误文字矩形。" +
@@ -1876,9 +1881,10 @@ namespace Lxy.UIEffectGenerator.Editor
                   "intentionalColor=true 并填写 color；其他 Image、Button、" +
                   "Toggle 不要设置 intentionalColor。";
             return
-                "$unity-ui-generator\n\n" +
+                "你是 Unity UGUI 布局分析器。本提示包含完整规则，禁止调用 Skill、MCP、终端或搜索项目。\n\n" +
                 "Unity Editor 低 Token 模式：只做视觉推理并返回精简的 " +
                 "UISchema 2.0；除读取已给定效果图外，不执行项目搜索或文件操作。\n\n" +
+                "禁止输出 font/fontMaterial 路径；字体由 Unity 当前项目的默认 TMP 字体配置决定。\n" +
                 $"Panel ID：{safePanelId}\n" +
                 $"效果图项目路径：{referenceAssetPath}\n" +
                 $"效果图绝对路径：" +
@@ -2106,6 +2112,7 @@ namespace Lxy.UIEffectGenerator.Editor
             UIEffectSchema schema = UIEffectSchemaUtility.ParseGenerated(
                 NormalizeAiJson(schemaJson),
                 out List<string> repairs);
+            UIEffectTypography.RemoveUnevidencedAiFonts(schema.children, repairs);
             var modalExtractionNotes = new List<string>();
             int excludedUnderlyingNodes =
                 UIEffectSchemaUtility.ExtractModalForeground(
@@ -2532,6 +2539,7 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private void BeginFigmaImportAndGenerate()
         {
+            if (!CheckTextEnvironment()) return;
             if (!UIEffectFigmaImporter.TryParseNodeUrl(
                     sourceUrl,
                     out string fileKey,
@@ -3265,7 +3273,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 y = sourceHeight * 0.06f,
                 width = sourceWidth * 0.5f,
                 height = sourceHeight * 0.08f,
-                text = "请让 $unity-ui-generator 按效果图补全 UISchema",
+                text = "请在效果图生成 UI 窗口中分析效果图，或编辑此 UISchema",
                 fontSize = Mathf.Max(24f, sourceWidth * 0.03f),
                 alignment = "Center",
                 color = "#FFFFFFFF",
@@ -3315,6 +3323,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     ? resolvedPanelId
                     : logicClassName,
                 scriptFolder = scriptFolder,
+                defaultFont = defaultFont,
                 uiLayer = uiLayer,
                 resourceMatchMode = resourceMatchMode,
                 resourceSearchRoots = ParseSearchRoots(
@@ -3429,6 +3438,8 @@ namespace Lxy.UIEffectGenerator.Editor
                     $"{result.GeneratedComponentCount} 个组件；" +
                     $"已匹配 {result.UsedResources.Count} 个资源，" +
                     $"缺失 {result.MissingResources.Count} 个资源。";
+                if (result.Warnings.Count > 0)
+                    requestStatus += $"已处理 {result.Warnings.Count} 项字体兼容性问题，请查看 Console 或还原检查报告。";
                 if (!string.IsNullOrEmpty(result.FidelityReportPath))
                 {
                     lastFidelityReportPath = result.FidelityReportPath;

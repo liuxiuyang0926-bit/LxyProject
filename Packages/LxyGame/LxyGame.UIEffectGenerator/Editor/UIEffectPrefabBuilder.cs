@@ -46,6 +46,7 @@ namespace Lxy.UIEffectGenerator.Editor
         /// 公开的脚本Folder数据。
         /// </summary>
         public string scriptFolder = string.Empty;
+        public TMP_FontAsset defaultFont;
         /// <summary>
         /// 公开的ui层级数据。
         /// </summary>
@@ -89,6 +90,7 @@ namespace Lxy.UIEffectGenerator.Editor
         public int GeneratedComponentCount { get; internal set; }
         public string FidelityReportPath { get; internal set; }
         public int FidelityReviewCount { get; internal set; }
+        public IReadOnlyList<string> Warnings { get; internal set; } = Array.Empty<string>();
         public double ElapsedSeconds { get; internal set; }
         public double TotalElapsedSeconds { get; internal set; }
     }
@@ -223,6 +225,10 @@ namespace Lxy.UIEffectGenerator.Editor
             IUIEffectProjectAdapter projectAdapter =
                 UIEffectProjectAdapterRegistry.Active;
             NormalizeOptions(options, schema, projectAdapter);
+            List<string> warnings = UIEffectTypography.Prepare(schema, options.defaultFont);
+            if (warnings.Count > 0)
+                Debug.LogWarning("[UI Effect Generator/Typography] 已处理字体兼容性问题：\n" +
+                    string.Join("\n", warnings));
 
             UIEffectPrefabHostResult initialResult =
                 projectAdapter.CreateOrUpdatePrefab(
@@ -281,7 +287,7 @@ namespace Lxy.UIEffectGenerator.Editor
             if (options.resourceMatchMode == UIEffectResourceMatchMode.VisualSimilarity)
             {
                 fidelityReport = UIEffectFidelityAudit.Create(initialResult.PrefabPath,
-                    schema, out fidelityReviewCount);
+                    schema, out fidelityReviewCount, warnings);
             }
 
             return new UIEffectPrefabGenerationResult
@@ -294,6 +300,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 GeneratedComponentCount = contentStats.ComponentCount,
                 FidelityReportPath = fidelityReport,
                 FidelityReviewCount = fidelityReviewCount,
+                Warnings = warnings.ToArray(),
             };
         }
 

@@ -26,6 +26,10 @@ Package Manager 还提供 `Basic UGUI Schema` 示例，可先验证无需 AI 的
 XLua、YooAsset 或任何业务 UI 框架。生成器只拥有 Prefab 根节点下的
 `Generated` 子树，重新生成会保留其他手工子节点。
 
+窗口的“默认 TMP 字体”用于选择当前项目字体，并按项目保存。有效的 Schema 字体覆盖仍保留；
+缺失字体或不兼容材质会回退并显示提示，不再因此中断整个 Prefab。AI 不再填写未经证实的字体路径。
+中文 UI 需要项目中包含相应字形的 TMP 字体；未导入 TMP 必需资源时会在 AI 开始前提示处理。
+
 安装后通过以下任一菜单打开：
 
 - `工具/UI工具/根据效果图生成Prefab`

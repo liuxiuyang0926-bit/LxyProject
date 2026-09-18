@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Lxy.UIEffectGenerator.Editor
 {
     // Explicit editor regression runner; no NUnit dependency in the portable package.
-    internal static class UIEffectFidelityValidation
+    internal static partial class UIEffectFidelityValidation
     {
         [MenuItem("工具/UI工具/验证效果图还原流水线")]
         public static void RunMenu() { Debug.Log(Run()); }
@@ -121,6 +121,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 ValidateIndependentSurface(schema, folder, checks);
 
                 UIEffectProjectAdapterRegistry.Register(adapter, int.MaxValue);
+                ValidateTypography(folder, checks);
                 var options = new UIEffectPrefabGenerationOptions { panelId = schema.name, prefabFolder = folder,
                     scriptType = UIEffectScriptType.None, resourceMatchMode = UIEffectResourceMatchMode.VisualSimilarity,
                     resourceSearchRoots = new[] { folder } };

@@ -10,11 +10,11 @@
 3. 输入存放本包的 Git URL，然后点击 `Add`。
 
 独立仓库的根目录必须直接包含 `package.json` 和 `Editor/`。地址形式如下，
-将 `<owner>/<repository>` 替换为实际已推送的仓库；只有已创建并推送对应 Tag 后才能使用 `#v1.1.0`：
+将 `<owner>/<repository>` 替换为实际已推送的仓库；只有已创建并推送对应 Tag 后才能使用 `#v1.1.1`：
 
 ```text
 https://github.com/<owner>/<repository>.git
-https://github.com/<owner>/<repository>.git#v1.1.0
+https://github.com/<owner>/<repository>.git#v1.1.1
 ```
 
 如果继续在 LxyProject 仓库中维护，推送改动后可使用子目录地址：
@@ -34,7 +34,9 @@ https://github.com/liuxiuyang0926-bit/LxyProject.git?path=/Packages/LxyGame/LxyG
    中文 UI 还需项目自己的 TMP 中文字体，不能依赖其他工程里的字体资源。
 2. 在 `Tools > UI Tools > Generate Prefab From Design` 或
    `工具 > UI工具 > 根据效果图生成Prefab` 打开窗口。
-3. 选择效果图、Prefab 输出目录和当前项目的 Sprite 总目录，然后生成。
+3. 在“默认 TMP 字体”中选择当前项目的字体。中文 UI 应选择含所需中文字形的 TMP 字体；
+   留空时使用 TMP Settings 的默认字体。这项选择按项目保存，不会继承其他工程的字体路径。
+4. 选择效果图、Prefab 输出目录和当前项目的 Sprite 总目录，然后生成。
 
 Package Manager 的 Samples 中提供 `Basic UGUI Schema`，导入后可选中
 `UIExample.json`，执行 `Assets > UI工具 > 根据选中的UISchema生成Prefab`。
@@ -43,6 +45,18 @@ Package Manager 的 Samples 中提供 `Basic UGUI Schema`，导入后可选中
 高精度/轻量 AI 分析要求制作机能够执行 `codex --version`，并已完成 Codex CLI 登录。
 默认高精度模式不依赖 UnityMCP。目标工程可以不是 Git 仓库；包调用 `codex exec` 时
 继续使用 `--skip-git-repo-check` 和只读沙箱。Figma 来源还需要制作机已有的 Figma MCP 授权。
+轻量和高精度模式的提示均自包含，不要求目标项目安装 LxyDemo 的 Skill 文件。
+
+## 更新与字体兼容性
+
+1.1.1 修复了 AI 拼错字体路径或复用其他工程 Schema 时因找不到字体而中止生成的问题。
+原有有效字体保持不变；缺失字体和不兼容材质按当前项目资源回退并记录提示。
+缺少中文字体仍需提供项目字体，工具不会复制其他工程的字体或伪装成同款字体。
+
+新代码推送后，请在目标工程更新 Git 包并确认版本为 `1.1.1`。Git 依赖会记录解析到的提交，
+仅推送远程不会自动替换已有的 PackageCache；可在 Package Manager 中重新添加相同 Git URL
+请求更新，或将 URL 的 `#main` 替换为刚推送的确切提交号。不要直接修改 `Library/PackageCache`。
+已分析成功、仅在 Prefab 构建时失败的 Schema 可以直接重建，无需再次调用 AI。
 
 ## 从本地安装
 
@@ -143,7 +157,7 @@ UIEffectPrefabGenerationResult result =
 powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Export-UIEffectGenerator.ps1
 ```
 
-输出到 `Build/UPMPackages/com.lxy.ui-effect-generator-1.1.0/`。也可传入
+输出到 `Build/UPMPackages/com.lxy.ui-effect-generator-1.1.1/`。也可传入
 `-Destination <空目录>`。脚本保留 `.meta`，只复制包文件，并校验依赖和 Editor 程序集边界；
 不会覆盖已有非空目录，也不会包含 Lxy 项目适配器、业务代码、游戏资源或账号配置。
 命令中的执行策略仅作用于本次 PowerShell 进程，不修改系统设置。

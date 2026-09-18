@@ -22,6 +22,7 @@ namespace Lxy.UIEffectGenerator.Editor
         public string difference;
         public string scope = "Generated 中可见且不透明的图像像素；排除文字排版区域。分数不是整图还原率。文字另行检查。";
         public int reviewCount;
+        public List<string> warnings = new List<string>();
         public List<UIEffectFidelityNodeReport> nodes = new List<UIEffectFidelityNodeReport>();
     }
 
@@ -40,7 +41,8 @@ namespace Lxy.UIEffectGenerator.Editor
 
     internal static class UIEffectFidelityAudit
     {
-        internal static string Create(string prefabPath, UIEffectSchema schema, out int reviewCount)
+        internal static string Create(string prefabPath, UIEffectSchema schema, out int reviewCount,
+            IReadOnlyList<string> generationWarnings = null)
         {
             string folder = Path.GetFullPath(Path.Combine(Application.dataPath,
                 "../Library/LxyUIEffectGenerator/Reports", UIEffectEditorUtility.SanitizeTypeName(schema.name)));
@@ -48,6 +50,7 @@ namespace Lxy.UIEffectGenerator.Editor
             var report = new UIEffectFidelityReport { prefab = prefabPath, referenceHash = schema.referenceImageHash,
                 preview = Path.Combine(folder, "Preview.png"), imageOnlyPreview = Path.Combine(folder, "Images.png"),
                 difference = Path.Combine(folder, "Difference.png") };
+            if (generationWarnings != null) report.warnings.AddRange(generationWarnings);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             RectTransform generated = prefab.transform.Find("Generated") as RectTransform;
             if (generated == null) throw new InvalidOperationException("视觉审计找不到 Generated。");
@@ -175,7 +178,15 @@ namespace Lxy.UIEffectGenerator.Editor
                 "a{color:#99caff}@media(max-width:900px){.images{grid-template-columns:1fr}}</style>");
             html.Append("<h1>UI 还原检查</h1><p>").Append(WebUtility.HtmlEncode(report.prefab))
                 .Append("</p><p>待复核：").Append(report.reviewCount).Append(" 个节点。")
-                .Append(WebUtility.HtmlEncode(report.scope)).Append("</p><div class=\"images\">");
+                .Append(WebUtility.HtmlEncode(report.scope)).Append("</p>");
+            if (report.warnings.Count > 0)
+            {
+                html.Append("<h2>字体兼容性提示</h2><ul>");
+                foreach (string warning in report.warnings)
+                    html.Append("<li>").Append(WebUtility.HtmlEncode(warning)).Append("</li>");
+                html.Append("</ul>");
+            }
+            html.Append("<div class=\"images\">");
             foreach (var item in new[] { new[] { "Reference.png", "原始效果图" },
                 new[] { "Preview.png", "实际生成结果（包含文字）" }, new[] { "Difference.png", "可比较区域差异（红色越亮差异越大）" } })
                 html.Append("<figure><figcaption>").Append(item[1]).Append("</figcaption><a href=\"")
