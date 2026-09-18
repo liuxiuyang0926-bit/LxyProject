@@ -1,22 +1,57 @@
 # 安装与项目适配
 
-## 安装独立包
+## 从 Git URL 安装
 
-将整个 `LxyGame.UIEffectGenerator` 目录复制到目标项目的 `Packages/LxyGame`，
-并在目标项目 `Packages/manifest.json` 中加入：
+包内仅包含通用 Editor 代码，不需要复制 LxyDemo 的 `Assets`、业务包或项目适配器。
+支持 Unity 2022.3；Package Manager 会解析本包声明的 UGUI 和 TextMeshPro 依赖。
+
+1. 在目标工程打开 `Window > Package Manager`。
+2. 点击 `+ > Add package from git URL`。
+3. 输入存放本包的 Git URL，然后点击 `Add`。
+
+独立仓库的根目录必须直接包含 `package.json` 和 `Editor/`。地址形式如下，
+将 `<owner>/<repository>` 替换为实际已推送的仓库；只有已创建并推送对应 Tag 后才能使用 `#v1.1.0`：
+
+```text
+https://github.com/<owner>/<repository>.git
+https://github.com/<owner>/<repository>.git#v1.1.0
+```
+
+如果继续在 LxyProject 仓库中维护，推送改动后可使用子目录地址：
+
+```text
+https://github.com/liuxiuyang0926-bit/LxyProject.git?path=/Packages/LxyGame/LxyGame.UIEffectGenerator
+```
+
+指定版本时，把 `#<tag-or-commit>` 放在 `?path=...` 后面。子目录安装仍需从整个
+仓库获取 Git 数据，因此单独维护工具仓库更适合共享给其他项目。地址规则见
+[Unity Git dependencies](https://docs.unity3d.com/2022.3/Documentation/Manual/upm-git.html)。
+制作机需安装 Git 并加入 PATH；私有仓库使用该制作机已有的 Git 访问凭据。
+
+## 首次使用
+
+1. 首次使用 TextMeshPro 时，执行 `Window > TextMeshPro > Import TMP Essential Resources`。
+   中文 UI 还需项目自己的 TMP 中文字体，不能依赖其他工程里的字体资源。
+2. 在 `Tools > UI Tools > Generate Prefab From Design` 或
+   `工具 > UI工具 > 根据效果图生成Prefab` 打开窗口。
+3. 选择效果图、Prefab 输出目录和当前项目的 Sprite 总目录，然后生成。
+
+Package Manager 的 Samples 中提供 `Basic UGUI Schema`，导入后可选中
+`UIExample.json`，执行 `Assets > UI工具 > 根据选中的UISchema生成Prefab`。
+这个示例不调用 AI，也不依赖业务 Sprite，适合先验证安装。
+
+高精度/轻量 AI 分析要求制作机能够执行 `codex --version`，并已完成 Codex CLI 登录。
+默认高精度模式不依赖 UnityMCP。目标工程可以不是 Git 仓库；包调用 `codex exec` 时
+继续使用 `--skip-git-repo-check` 和只读沙箱。Figma 来源还需要制作机已有的 Figma MCP 授权。
+
+## 从本地安装
+
+在 Unity Package Manager 中选择 `Add package from disk`，指向本包的 `package.json`。
+也可将整个目录复制到目标项目的 `Packages/LxyGame`，并在项目的 `Packages/manifest.json` 中加入：
 
 ```json
 "com.lxy.ui-effect-generator": "file:LxyGame/LxyGame.UIEffectGenerator"
 ```
-
-也可以在 Unity Package Manager 中选择 `Add package from disk`，指向该目录
-的 `package.json`。如果包保存在 Git 仓库子目录，可使用带
-`?path=Packages/LxyGame/LxyGame.UIEffectGenerator` 的 Git UPM 地址。
-
-目标项目需要 Unity 2022.3、UGUI 和 TextMeshPro。高精度/轻量 AI 分析还
-要求制作机能够执行 `codex --version`，并已完成 Codex CLI 登录。默认高精度
-模式不依赖 UnityMCP。目标工程可以不是 Git 仓库；包调用 `codex exec` 时会
-使用官方 `--skip-git-repo-check` 参数，同时继续保持只读沙箱。
 
 ## 通用项目默认行为
 
@@ -29,9 +64,12 @@
 - Sprite 默认从 `Assets` 及全部子目录扫描；
 - Prefab 根包含 `RectTransform`、`Canvas`、`GraphicRaycaster` 和
   `CanvasGroup`；
-- 不生成业务脚本，不挂载项目专属 Binder。
+- 不生成业务脚本，不挂载项目专属 Binder；
+- 整个框架配置区域不显示：Prefab 适配器、脚本类型、C# 命名空间、逻辑类名、
+  脚本目录、UI 层级及通用适配器提示均隐藏。
 
-这些目录都可以在生成窗口中修改。资源总目录应尽量选择实际 UI Sprite 的
+窗口可设置 Prefab 输出目录和资源总目录，其他默认目录可由项目适配器提供。
+资源总目录应尽量选择实际 UI Sprite 的
 共同父目录，以减少扫描时间并提高候选质量。
 
 ## 接入项目自己的 UI 框架
@@ -72,6 +110,8 @@ LxyDemo 的参考实现位于：
 
 它继续调用原有 `CSharpUIGenerator`，因此 LxyDemo 中的 ObjectBinder、
 UICodeBinder、C#/Lua 配置和默认目录保持不变。
+该文件属于 Lxy 的业务包，不随生成器独立包导出。只有适配器声明支持脚本生成或
+层级选择时，窗口才绘制相应配置；不通过工程名、机器路径或业务程序集反射判断。
 
 ## Editor API
 
@@ -95,12 +135,29 @@ UIEffectPrefabGenerationResult result =
         true);
 ```
 
-## 打包发布
+## 从 LxyDemo 导出独立仓库内容
+
+在 LxyDemo 根目录执行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Export-UIEffectGenerator.ps1
+```
+
+输出到 `Build/UPMPackages/com.lxy.ui-effect-generator-1.1.0/`。也可传入
+`-Destination <空目录>`。脚本保留 `.meta`，只复制包文件，并校验依赖和 Editor 程序集边界；
+不会覆盖已有非空目录，也不会包含 Lxy 项目适配器、业务代码、游戏资源或账号配置。
+命令中的执行策略仅作用于本次 PowerShell 进程，不修改系统设置。
+
+将输出目录的**内容**放到独立 Git 仓库根目录，提交并推送后即可使用该仓库的 `.git` URL。
+后续版本继续从同一包目录导出，保持包名和已有 `.meta` GUID 不变。
+导出脚本只准备文件，不创建远程仓库或自动推送。
+
+## 发布检查
 
 独立包目录本身就是标准 UPM 包。发布前至少验证：
 
 - 新建的普通 Unity 2022.3 工程只安装此包即可编译；
-- 菜单能打开且显示 `通用 UGUI` 适配器；
+- 菜单能打开，且不显示项目框架配置区域；
 - 纯色 UISchema 能生成 Prefab，根节点没有 Missing Script；
 - 选择项目 Sprite 根后，视觉模式能正确匹配普通和九宫格 Sprite；
 - 重新生成只替换 `Generated`，手工兄弟节点保持不变。

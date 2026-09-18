@@ -4,10 +4,22 @@
 UISchema 2.0 生成可编辑的 UGUI Prefab。Sprite 视觉匹配、九宫格、层级恢复、
 运行时模板裁剪和高精度 Codex 两阶段分析都位于这个独立包内。
 
+## Git URL 安装
+
+将本目录作为独立 Git 仓库的根目录推送后，在 `Window > Package Manager > + >
+Add package from git URL` 中输入该仓库的 `.git` 地址即可安装。
+也支持在仓库地址后指定本包子目录 `?path=/Packages/LxyGame/LxyGame.UIEffectGenerator`。
+具体地址格式、发布步骤和首次使用说明见 [Installation](Documentation~/Installation.md)。
+
+其他项目只安装本包即可使用通用 UGUI 生成流程，窗口隐藏整块脚本/框架配置。
+LxyDemo 的适配器保留在业务包中，继续显示原有配置并处理 Canvas、Binder、C#/Lua 脚本。
+Package Manager 还提供 `Basic UGUI Schema` 示例，可先验证无需 AI 的 Prefab 生成。
+
 ## 依赖
 
 - Unity UI (`com.unity.ugui`)
 - TextMeshPro (`com.unity.textmeshpro`)
+- Unity 内置图片编解码和 JSON 序列化模块（由 Package Manager 解析）
 - 每台制作机单独安装并登录 Codex CLI
 
 默认 `Generic UGUI` 适配器只创建标准 UGUI Prefab，不依赖 ObjectBinder、

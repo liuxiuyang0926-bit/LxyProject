@@ -2,7 +2,7 @@
   "name": "Lxy.UIEffectGenerator.Editor",
   "rootNamespace": "Lxy.UIEffectGenerator.Editor",
   "references": [
-    "Unity.UGUI",
+    "UnityEngine.UI",
     "Unity.TextMeshPro"
   ],
   "includePlatforms": [

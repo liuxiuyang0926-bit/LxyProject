@@ -720,6 +720,13 @@ namespace Lxy.UIEffectGenerator.Editor
 
             IUIEffectProjectAdapter adapter =
                 UIEffectProjectAdapterRegistry.Active;
+            // Framework settings belong to the host project. A standalone install
+            // only exposes design input, resource matching and Prefab output.
+            if (!adapter.SupportsScriptGeneration && !adapter.SupportsLayerSelection)
+            {
+                return;
+            }
+
             EditorGUILayout.LabelField(
                 "Prefab 适配器",
                 adapter.DisplayName);
@@ -747,20 +754,12 @@ namespace Lxy.UIEffectGenerator.Editor
                         "脚本目录",
                         scriptFolder);
                 }
-
-                if (adapter.SupportsLayerSelection)
-                {
-                    uiLayer = (UIEffectLayer)EditorGUILayout.EnumPopup(
-                        "UI 层级",
-                        uiLayer);
-                }
             }
-            else
+            if (adapter.SupportsLayerSelection)
             {
-                EditorGUILayout.HelpBox(
-                    "当前使用通用 UGUI 适配器：生成标准 Canvas Prefab，" +
-                    "不依赖项目 Binder，也不生成业务脚本。",
-                    MessageType.None);
+                uiLayer = (UIEffectLayer)EditorGUILayout.EnumPopup(
+                    "UI 层级",
+                    uiLayer);
             }
         }
 
