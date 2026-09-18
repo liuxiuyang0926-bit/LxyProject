@@ -181,7 +181,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 .Append(WebUtility.HtmlEncode(report.scope)).Append("</p>");
             if (report.warnings.Count > 0)
             {
-                html.Append("<h2>字体兼容性提示</h2><ul>");
+                html.Append("<h2>资源与字体提示</h2><ul>");
                 foreach (string warning in report.warnings)
                     html.Append("<li>").Append(WebUtility.HtmlEncode(warning)).Append("</li>");
                 html.Append("</ul>");

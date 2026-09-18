@@ -1,14 +1,17 @@
-# Lxy UI Effect Generator
+# Lxy UIPrefabGenerator
 
 面向 Unity 2022.3 的可移植 Editor 包，可以从本地效果图、Figma 节点或
 UISchema 2.0 生成可编辑的 UGUI Prefab。Sprite 视觉匹配、九宫格、层级恢复、
 运行时模板裁剪和高精度 Codex 两阶段分析都位于这个独立包内。
 
+1.1.3 起，Package Manager 中显示为 `LxyGame.UIPrefabGenerator`，窗口标题为
+“UI预制体生成器”。包 ID、程序集/API 标识和已有设置保持兼容，旧工程可直接更新。
+
 ## Git URL 安装
 
 将本目录作为独立 Git 仓库的根目录推送后，在 `Window > Package Manager > + >
 Add package from git URL` 中输入该仓库的 `.git` 地址即可安装。
-也支持在仓库地址后指定本包子目录 `?path=/Packages/LxyGame/LxyGame.UIEffectGenerator`。
+也支持在仓库地址后指定本包子目录 `?path=/Packages/LxyGame/LxyGame.UIPrefabGenerator`。
 具体地址格式、发布步骤和首次使用说明见 [Installation](Documentation~/Installation.md)。
 
 其他项目只安装本包即可使用通用 UGUI 生成流程，窗口隐藏整块脚本/框架配置。

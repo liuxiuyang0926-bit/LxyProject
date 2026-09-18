@@ -152,7 +152,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 result.ElapsedSeconds = UIEffectGenerationTiming.BuildSeconds;
                 result.TotalElapsedSeconds = UIEffectGenerationTiming.ElapsedSeconds;
                 UIEffectGenerationTiming.Finish("成功", result.SchemaName);
-                Debug.Log($"[UI Effect Generator/Timing] {result.SchemaName}：总耗时 " +
+                Debug.Log($"[UIPrefabGenerator/Timing] {result.SchemaName}：总耗时 " +
                     UIEffectGenerationTiming.Format(result.TotalElapsedSeconds) + "，Unity 构建 " +
                     UIEffectGenerationTiming.Format(result.ElapsedSeconds));
                 return result;
@@ -183,7 +183,7 @@ namespace Lxy.UIEffectGenerator.Editor
             if (excludedUnderlyingNodes > 0)
             {
                 Debug.Log(
-                    "[UI Effect Generator/Modal Foreground] 检测到模态弹窗，" +
+                    "[UIPrefabGenerator/Modal Foreground] 检测到模态弹窗，" +
                     "仅生成遮罩与弹窗前景；效果图中被覆盖的底层界面不进入 " +
                     "Prefab：\n" + string.Join("\n", modalExtractionNotes));
             }
@@ -195,7 +195,7 @@ namespace Lxy.UIEffectGenerator.Editor
             if (inferredRuntimeTemplateNodes > 0)
             {
                 Debug.Log(
-                    "[UI Effect Generator] 严格同构的颜色/阵营运行时" +
+                    "[UIPrefabGenerator] 严格同构的颜色/阵营运行时" +
                     $"模板候选已自动标记：{inferredRuntimeTemplateNodes} 个节点。" +
                     "资源匹配完成后只保留证据最完整的一项。");
             }
@@ -233,7 +233,7 @@ namespace Lxy.UIEffectGenerator.Editor
             NormalizeOptions(options, schema, projectAdapter);
             List<string> warnings = UIEffectTypography.Prepare(schema, options.defaultFont);
             if (warnings.Count > 0)
-                Debug.LogWarning("[UI Effect Generator/Typography] 已处理字体兼容性问题：\n" +
+                Debug.LogWarning("[UIPrefabGenerator/Typography] 已处理字体兼容性问题：\n" +
                     string.Join("\n", warnings));
 
             UIEffectPrefabHostResult initialResult =
@@ -262,7 +262,7 @@ namespace Lxy.UIEffectGenerator.Editor
             if (repairedBindingNames > 0)
             {
                 Debug.LogWarning(
-                    "[UI Effect Generator/Binding Repair] 最终 UI 树存在 " +
+                    "[UIPrefabGenerator/Binding Repair] 最终 UI 树存在 " +
                     "重复绑定名，已按最近父级路径确定性命名；视觉节点、层级、" +
                     "坐标和资源均未改变：\n" +
                     string.Join("\n", bindingNameRepairs));
@@ -273,6 +273,8 @@ namespace Lxy.UIEffectGenerator.Editor
                 resolver,
                 projectAdapter,
                 options);
+            warnings.AddRange(resolver.ResourceWarnings);
+            warnings.AddRange(resolver.MissingResources.Select(item => "未匹配 Sprite：" + item));
 
             // The active adapter configured the Prefab root before the
             // Generated subtree was rebuilt. Save and import that exact asset
@@ -1848,6 +1850,7 @@ namespace Lxy.UIEffectGenerator.Editor
         private readonly List<SpriteEntry> sprites;
         private readonly List<string> usedResources = new List<string>();
         private readonly List<string> missingResources = new List<string>();
+        private readonly List<string> resourceWarnings = new List<string>();
         private readonly UIEffectResourceMatchMode matchMode;
         private readonly Dictionary<UIEffectNode, string> visualFailures =
             new Dictionary<UIEffectNode, string>();
@@ -1872,6 +1875,9 @@ namespace Lxy.UIEffectGenerator.Editor
             sprites = matchMode == UIEffectResourceMatchMode.ColorBlocks
                 ? new List<SpriteEntry>()
                 : GetOrBuildSpriteIndex(searchRoots);
+            if (matchMode != UIEffectResourceMatchMode.ColorBlocks && sprites.Count == 0)
+                WarnResource("资源索引为空。搜索目录：" + string.Join("、", searchRoots ?? Array.Empty<string>()) +
+                    "。请确认资源总目录覆盖图片所在目录，且图片已导入为 Sprite (2D and UI)；仅存在 Texture2D 文件不能直接赋给 UGUI Image。");
         }
 
         /// <summary>
@@ -1882,6 +1888,14 @@ namespace Lxy.UIEffectGenerator.Editor
         /// 向调用方提供MissingResources。
         /// </summary>
         public IReadOnlyList<string> MissingResources => missingResources;
+        internal IReadOnlyList<string> ResourceWarnings => resourceWarnings;
+
+        private void WarnResource(string message)
+        {
+            if (resourceWarnings.Contains(message)) return;
+            resourceWarnings.Add(message);
+            Debug.LogWarning("[UIPrefabGenerator] " + message);
+        }
 
         /// <summary>
         /// 清空Caches。
@@ -2067,7 +2081,7 @@ namespace Lxy.UIEffectGenerator.Editor
                         prunedRuntimeTemplates > 0)
                     {
                         Debug.Log(
-                            "[UI Effect Generator] 资源感知结构校正：" +
+                            "[UIPrefabGenerator] 资源感知结构校正：" +
                             $"整幅背景 {expandedBackgrounds}，" +
                             $"文字承载背景 {generatedTextSurfaces}，" +
                             $"父图内置分组 {convertedVisualWrappers}，" +
@@ -2081,7 +2095,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     if (collapsedVisuals > 0)
                     {
                         Debug.Log(
-                            $"[UI Effect Generator] 父 Sprite 已包含局部视觉，" +
+                            $"[UIPrefabGenerator] 父 Sprite 已包含局部视觉，" +
                             $"自动折叠冗余 Image：{collapsedVisuals}");
                     }
                 }
@@ -2143,7 +2157,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 }
 
                 Debug.Log(
-                    $"[UI Effect Generator] 运行时模板组 {group.Key} " +
+                    $"[UIPrefabGenerator] 运行时模板组 {group.Key} " +
                     $"保留 {selected.Node.name}；候选证据：" +
                     string.Join(
                         "，",
@@ -2350,9 +2364,7 @@ namespace Lxy.UIEffectGenerator.Editor
             for (int index = 0; index < candidates.Count; index++)
             {
                 string candidate = candidates[index];
-                if (!candidate.StartsWith(
-                        "Assets/",
-                        StringComparison.OrdinalIgnoreCase))
+                if (!IsAssetResourcePath(candidate))
                 {
                     continue;
                 }
@@ -2418,7 +2430,7 @@ namespace Lxy.UIEffectGenerator.Editor
         private void RecordUsed(string assetPath, Sprite sprite)
         {
             string value = assetPath;
-            if (!string.Equals(
+            if (assetPath.IndexOf('#') < 0 && !string.Equals(
                     sprite.name,
                     Path.GetFileNameWithoutExtension(assetPath),
                     StringComparison.OrdinalIgnoreCase))
@@ -2490,8 +2502,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     path,
                     out float sourceScaleX,
                     out float sourceScaleY);
-                foreach (Sprite sprite in
-                         AssetDatabase.LoadAllAssetsAtPath(path)
+                Sprite[] assetSprites = AssetDatabase.LoadAllAssetsAtPath(path)
                              .OfType<Sprite>()
                              .OrderBy(
                                  item => item.name,
@@ -2499,13 +2510,15 @@ namespace Lxy.UIEffectGenerator.Editor
                              .ThenBy(item => item.rect.x)
                              .ThenBy(item => item.rect.y)
                              .ThenBy(item => item.rect.width)
-                             .ThenBy(item => item.rect.height))
+                             .ThenBy(item => item.rect.height).ToArray();
+                foreach (Sprite sprite in assetSprites)
                 {
                     result.Add(new SpriteEntry(
                         path,
                         sprite,
                         sourceScaleX,
-                        sourceScaleY));
+                        sourceScaleY,
+                        assetSprites.Length > 1));
                 }
             }
 
@@ -2553,19 +2566,21 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private static Sprite LoadSpriteAtPath(string assetPath)
         {
-            Sprite direct =
-                AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
-            if (direct != null)
-            {
-                return direct;
-            }
-
+            if (string.IsNullOrWhiteSpace(assetPath)) return null;
+            assetPath = assetPath.Trim().Replace('\\', '/');
             string spriteName = string.Empty;
             int separator = assetPath.LastIndexOf('#');
             if (separator >= 0)
             {
                 spriteName = assetPath.Substring(separator + 1);
                 assetPath = assetPath.Substring(0, separator);
+            }
+
+            if (!IsAssetResourcePath(assetPath)) return null;
+            if (separator < 0)
+            {
+                Sprite direct = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+                if (direct != null) return direct;
             }
 
             return AssetDatabase.LoadAllAssetsAtPath(assetPath)
@@ -2908,7 +2923,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 nodes.RemoveAt(index + 1);
                 corrected++;
                 Debug.Log(
-                    $"[UI Effect Generator] 相邻背景 {first.name} 与 " +
+                    $"[UIPrefabGenerator] 相邻背景 {first.name} 与 " +
                     $"{second.name} 还原为单张父级宽图 " +
                     $"{GetSpriteResourcePath(best)}（{bestScore:F3}/" +
                     $"{bestScore - secondScore:F3}）。");
@@ -3120,7 +3135,7 @@ namespace Lxy.UIEffectGenerator.Editor
             background.children.AddRange(contentChildren);
 
             Debug.Log(
-                $"[UI Effect Generator] {owner.name} 扩展为整幅背景，" +
+                $"[UIPrefabGenerator] {owner.name} 扩展为整幅背景，" +
                 $"命中 {GetSpriteResourcePath(best)}（{bestScore:F3}/" +
                 $"{bestScore - secondScore:F3}）。");
             return true;
@@ -3234,7 +3249,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 bestScore - secondScore);
 
             Debug.Log(
-                $"[UI Effect Generator] {owner.name} 从局部可见矩形" +
+                $"[UIPrefabGenerator] {owner.name} 从局部可见矩形" +
                 $"恢复为父级完整背景，命中 " +
                 $"{GetSpriteResourcePath(best)}（{bestScore:F3}/" +
                 $"{bestScore - secondScore:F3}）。");
@@ -3806,7 +3821,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     nodes.Insert(index, surface);
                     created++;
                     Debug.Log(
-                        $"[UI Effect Generator] 为文字组 {surface.name} " +
+                        $"[UIPrefabGenerator] 为文字组 {surface.name} " +
                         $"补建 Sprite 承载节点 {surface.resource}" +
                         $"（{matchScore:F3}/{matchMargin:F3}）。");
                 }
@@ -4220,7 +4235,7 @@ namespace Lxy.UIEffectGenerator.Editor
                             bestScore,
                             bestScore - secondScore);
                         Debug.Log(
-                            $"[UI Effect Generator] 视觉资源 {node.name} -> " +
+                            $"[UIPrefabGenerator] 视觉资源 {node.name} -> " +
                             $"{node.resource}（分数 {bestScore:F3}，" +
                             $"领先 {bestScore - secondScore:F3}，背景 " +
                             (source.HasSpatialReferenceBackdrop
@@ -4780,7 +4795,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     if (hasConflict)
                     {
                         Debug.Log(
-                            $"[UI Effect Generator] 同构视觉组 " +
+                            $"[UIPrefabGenerator] 同构视觉组 " +
                             $"{string.Join(", ", group.Select(item => item.name))} " +
                             $"保留局部结果：去背景后最佳均值 " +
                             $"{selected.AverageScore:F3}，领先 " +
@@ -4835,7 +4850,7 @@ namespace Lxy.UIEffectGenerator.Editor
                         selected);
                     propagated++;
                     Debug.Log(
-                        $"[UI Effect Generator] 同构视觉 {target.name} " +
+                        $"[UIPrefabGenerator] 同构视觉 {target.name} " +
                         (hasConflict
                             ? "纠正为组内一致 Sprite "
                             : "复用同级已验证 Sprite ") +
@@ -5148,7 +5163,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     location.AbsoluteY);
                 propagated++;
                 Debug.Log(
-                    $"[UI Effect Generator] 运行时模板通用视觉 " +
+                    $"[UIPrefabGenerator] 运行时模板通用视觉 " +
                     $"{target.name} -> {selectedPath}（局部 " +
                     $"{localScore:F3}，组均值 " +
                     $"{selected.AverageScore:F3}/" +
@@ -5576,6 +5591,13 @@ namespace Lxy.UIEffectGenerator.Editor
             EditorUtility.ClearProgressBar();
             ScoreQuickCandidates(source, shortlist, textCovered);
 
+            // Exact copies are one visual choice. Otherwise duplicate files can fill
+            // the shortlist and give even a perfect match a zero confidence margin.
+            // Similar-looking variants must still compete independently.
+            shortlist = DistinctVisualCandidates(shortlist
+                .OrderByDescending(item => item.QuickScore)
+                .ThenBy(item => GetSpriteResourcePath(item.Entry), StringComparer.Ordinal));
+
             var scoredCandidates = new List<VisualCandidate>();
             var refinementCandidates = shortlist
                          .OrderByDescending(item => item.QuickScore)
@@ -5723,7 +5745,7 @@ namespace Lxy.UIEffectGenerator.Editor
                             $"色差{item.AuthoredColorDistance:F3}/" +
                             $"染色{item.UsesMaterialTint}"));
                 Debug.Log(
-                    $"[UI Effect Generator] 着色候选复核 " +
+                    $"[UIPrefabGenerator] 着色候选复核 " +
                     $"{semanticHint}：{alternatives}。");
             }
 
@@ -5863,7 +5885,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     visualParentContexts.Remove(node);
                     converted++;
                     Debug.Log(
-                        $"[UI Effect Generator] {node.name} 的底图已由父 " +
+                        $"[UIPrefabGenerator] {node.name} 的底图已由父 " +
                         $"Sprite 完整表达，保留层级并转为 Container" +
                         $"（父图 {parentScore:F3}，独立资源 " +
                         $"{ownScore:F3}）。");
@@ -6024,7 +6046,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     visualFailures.Remove(node);
                     collapsed++;
                     Debug.Log(
-                        $"[UI Effect Generator] 折叠父图已包含的视觉节点 " +
+                        $"[UIPrefabGenerator] 折叠父图已包含的视觉节点 " +
                         $"{node.name}（父图局部分数 {parentScore:F3}，" +
                         $"节点自身分数 {ownScore:F3}，" +
                         (inferredMerge
@@ -6121,7 +6143,7 @@ namespace Lxy.UIEffectGenerator.Editor
                             nodes.Insert(index, backdrop);
                             index++;
                             Debug.Log(
-                                $"[UI Effect Generator] {node.name} 识别为" +
+                                $"[UIPrefabGenerator] {node.name} 识别为" +
                                 $"双层艺术字：{GetSpriteResourcePath(back)} + " +
                                 $"{GetSpriteResourcePath(front)}" +
                                 $"（{layeredScore:F3}）。");
@@ -6129,7 +6151,7 @@ namespace Lxy.UIEffectGenerator.Editor
                         else
                         {
                             Debug.Log(
-                                $"[UI Effect Generator] {node.name} 由 Text " +
+                                $"[UIPrefabGenerator] {node.name} 由 Text " +
                                 $"校正为 Sprite：" +
                                 GetSpriteResourcePath(front) +
                                 $"（{foregroundScore:F3}/" +
@@ -6605,7 +6627,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     index--;
                     suppressed++;
                     Debug.Log(
-                        $"[UI Effect Generator] 删除父 Sprite 已烘焙的文字 " +
+                        $"[UIPrefabGenerator] 删除父 Sprite 已烘焙的文字 " +
                         $"{node.name}（局部分数 {parentScore:F3}）。");
                     continue;
                 }
@@ -6613,7 +6635,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 if (shouldCheckBakedText)
                 {
                     Debug.Log(
-                        $"[UI Effect Generator] 烘焙文字复核 {node.name}：" +
+                        $"[UIPrefabGenerator] 烘焙文字复核 {node.name}：" +
                         (evaluatedBakedText
                             ? $"父图局部 {parentScore:F3}，节点自身 " +
                               $"{ownScore:F3}，门槛 " +
@@ -7425,6 +7447,7 @@ namespace Lxy.UIEffectGenerator.Editor
             string cacheKey = entry.AssetPath + "#" +
                               entry.Sprite.name + "|" +
                               entry.DependencyHash +
+                              "|" + QualitySettings.activeColorSpace +
                               (entry.HasBorder
                                   ? $"|sliced:{Mathf.RoundToInt(source.Width)}x" +
                                     Mathf.RoundToInt(source.Height)
@@ -8872,8 +8895,33 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private static bool HasExplicitAssetResource(UIEffectNode node)
         {
-            return !string.IsNullOrWhiteSpace(node.resource) &&
-                   node.resource.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase);
+            return IsAssetResourcePath(node.resource);
+        }
+
+        private static bool IsAssetResourcePath(string path)
+        {
+            return !string.IsNullOrWhiteSpace(path) &&
+                   (path.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase) ||
+                    path.StartsWith("Packages/", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static List<VisualCandidate> DistinctVisualCandidates(IEnumerable<VisualCandidate> candidates)
+        {
+            var result = new List<VisualCandidate>();
+            var groups = new Dictionary<string, List<VisualCandidate>>(StringComparer.Ordinal);
+            foreach (VisualCandidate candidate in candidates)
+            {
+                string key = candidate.Entry.VisualContentKey;
+                if (!groups.TryGetValue(key, out List<VisualCandidate> group))
+                    groups[key] = group = new List<VisualCandidate>();
+                if (group.Any(other =>
+                        other.Descriptor.Pixels.SequenceEqual(candidate.Descriptor.Pixels) &&
+                        other.Descriptor.Mask.SequenceEqual(candidate.Descriptor.Mask)))
+                    continue;
+                group.Add(candidate);
+                result.Add(candidate);
+            }
+            return result;
         }
 
         /// <summary>
@@ -8882,7 +8930,7 @@ namespace Lxy.UIEffectGenerator.Editor
         private static string GetSpriteResourcePath(SpriteEntry entry)
         {
             string value = entry.AssetPath;
-            if (!string.Equals(
+            if (entry.IsSubSprite || !string.Equals(
                     entry.Sprite.name,
                     Path.GetFileNameWithoutExtension(entry.AssetPath),
                     StringComparison.OrdinalIgnoreCase))
@@ -9665,7 +9713,8 @@ namespace Lxy.UIEffectGenerator.Editor
                 string assetPath,
                 Sprite sprite,
                 float sourceScaleX,
-                float sourceScaleY)
+                float sourceScaleY,
+                bool isSubSprite = false)
             {
                 AssetPath = assetPath;
                 Sprite = sprite;
@@ -9689,6 +9738,21 @@ namespace Lxy.UIEffectGenerator.Editor
                     ? 0f
                     : AuthoredWidth / AuthoredHeight;
                 HasBorder = sprite.border.sqrMagnitude > 0f;
+                IsSubSprite = isSubSprite;
+                Texture2D texture = sprite.texture;
+                Hash128 contentHash = texture.imageContentsHash;
+                // A missing hash cannot establish equivalence between separate textures.
+                string textureIdentity = contentHash.isValid
+                    ? contentHash.ToString() : "instance:" + texture.GetInstanceID();
+                Texture2D alpha = sprite.associatedAlphaSplitTexture;
+                string alphaIdentity = alpha == null ? string.Empty :
+                    alpha.imageContentsHash.isValid ? alpha.imageContentsHash.ToString() :
+                    "instance:" + alpha.GetInstanceID();
+                VisualContentKey = FormattableString.Invariant(
+                    $"{textureIdentity}|{alphaIdentity}|{texture.width}|{texture.height}|{texture.format}|{texture.filterMode}|") +
+                    FormattableString.Invariant($"{sprite.rect.x:R}|{sprite.rect.y:R}|{sprite.rect.width:R}|{sprite.rect.height:R}|") +
+                    FormattableString.Invariant($"{AuthoredWidth:R}|{AuthoredHeight:R}|{sprite.pixelsPerUnit:R}|") +
+                    FormattableString.Invariant($"{sprite.border.x:R}|{sprite.border.y:R}|{sprite.border.z:R}|{sprite.border.w:R}");
                 DependencyHash =
                     AssetDatabase.GetAssetDependencyHash(assetPath)
                         .ToString();
@@ -9746,6 +9810,8 @@ namespace Lxy.UIEffectGenerator.Editor
             /// 指示是否具有Border。
             /// </summary>
             public bool HasBorder { get; }
+            public bool IsSubSprite { get; }
+            public string VisualContentKey { get; }
             /// <summary>
             /// 向调用方提供Dependency哈希。
             /// </summary>

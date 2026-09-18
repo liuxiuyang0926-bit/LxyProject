@@ -114,7 +114,7 @@ namespace Lxy.UIEffectGenerator.Editor
             nodeEvidence[node] = evidence;
         }
 
-        private static void PrepareCandidatePolicies(IEnumerable<UIEffectNode> nodes)
+        private void PrepareCandidatePolicies(IEnumerable<UIEffectNode> nodes)
         {
             foreach (UIEffectNode node in nodes)
             {
@@ -132,6 +132,20 @@ namespace Lxy.UIEffectGenerator.Editor
                     node.resource = string.Empty;
                     node.resourceCandidates.Clear();
                     node.intentionalColor = true;
+                }
+                else if (HasExplicitAssetResource(node))
+                {
+                    if (LoadSpriteAtPath(node.resource) == null)
+                    {
+                        // A path retained from another project or a moved asset is not
+                        // a verified Sprite. Release the lock and search this project.
+                        WarnResource($"{node.name} 的 Sprite 路径已失效：" +
+                            node.resource + "；将重新执行本地视觉匹配。");
+                        node.resource = string.Empty;
+                        node.resourcePolicy = "Auto";
+                    }
+                    // An explicit Sprite must not be hidden by an old color fallback flag.
+                    node.intentionalColor = false;
                 }
                 PrepareCandidatePolicies(node.children);
             }

@@ -1,5 +1,9 @@
 # 安装与项目适配
 
+工具名称为 `LxyGame.UIPrefabGenerator`。为兼容已有项目，UPM 包 ID 继续使用
+`com.lxy.ui-effect-generator`，程序集与命名空间继续使用 `Lxy.UIEffectGenerator.Editor`。
+使用下面的新 URL 更新同一个包即可，无需同时安装两个版本。
+
 ## 从 Git URL 安装
 
 包内仅包含通用 Editor 代码，不需要复制 LxyDemo 的 `Assets`、业务包或项目适配器。
@@ -10,17 +14,17 @@
 3. 输入存放本包的 Git URL，然后点击 `Add`。
 
 独立仓库的根目录必须直接包含 `package.json` 和 `Editor/`。地址形式如下，
-将 `<owner>/<repository>` 替换为实际已推送的仓库；只有已创建并推送对应 Tag 后才能使用 `#v1.1.1`：
+将 `<owner>/<repository>` 替换为实际已推送的仓库；只有已创建并推送对应 Tag 后才能使用 `#v1.1.3`：
 
 ```text
 https://github.com/<owner>/<repository>.git
-https://github.com/<owner>/<repository>.git#v1.1.1
+https://github.com/<owner>/<repository>.git#v1.1.3
 ```
 
 如果继续在 LxyProject 仓库中维护，推送改动后可使用子目录地址：
 
 ```text
-https://github.com/liuxiuyang0926-bit/LxyProject.git?path=/Packages/LxyGame/LxyGame.UIEffectGenerator
+https://github.com/liuxiuyang0926-bit/LxyProject.git?path=/Packages/LxyGame/LxyGame.UIPrefabGenerator#main
 ```
 
 指定版本时，把 `#<tag-or-commit>` 放在 `?path=...` 后面。子目录安装仍需从整个
@@ -53,18 +57,23 @@ Package Manager 的 Samples 中提供 `Basic UGUI Schema`，导入后可选中
 原有有效字体保持不变；缺失字体和不兼容材质按当前项目资源回退并记录提示。
 缺少中文字体仍需提供项目字体，工具不会复制其他工程的字体或伪装成同款字体。
 
-新代码推送后，请在目标工程更新 Git 包并确认版本为 `1.1.1`。Git 依赖会记录解析到的提交，
+新代码推送后，请在目标工程更新 Git 包并确认版本为 `1.1.3`。Git 依赖会记录解析到的提交，
 仅推送远程不会自动替换已有的 PackageCache；可在 Package Manager 中重新添加相同 Git URL
 请求更新，或将 URL 的 `#main` 替换为刚推送的确切提交号。不要直接修改 `Library/PackageCache`。
 已分析成功、仅在 Prefab 构建时失败的 Schema 可以直接重建，无需再次调用 AI。
 
 ## 从本地安装
 
+公司网络无法访问 Git 时，可分发本包的 `.tgz` 文件，在 Package Manager 中选择
+`Add package from tarball` 安装，无需解压。每次更新分发新的版本包。
+1.1.2 包含跨工程 Sprite 匹配修复；升级后可先使用已有 UISchema 重建 Prefab，
+无需重新调用 AI。若原 Schema 将纹理节点误标成 ColorFallback，需复核该节点或重新分析。
+
 在 Unity Package Manager 中选择 `Add package from disk`，指向本包的 `package.json`。
 也可将整个目录复制到目标项目的 `Packages/LxyGame`，并在项目的 `Packages/manifest.json` 中加入：
 
 ```json
-"com.lxy.ui-effect-generator": "file:LxyGame/LxyGame.UIEffectGenerator"
+"com.lxy.ui-effect-generator": "file:LxyGame/LxyGame.UIPrefabGenerator"
 ```
 
 ## 通用项目默认行为
@@ -154,10 +163,10 @@ UIEffectPrefabGenerationResult result =
 在 LxyDemo 根目录执行：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Export-UIEffectGenerator.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Export-UIPrefabGenerator.ps1
 ```
 
-输出到 `Build/UPMPackages/com.lxy.ui-effect-generator-1.1.1/`。也可传入
+输出到 `Build/UPMPackages/UIPrefabGenerator-1.1.3/`。也可传入
 `-Destination <空目录>`。脚本保留 `.meta`，只复制包文件，并校验依赖和 Editor 程序集边界；
 不会覆盖已有非空目录，也不会包含 Lxy 项目适配器、业务代码、游戏资源或账号配置。
 命令中的执行策略仅作用于本次 PowerShell 进程，不修改系统设置。

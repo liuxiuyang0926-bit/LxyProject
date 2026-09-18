@@ -21,7 +21,7 @@
           "y": 32,
           "width": 416,
           "height": 48,
-          "text": "UI Effect Generator",
+          "text": "UIPrefabGenerator",
           "fontSize": 30,
           "alignment": "Center"
         },

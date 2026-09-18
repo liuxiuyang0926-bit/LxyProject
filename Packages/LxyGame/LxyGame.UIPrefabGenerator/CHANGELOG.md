@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.3
+
+- 工具更名为 UIPrefabGenerator：包目录为 `LxyGame.UIPrefabGenerator`，Package Manager 显示 `LxyGame.UIPrefabGenerator`，窗口标题为“UI预制体生成器”。
+- 更新 Git 子目录安装 URL、导出入口及日志名称。
+- 保留包 ID `com.lxy.ui-effect-generator`、程序集/API 标识、设置键与资源 GUID，已有工程直接更新同一个包即可。
+- 包含 1.1.2 的资源匹配修复。
+
+## 1.1.2
+
+- 修复多个完全相同的 Sprite 相互压低匹配领先幅度，导致高分候选仍退回色块的问题。精排前合并纹理内容、几何、Border、PPU 与描述像素全部一致的候选；真实变体继续独立竞争。
+- 旧 Schema 中失效的显式 Sprite 路径会解除锁定并重新进行本地视觉检索；有效显式资源会清除冲突的旧纯色标记。
+- 修复子 Sprite 与图集文件同名时丢失子资源选择器的问题，支持 Packages 下的显式资源路径，并避免日志重复追加子 Sprite 名。
+- 空资源索引会提示所选目录与 Sprite 导入要求；失效路径和未匹配节点的候选分数、领先幅度进入还原检查报告。
+- 描述图缓存区分项目颜色空间；新增重复资源、细微变体、失效路径、图集和真实 Prefab 保存回归验证。
+
 ## 1.1.1
 
 - 修复 Schema 中字体路径缺失或拼错导致整个 Prefab 生成失败的问题。

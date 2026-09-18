@@ -372,7 +372,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 // Frame's landscape coordinate space, so normalize the root
                 // schema dimensions before calculating crop scales.
                 Debug.LogWarning(
-                    "[UI Effect Generator/Figma] UISchema 宽高轴与截图互换，" +
+                    "[UIPrefabGenerator/Figma] UISchema 宽高轴与截图互换，" +
                     $"已自动纠正为 {screenshot.width}x{screenshot.height}。");
                 schema.designWidth = screenshot.width;
                 schema.designHeight = screenshot.height;

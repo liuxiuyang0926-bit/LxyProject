@@ -117,6 +117,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 Require(identical.samples > 100 && identical.colorError < .015f,
                     "audit aligns source pixel centers", checks);
                 ValidateSlicedSampling(checks);
+                ValidateResourceMatching(checks);
                 ValidateRankedTemplates(checks);
                 ValidateIndependentSurface(schema, folder, checks);
 

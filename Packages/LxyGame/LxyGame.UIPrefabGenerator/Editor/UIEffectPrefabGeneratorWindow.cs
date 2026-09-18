@@ -187,7 +187,7 @@ namespace Lxy.UIEffectGenerator.Editor
         private static void Open()
         {
             var window = GetWindow<UIEffectPrefabGeneratorWindow>();
-            window.titleContent = new GUIContent("效果图生成 UI");
+            window.titleContent = new GUIContent("UI预制体生成器");
             window.minSize = new Vector2(510f, 650f);
             window.Show();
         }
@@ -263,6 +263,7 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private void OnEnable()
         {
+            titleContent = new GUIContent("UI预制体生成器");
             ApplyProjectDefaults();
             LoadPrefabFolderPreference();
             LoadDefaultFontPreference();
@@ -314,7 +315,7 @@ namespace Lxy.UIEffectGenerator.Editor
             }
             codexRunner = new UIEffectCodexRunner();
             EditorApplication.update += PollCodexRunner;
-            ScheduleResourceRescan("打开效果图生成 UI 编辑器");
+            ScheduleResourceRescan("打开 UI预制体生成器");
         }
 
         /// <summary>
@@ -1356,7 +1357,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     : "效果图未变化，已稳定复用 UISchema：" +
                       schemaAssetPath;
                 Debug.Log(
-                    "[UI Effect Generator] " + requestStatus +
+                    "[UIPrefabGenerator] " + requestStatus +
                     "\n未重新调用 AI。",
                     schemaAsset);
 
@@ -1370,7 +1371,7 @@ namespace Lxy.UIEffectGenerator.Editor
             catch (Exception exception)
             {
                 Debug.LogWarning(
-                    "[UI Effect Generator] 现有 UISchema 无法稳定复用，" +
+                    "[UIPrefabGenerator] 现有 UISchema 无法稳定复用，" +
                     "将进入重新分析流程：" + exception.Message);
                 return false;
             }
@@ -1561,7 +1562,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     "AI 已生成 UISchema：" +
                     pendingSchemaAssetPath;
                 Debug.Log(
-                    "[UI Effect Generator/Codex] UISchema：" +
+                    "[UIPrefabGenerator/Codex] UISchema：" +
                     pendingSchemaAssetPath +
                     $"\n自动归入视觉父节点：{inferredHierarchyNodes}" +
                     $"\n自动标记运行时模板候选：{inferredRuntimeTemplateNodes}" +
@@ -1708,7 +1709,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 requestStatus =
                     "高精度 UISchema 已生成，正在由 Unity Builder 创建 Prefab…";
                 Debug.Log(
-                    "[UI Effect Generator/Node Correction] UISchema：" +
+                    "[UIPrefabGenerator/Node Correction] UISchema：" +
                     pendingSchemaAssetPath +
                     $"\n自动归入视觉父节点：{inferredHierarchyNodes}" +
                     $"\n自动标记运行时模板候选：{inferredRuntimeTemplateNodes}" +
@@ -2121,7 +2122,7 @@ namespace Lxy.UIEffectGenerator.Editor
             if (repairs.Count > 0)
             {
                 Debug.LogWarning(
-                    "[UI Effect Generator/AI Schema Repair] " + source +
+                    "[UIPrefabGenerator/AI Schema Repair] " + source +
                     " 返回了可安全归一化的字段值，已继续生成：\n" +
                     string.Join("\n", repairs.Take(20)) +
                     (repairs.Count > 20
@@ -2132,7 +2133,7 @@ namespace Lxy.UIEffectGenerator.Editor
             if (excludedUnderlyingNodes > 0)
             {
                 Debug.Log(
-                    "[UI Effect Generator/Modal Foreground] " + source +
+                    "[UIPrefabGenerator/Modal Foreground] " + source +
                     " 被识别为模态弹窗；已从 Schema 排除底层界面节点 " +
                     excludedUnderlyingNodes + " 个。只保留遮罩与弹窗内容：\n" +
                     string.Join("\n", modalExtractionNotes));
@@ -2877,7 +2878,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     ? "无"
                     : summary.Trim();
                 Debug.Log(
-                    "[UI Effect Generator/Figma MCP]" +
+                    "[UIPrefabGenerator/Figma MCP]" +
                     $"\nUISchema：{schemaPath}" +
                     $"\n裁切资源：{cropAssets.Count}" +
                     $"\n自动推断裁切节点：{inferredCropNodeCount}" +
@@ -3060,7 +3061,7 @@ namespace Lxy.UIEffectGenerator.Editor
             {
                 requestInProgress = false;
                 requestStatus = "Node 下载 Figma 截图失败：" + exception.Message;
-                Debug.LogError("[UI Effect Generator/Figma] " + requestStatus);
+                Debug.LogError("[UIPrefabGenerator/Figma] " + requestStatus);
                 CancelNodeDownload();
             }
         }
@@ -3088,7 +3089,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 {
                     requestStatus = "Node 下载 Figma 截图失败（退出码 " +
                                     exitCode + "）：" + GetShortError(error);
-                    Debug.LogError("[UI Effect Generator/Figma] " + requestStatus);
+                    Debug.LogError("[UIPrefabGenerator/Figma] " + requestStatus);
                     return;
                 }
 
@@ -3096,7 +3097,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 if (bytes.Length == 0)
                 {
                     requestStatus = "Node 下载的 Figma 截图为空。";
-                    Debug.LogError("[UI Effect Generator/Figma] " + requestStatus);
+                    Debug.LogError("[UIPrefabGenerator/Figma] " + requestStatus);
                     return;
                 }
 
@@ -3273,7 +3274,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 y = sourceHeight * 0.06f,
                 width = sourceWidth * 0.5f,
                 height = sourceHeight * 0.08f,
-                text = "请在效果图生成 UI 窗口中分析效果图，或编辑此 UISchema",
+                text = "请在 UI预制体生成器窗口中分析效果图，或编辑此 UISchema",
                 fontSize = Mathf.Max(24f, sourceWidth * 0.03f),
                 alignment = "Center",
                 color = "#FFFFFFFF",
@@ -3426,7 +3427,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     ? "无"
                     : string.Join("\n", result.MissingResources);
                 Debug.Log(
-                    $"[UI Effect Generator] Prefab：{result.PrefabPath}\n" +
+                    $"[UIPrefabGenerator] Prefab：{result.PrefabPath}\n" +
                     $"Generated：{result.GeneratedObjectCount} 个对象，" +
                     $"{result.GeneratedComponentCount} 个组件\n" +
                     $"已匹配资源：\n{used}\n" +
@@ -3439,12 +3440,12 @@ namespace Lxy.UIEffectGenerator.Editor
                     $"已匹配 {result.UsedResources.Count} 个资源，" +
                     $"缺失 {result.MissingResources.Count} 个资源。";
                 if (result.Warnings.Count > 0)
-                    requestStatus += $"已处理 {result.Warnings.Count} 项字体兼容性问题，请查看 Console 或还原检查报告。";
+                    requestStatus += $"有 {result.Warnings.Count} 项资源或字体提示，请查看 Console 或还原检查报告。";
                 if (!string.IsNullOrEmpty(result.FidelityReportPath))
                 {
                     lastFidelityReportPath = result.FidelityReportPath;
                     requestStatus += $"视觉检查：{result.FidelityReviewCount} 个节点待复核。";
-                    Debug.Log("[UI Effect Generator/Visual Audit] " + result.FidelityReportPath +
+                    Debug.Log("[UIPrefabGenerator/Visual Audit] " + result.FidelityReportPath +
                         "\n报告与实际预览已保存；像素差异分数只覆盖可比较区域，不代表整图还原率。", prefab);
                 }
             }
@@ -3528,7 +3529,7 @@ namespace Lxy.UIEffectGenerator.Editor
                 AssetDatabase.GetAssetPath(Selection.activeObject);
             OptimizeSchemaAsset(assetPath, out int collapsedNodes);
             Debug.Log(
-                $"[UI Effect Generator] 已压缩 {assetPath}，" +
+                $"[UIPrefabGenerator] 已压缩 {assetPath}，" +
                 $"合并重复节点 {collapsedNodes} 个。",
                 Selection.activeObject);
         }
