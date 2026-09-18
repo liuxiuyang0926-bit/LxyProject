@@ -63,6 +63,9 @@ namespace Lxy.UIEffectGenerator.Editor
         private TextAsset schemaAsset;
         private string panelId = "UIExample";
         private string prefabFolder = string.Empty;
+        private DefaultAsset prefabOutputFolder;
+        private static string PrefabFolderPreferenceKey =>
+            "Lxy.UIEffectGenerator.PrefabFolderGuid." + Hash128.Compute(Application.dataPath);
         private UIEffectScriptType scriptType =
             UIEffectScriptType.ProjectDefault;
         private string codeNamespace = string.Empty;
@@ -261,6 +264,7 @@ namespace Lxy.UIEffectGenerator.Editor
         private void OnEnable()
         {
             ApplyProjectDefaults();
+            LoadPrefabFolderPreference();
             LoadDefaultFontPreference();
             codexCommand = GetStringPreference(
                 CodexCommandEditorPrefsKey,
@@ -657,9 +661,7 @@ namespace Lxy.UIEffectGenerator.Editor
             EditorGUILayout.LabelField(
                 "3. 生成 Prefab",
                 EditorStyles.boldLabel);
-            prefabFolder = EditorGUILayout.TextField(
-                "Prefab 目录",
-                prefabFolder);
+            DrawPrefabFolder();
             DrawDefaultFont();
             int resourceModeIndex = resourceMatchMode ==
                                     UIEffectResourceMatchMode.ColorBlocks
@@ -793,11 +795,11 @@ namespace Lxy.UIEffectGenerator.Editor
                 UIEffectEditorUtility.ToAbsolutePath(referenceAssetPath);
             string schemaAssetPath =
                 $"{SchemaFolder}/{safePanelId}.json";
-            string normalizedPrefabFolder = (prefabFolder ?? string.Empty)
+            string normalizedPrefabFolder = (GetPrefabOutputFolder() ?? string.Empty)
                 .Trim()
                 .TrimEnd('/', '\\')
                 .Replace('\\', '/');
-            if (!normalizedPrefabFolder.StartsWith(
+            if (normalizedPrefabFolder != "Assets" && !normalizedPrefabFolder.StartsWith(
                     "Assets/",
                     StringComparison.OrdinalIgnoreCase))
             {
@@ -1379,11 +1381,6 @@ namespace Lxy.UIEffectGenerator.Editor
         /// </summary>
         private void PollCodexRunner()
         {
-            if (UIEffectGenerationTiming.IsRunning && EditorApplication.timeSinceStartup >= nextTimingRepaint)
-            {
-                nextTimingRepaint = EditorApplication.timeSinceStartup + 0.25;
-                Repaint();
-            }
             if (codexRunner == null)
             {
                 return;
@@ -1419,7 +1416,10 @@ namespace Lxy.UIEffectGenerator.Editor
             }
 
             if (UIEffectGenerationTiming.IsRunning && !IsBusy && pendingCodexTask == CodexTaskKind.None)
+            {
                 UIEffectGenerationTiming.Finish(requestStatus.Contains("取消") ? "已取消" : "失败");
+                changed = true;
+            }
 
             if (awaitingStructure && pendingCodexTask == CodexTaskKind.FullFidelity && codexRunner.IsRunning)
                 TickNativePixelWarmup();
@@ -3315,7 +3315,7 @@ namespace Lxy.UIEffectGenerator.Editor
             return new UIEffectPrefabGenerationOptions
             {
                 panelId = resolvedPanelId,
-                prefabFolder = prefabFolder,
+                prefabFolder = GetPrefabOutputFolder(),
                 scriptType = scriptType,
                 codeNamespace = codeNamespace,
                 logicClassName = string.IsNullOrWhiteSpace(
@@ -3560,6 +3560,67 @@ namespace Lxy.UIEffectGenerator.Editor
                 assetPath,
                 ImportAssetOptions.ForceSynchronousImport |
                 ImportAssetOptions.ForceUpdate);
+        }
+
+        private void LoadPrefabFolderPreference()
+        {
+            string savedPath = AssetDatabase.GUIDToAssetPath(
+                EditorPrefs.GetString(PrefabFolderPreferenceKey, string.Empty));
+            if (IsPrefabOutputFolder(savedPath)) prefabFolder = savedPath;
+            prefabOutputFolder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(prefabFolder);
+        }
+
+        private static bool IsPrefabOutputFolder(string path)
+        {
+            return !string.IsNullOrEmpty(path) &&
+                   (path == "Assets" || path.StartsWith("Assets/", StringComparison.Ordinal)) &&
+                   AssetDatabase.IsValidFolder(path);
+        }
+
+        private string GetPrefabOutputFolder()
+        {
+            if (prefabOutputFolder != null)
+                prefabFolder = AssetDatabase.GetAssetPath(prefabOutputFolder);
+            return prefabFolder;
+        }
+
+        private void DrawPrefabFolder()
+        {
+            if (prefabOutputFolder == null && IsPrefabOutputFolder(prefabFolder))
+                prefabOutputFolder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(prefabFolder);
+            using (new EditorGUI.DisabledScope(IsBusy))
+            {
+                EditorGUI.BeginChangeCheck();
+                var selectedFolder = (DefaultAsset)EditorGUILayout.ObjectField(
+                    new GUIContent("Prefab 目录", "拖入或选择 Assets 下的输出文件夹；清空后恢复项目默认目录。"),
+                    prefabOutputFolder, typeof(DefaultAsset), false);
+                if (EditorGUI.EndChangeCheck()) SetPrefabOutputFolder(selectedFolder);
+            }
+            EditorGUILayout.LabelField("输出路径", GetPrefabOutputFolder(), EditorStyles.miniLabel);
+            if (prefabOutputFolder == null)
+                EditorGUILayout.LabelField("目录尚不存在，将在生成时自动创建。", EditorStyles.miniLabel);
+        }
+
+        private void SetPrefabOutputFolder(DefaultAsset folder)
+        {
+            if (folder == null)
+            {
+                prefabFolder = GetProjectDefaults().prefabFolder;
+                prefabOutputFolder = AssetDatabase.LoadAssetAtPath<DefaultAsset>(prefabFolder);
+                EditorPrefs.DeleteKey(PrefabFolderPreferenceKey);
+                return;
+            }
+
+            string path = AssetDatabase.GetAssetPath(folder);
+            if (!IsPrefabOutputFolder(path))
+            {
+                requestStatus = "Prefab 目录必须是当前项目 Assets 下的文件夹。";
+                return;
+            }
+
+            prefabOutputFolder = folder;
+            prefabFolder = path;
+            EditorPrefs.SetString(PrefabFolderPreferenceKey, AssetDatabase.AssetPathToGUID(path));
         }
 
         /// <summary>

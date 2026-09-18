@@ -103,7 +103,6 @@ namespace Lxy.UIEffectGenerator.Editor
     public sealed partial class UIEffectPrefabGeneratorWindow
     {
         [SerializeField] private bool showGenerationHistory;
-        private double nextTimingRepaint;
         private GUIStyle elapsedTimeStyle;
         private Vector2 generationHistoryScroll;
 
@@ -123,30 +122,18 @@ namespace Lxy.UIEffectGenerator.Editor
             {
                 if (UIEffectGenerationTiming.IsRunning)
                 {
-                    DrawElapsedTime("本次生成已用时", UIEffectGenerationTiming.ElapsedSeconds);
-                    foreach (var stage in UIEffectGenerationTiming.Stages)
-                        EditorGUILayout.LabelField(stage.name, UIEffectGenerationTiming.Format(stage.seconds));
-                    if (!string.IsNullOrEmpty(UIEffectGenerationTiming.CurrentStage))
-                        EditorGUILayout.LabelField(UIEffectGenerationTiming.CurrentStage + "（进行中）",
-                            UIEffectGenerationTiming.Format(UIEffectGenerationTiming.CurrentStageSeconds));
-                    if (nativePixelWarmup != null)
-                        EditorGUILayout.LabelField("资源预计算（与 AI 同时进行）",
-                            $"{nativePixelWarmup.Prepared}/{nativePixelWarmup.Total}");
+                    EditorGUILayout.LabelField("生成耗时", "生成中，完成后显示总耗时");
+                    return;
                 }
                 var records = UIEffectGenerationTiming.instance.History;
                 if (records.Count == 0)
                 {
-                    EditorGUILayout.LabelField("生成耗时", "生成后在此显示总耗时和构建耗时");
+                    EditorGUILayout.LabelField("生成耗时", "生成完成后显示总耗时");
                     return;
                 }
                 var latest = records[0];
-                DrawElapsedTime("最近一次生成 · " + latest.status, latest.totalSeconds);
+                DrawElapsedTime("生成总耗时 · " + latest.status, latest.totalSeconds);
                 EditorGUILayout.LabelField(latest.panel + "  ·  " + latest.completedAt, EditorStyles.miniLabel);
-                if (latest.stages != null && latest.stages.Count > 0)
-                    foreach (var stage in latest.stages)
-                        EditorGUILayout.LabelField(stage.name, UIEffectGenerationTiming.Format(stage.seconds));
-                else
-                    EditorGUILayout.LabelField("Unity 构建（含资源匹配与检查）：" + UIEffectGenerationTiming.Format(latest.buildSeconds));
                 showGenerationHistory = EditorGUILayout.Foldout(showGenerationHistory,
                     $"最近 {records.Count} 次记录（总耗时包含 AI 分析）", true);
                 if (showGenerationHistory)
@@ -156,8 +143,8 @@ namespace Lxy.UIEffectGenerator.Editor
                     foreach (var record in records)
                     {
                         EditorGUILayout.LabelField(record.completedAt + "  " + record.panel, EditorStyles.miniLabel);
-                        EditorGUILayout.LabelField(record.status + "  ·  总计 " + UIEffectGenerationTiming.Format(record.totalSeconds) +
-                            "  ·  构建 " + UIEffectGenerationTiming.Format(record.buildSeconds), EditorStyles.wordWrappedMiniLabel);
+                        EditorGUILayout.LabelField(record.status + "  ·  总耗时 " + UIEffectGenerationTiming.Format(record.totalSeconds),
+                            EditorStyles.wordWrappedMiniLabel);
                     }
                     EditorGUILayout.EndScrollView();
                 }
