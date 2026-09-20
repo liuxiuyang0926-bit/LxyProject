@@ -118,6 +118,7 @@ namespace Lxy.UIEffectGenerator.Editor
                     "audit aligns source pixel centers", checks);
                 ValidateSlicedSampling(checks);
                 ValidateResourceMatching(checks);
+                ValidateGeometryRecovery(checks);
                 ValidateRankedTemplates(checks);
                 ValidateIndependentSurface(schema, folder, checks);
 

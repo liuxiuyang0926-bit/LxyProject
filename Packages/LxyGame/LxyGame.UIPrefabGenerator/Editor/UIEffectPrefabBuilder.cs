@@ -3955,6 +3955,8 @@ namespace Lxy.UIEffectGenerator.Editor
             Color selectedColor = Color.white;
             Rect selectedRect = default;
             string groupKey = GetTextSurfaceGroupKey(textNodes[0]);
+            Rect[] textRects = textNodes.Select(text => new Rect(parentX + text.x, parentY + text.y,
+                text.width, text.height)).ToArray();
 
             foreach (float widthScale in widthScales)
             {
@@ -3974,6 +3976,11 @@ namespace Lxy.UIEffectGenerator.Editor
                     centerY - targetHeight * 0.5f,
                     0f,
                     Mathf.Max(0f, parentHeight - targetHeight));
+                // A high Sprite score alone is not evidence that a separate plate
+                // exists. Smooth parent backgrounds often resemble a stretched bar.
+                var targetRect = new Rect(parentX + targetX, parentY + targetY, targetWidth, targetHeight);
+                if (!HasIndependentTextSurfaceBoundary(reference, schema, targetRect, textRects))
+                    continue;
                 VisualDescriptor source = CreateReferenceDescriptor(
                     reference,
                     schema.designWidth,
@@ -4055,6 +4062,88 @@ namespace Lxy.UIEffectGenerator.Editor
 
             visualFailures.Remove(surface);
             return true;
+        }
+
+        private static bool HasIndependentTextSurfaceBoundary(Texture2D reference, UIEffectSchema schema,
+            Rect rect, IReadOnlyList<Rect> textRects)
+        {
+            // Require a coherent pair of opposite edges. Compare the cross-edge
+            // jump with nearby continuation so gradients and texture are not plates.
+            var edges = new bool[4];
+            var canvas = new Rect(0f, 0f, schema.designWidth, schema.designHeight);
+            const float distance = 1.5f;
+            for (int side = 0; side < 4; side++)
+            {
+                int visible = 0, supported = 0;
+                float totalJump = 0f;
+                for (int sample = 0; sample < 16; sample++)
+                {
+                    float t = (sample + .5f) / 16f;
+                    Vector2 point = side < 2
+                        ? new Vector2(side == 0 ? rect.xMin : rect.xMax, Mathf.Lerp(rect.yMin, rect.yMax, t))
+                        : new Vector2(Mathf.Lerp(rect.xMin, rect.xMax, t), side == 2 ? rect.yMin : rect.yMax);
+                    Vector2 inward = side == 0 ? Vector2.right : side == 1 ? Vector2.left :
+                        side == 2 ? Vector2.up : Vector2.down;
+                    if (!TrySampleTextSurfaceEdge(reference, schema, canvas, textRects, point, inward,
+                            distance, out float jump, out bool supportsEdge))
+                        continue;
+                    visible++;
+                    if (supportsEdge)
+                    {
+                        supported++;
+                        totalJump += jump;
+                    }
+                }
+                edges[side] = visible >= 6 && supported >= Mathf.CeilToInt(visible * .6f) &&
+                    totalJump / Mathf.Max(1, supported) >= .025f;
+                if (!edges[side]) continue;
+
+                // An ancestor's long edges also cross this rectangle. A newly
+                // inferred plate needs edges which end near its own corners.
+                int extended = 0;
+                foreach (float t in new[] { -.4f, -.2f, 1.2f, 1.4f })
+                {
+                    Vector2 point = side < 2
+                        ? new Vector2(side == 0 ? rect.xMin : rect.xMax, Mathf.LerpUnclamped(rect.yMin, rect.yMax, t))
+                        : new Vector2(Mathf.LerpUnclamped(rect.xMin, rect.xMax, t), side == 2 ? rect.yMin : rect.yMax);
+                    Vector2 inward = side == 0 ? Vector2.right : side == 1 ? Vector2.left :
+                        side == 2 ? Vector2.up : Vector2.down;
+                    if (TrySampleTextSurfaceEdge(reference, schema, canvas, textRects, point, inward,
+                            distance, out _, out bool supportsEdge) && supportsEdge)
+                        extended++;
+                }
+                if (extended >= 2) edges[side] = false;
+            }
+            return edges[0] && edges[1] || edges[2] && edges[3];
+        }
+
+        private static bool TrySampleTextSurfaceEdge(Texture2D reference, UIEffectSchema schema,
+            Rect canvas, IReadOnlyList<Rect> textRects, Vector2 point, Vector2 inward, float distance,
+            out float jump, out bool supportsEdge)
+        {
+            jump = 0f;
+            supportsEdge = false;
+            Vector2 inner = point + inward * distance;
+            Vector2 outer = point - inward * distance;
+            Vector2 innerFar = point + inward * (distance * 3f);
+            Vector2 outerFar = point - inward * (distance * 3f);
+            if (!canvas.Contains(innerFar) || !canvas.Contains(outerFar) ||
+                textRects.Any(text => text.Contains(inner) || text.Contains(outer) || text.Contains(outerFar)))
+                return false;
+            Color a = SampleReferencePoint(reference, schema, inner);
+            Color b = SampleReferencePoint(reference, schema, outer);
+            jump = GetColorError(a, b);
+            float continuation = GetColorError(b, SampleReferencePoint(reference, schema, outerFar));
+            if (!textRects.Any(text => text.Contains(innerFar)))
+                continuation = Mathf.Max(continuation,
+                    GetColorError(a, SampleReferencePoint(reference, schema, innerFar)));
+            supportsEdge = jump >= .02f && jump > continuation * 1.8f + .01f;
+            return true;
+        }
+
+        private static Color SampleReferencePoint(Texture2D reference, UIEffectSchema schema, Vector2 point)
+        {
+            return reference.GetPixelBilinear(point.x / schema.designWidth, 1f - point.y / schema.designHeight);
         }
 
         /// <summary>
@@ -4208,11 +4297,35 @@ namespace Lxy.UIEffectGenerator.Editor
                             reference,
                             renderer,
                             sourceOcclusions,
+                            backdropOcclusions,
+                            visualParent,
                             contextualSemanticHint,
                             ref best,
                             ref bestScore,
                             ref secondScore,
-                            ref matchedColor);
+                            ref matchedColor,
+                            out Rect expandedRect,
+                            out VisualDescriptor expandedSource);
+                        if (matched)
+                        {
+                            Debug.Log($"[UIPrefabGenerator] 图形范围恢复 {node.name}：" +
+                                $"{node.width:F1}x{node.height:F1} -> {expandedRect.width:F1}x{expandedRect.height:F1}，" +
+                                "已保持后代绝对位置。");
+                            float deltaX = node.x - expandedRect.x;
+                            float deltaY = node.y - expandedRect.y;
+                            foreach (UIEffectNode child in node.children)
+                            {
+                                child.x += deltaX;
+                                child.y += deltaY;
+                            }
+                            node.x = expandedRect.x;
+                            node.y = expandedRect.y;
+                            node.width = expandedRect.width;
+                            node.height = expandedRect.height;
+                            absoluteX = parentX + node.x;
+                            absoluteY = parentY + node.y;
+                            source = nodeSource = expandedSource;
+                        }
                     }
                     if (matched && !containerProbe && !artworkProbe)
                     {
@@ -4614,12 +4727,18 @@ namespace Lxy.UIEffectGenerator.Editor
             Texture2D reference,
             SpritePreviewRenderer renderer,
             IReadOnlyCollection<Rect> occlusions,
+            IReadOnlyCollection<Rect> backdropOcclusions,
+            VisualParentContext visualParent,
             string semanticHint,
             ref SpriteEntry selected,
             ref float selectedScore,
             ref float selectedSecondScore,
-            ref Color selectedColor)
+            ref Color selectedColor,
+            out Rect selectedRect,
+            out VisualDescriptor selectedSource)
         {
+            selectedRect = default;
+            selectedSource = null;
             if (node == null || parentWidth <= 1f || parentHeight <= 1f)
             {
                 return false;
@@ -4634,7 +4753,10 @@ namespace Lxy.UIEffectGenerator.Editor
                 new Vector2(node.width * 1.45f, node.height * 1.45f),
             };
             float squareEdge = Mathf.Max(node.width, node.height);
-            proposals.Add(new Vector2(squareEdge * 1.1f, squareEdge * 1.1f));
+            // AI commonly measures the opaque silhouette, while the Sprite is a
+            // square with transparent padding. Restore both axes, not the cropped aspect.
+            foreach (float scale in new[] { 1.1f, 1.3f, 1.4f, 1.5f })
+                proposals.Add(new Vector2(squareEdge * scale, squareEdge * scale));
             bool accepted = false;
             foreach (Vector2 proposal in proposals)
             {
@@ -4656,7 +4778,10 @@ namespace Lxy.UIEffectGenerator.Editor
                     parentY + localY,
                     sampleWidth,
                     sampleHeight,
-                    occlusions);
+                    occlusions,
+                    backdropOcclusions);
+                ApplyVisualParentBackdrop(expandedSource, parentX + localX, parentY + localY,
+                    sampleWidth, sampleHeight, visualParent);
                 if (expandedSource == null ||
                     !TryFindBestVisualMatch(
                         expandedSource,
@@ -4684,6 +4809,8 @@ namespace Lxy.UIEffectGenerator.Editor
                 selectedScore = bestScore;
                 selectedSecondScore = secondScore;
                 selectedColor = matchedColor;
+                selectedRect = new Rect(localX, localY, sampleWidth, sampleHeight);
+                selectedSource = expandedSource;
                 accepted = true;
             }
 

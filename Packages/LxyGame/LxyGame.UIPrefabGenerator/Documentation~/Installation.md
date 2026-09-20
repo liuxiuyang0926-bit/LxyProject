@@ -13,22 +13,21 @@
 2. 点击 `+ > Add package from git URL`。
 3. 输入存放本包的 Git URL，然后点击 `Add`。
 
-独立仓库的根目录必须直接包含 `package.json` 和 `Editor/`。地址形式如下，
-将 `<owner>/<repository>` 替换为实际已推送的仓库；只有已创建并推送对应 Tag 后才能使用 `#v1.1.3`：
+独立仓库的根目录直接包含 `package.json` 和 `Editor/`。固定版本地址：
 
 ```text
-https://github.com/<owner>/<repository>.git
-https://github.com/<owner>/<repository>.git#v1.1.3
+https://github.com/liuxiuyang0926-bit/UIPrefabGenerator.git#v1.1.4
 ```
 
-如果继续在 LxyProject 仓库中维护，推送改动后可使用子目录地址：
+需要跟随最新发布提交时也可使用：
 
 ```text
-https://github.com/liuxiuyang0926-bit/LxyProject.git?path=/Packages/LxyGame/LxyGame.UIPrefabGenerator#main
+https://github.com/liuxiuyang0926-bit/UIPrefabGenerator.git#main
 ```
 
-指定版本时，把 `#<tag-or-commit>` 放在 `?path=...` 后面。子目录安装仍需从整个
-仓库获取 Git 数据，因此单独维护工具仓库更适合共享给其他项目。地址规则见
+旧的 `LxyProject.git?path=...` 地址不再用于分发本包。`path` 只指定包在仓库中的位置，
+无法把 Git 下载限制到那个子目录；大工程仓库容易因下载时间长而中断。
+独立仓库从包快照建立新历史，没有带入工程的 Assets 或旧提交。地址规则见
 [Unity Git dependencies](https://docs.unity3d.com/2022.3/Documentation/Manual/upm-git.html)。
 制作机需安装 Git 并加入 PATH；私有仓库使用该制作机已有的 Git 访问凭据。
 
@@ -57,7 +56,7 @@ Package Manager 的 Samples 中提供 `Basic UGUI Schema`，导入后可选中
 原有有效字体保持不变；缺失字体和不兼容材质按当前项目资源回退并记录提示。
 缺少中文字体仍需提供项目字体，工具不会复制其他工程的字体或伪装成同款字体。
 
-新代码推送后，请在目标工程更新 Git 包并确认版本为 `1.1.3`。Git 依赖会记录解析到的提交，
+请在目标工程使用上面的独立仓库地址更新 Git 包，并确认版本为 `1.1.4`。Git 依赖会记录解析到的提交，
 仅推送远程不会自动替换已有的 PackageCache；可在 Package Manager 中重新添加相同 Git URL
 请求更新，或将 URL 的 `#main` 替换为刚推送的确切提交号。不要直接修改 `Library/PackageCache`。
 已分析成功、仅在 Prefab 构建时失败的 Schema 可以直接重建，无需再次调用 AI。
@@ -66,7 +65,8 @@ Package Manager 的 Samples 中提供 `Basic UGUI Schema`，导入后可选中
 
 公司网络无法访问 Git 时，可分发本包的 `.tgz` 文件，在 Package Manager 中选择
 `Add package from tarball` 安装，无需解压。每次更新分发新的版本包。
-1.1.2 包含跨工程 Sprite 匹配修复；升级后可先使用已有 UISchema 重建 Prefab，
+`UIPrefabGenerator-1.1.4.tgz` 包含跨工程 Sprite 匹配、误补文字底板和徽标透明留边修复；
+升级后可先使用已有 UISchema 重建 Prefab，
 无需重新调用 AI。若原 Schema 将纹理节点误标成 ColorFallback，需复核该节点或重新分析。
 
 在 Unity Package Manager 中选择 `Add package from disk`，指向本包的 `package.json`。
@@ -163,10 +163,11 @@ UIEffectPrefabGenerationResult result =
 在 LxyDemo 根目录执行：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Export-UIPrefabGenerator.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Export-UIPrefabGenerator.ps1 -CreateTarball
 ```
 
-输出到 `Build/UPMPackages/UIPrefabGenerator-1.1.3/`。也可传入
+输出到 `Build/UPMPackages/UIPrefabGenerator-1.1.4/`，并创建同目录的 `.tgz` 离线包。
+省略 `-CreateTarball` 时只导出文件夹。也可传入
 `-Destination <空目录>`。脚本保留 `.meta`，只复制包文件，并校验依赖和 Editor 程序集边界；
 不会覆盖已有非空目录，也不会包含 Lxy 项目适配器、业务代码、游戏资源或账号配置。
 命令中的执行策略仅作用于本次 PowerShell 进程，不修改系统设置。

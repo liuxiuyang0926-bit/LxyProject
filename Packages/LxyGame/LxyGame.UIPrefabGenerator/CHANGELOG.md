@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.4
+
+- 改为独立轻量仓库发布，包位于仓库根目录，安装不再拉取 LxyProject 工程历史；同时提供离线 tarball。
+- 自动补建文字底板前验证原图中成对的独立边缘，避免把连续背景误判为额外九宫格底板。
+- 小图标外扩匹配增加完整正方形范围，使用已匹配祖先的逐点底色；命中后同步保存修正的矩形，并保持后代绝对位置，修复透明留边导致的漏配和错误缩放。
+- 增加文字底板边界、透明留边恢复和坐标保持回归验证。
+
 ## 1.1.3
 
 - 工具更名为 UIPrefabGenerator：包目录为 `LxyGame.UIPrefabGenerator`，Package Manager 显示 `LxyGame.UIPrefabGenerator`，窗口标题为“UI预制体生成器”。

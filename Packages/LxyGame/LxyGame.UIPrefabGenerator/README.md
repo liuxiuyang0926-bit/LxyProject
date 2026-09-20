@@ -9,9 +9,16 @@ UISchema 2.0 生成可编辑的 UGUI Prefab。Sprite 视觉匹配、九宫格、
 
 ## Git URL 安装
 
-将本目录作为独立 Git 仓库的根目录推送后，在 `Window > Package Manager > + >
-Add package from git URL` 中输入该仓库的 `.git` 地址即可安装。
-也支持在仓库地址后指定本包子目录 `?path=/Packages/LxyGame/LxyGame.UIPrefabGenerator`。
+在 `Window > Package Manager > + > Add package from git URL` 中输入：
+
+```text
+https://github.com/liuxiuyang0926-bit/UIPrefabGenerator.git#v1.1.4
+```
+
+独立仓库根目录只包含本包，拥有独立的轻量 Git 历史。
+旧的 `LxyProject.git?path=...` 地址需要获取整个工程仓库的 Git 数据，不再用于分发本工具。
+公司网络无法使用 Git 时，使用 `UIPrefabGenerator-1.1.4.tgz`，通过
+`Package Manager > + > Add package from tarball` 安装。
 具体地址格式、发布步骤和首次使用说明见 [Installation](Documentation~/Installation.md)。
 
 其他项目只安装本包即可使用通用 UGUI 生成流程，窗口隐藏整块脚本/框架配置。
