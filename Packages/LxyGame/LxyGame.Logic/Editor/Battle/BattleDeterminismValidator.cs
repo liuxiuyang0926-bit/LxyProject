@@ -3,7 +3,6 @@ using Game.Battle.Config;
 using Game.Battle.Core;
 using Game.Battle.Core.Math;
 using Game.Battle.Protocol;
-using UnityEditor;
 using UnityEngine;
 
 namespace Game.Battle.Editor
@@ -13,7 +12,6 @@ namespace Game.Battle.Editor
         /// <summary>
         /// 执行校验相关逻辑。
         /// </summary>
-        [MenuItem("工具/战斗/运行确定性自检", false, 30)]
         public static void Validate()
         {
             ValidateFixedPointBoundaries();

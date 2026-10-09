@@ -14,6 +14,7 @@ namespace Game.Battle.TurnBased.Generated
         public static class Data
         {
             public const int DamageRate_1001Key = 1001;
+            // 配置百分比：50%；以下值为编译后的定点比例 Raw，仅供运行时使用。
             public const long DamageRate_1001Default = 5000L;
             public const int DamageValue_3001Key = 3001;
             public const long DamageValue_3001Default = 0L;

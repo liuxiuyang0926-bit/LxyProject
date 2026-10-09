@@ -14,8 +14,10 @@ namespace Game.Battle.Editor
         private const string DefaultAssetPath =
             "Assets/GameResources/Battle/TurnBased/Formations/DefaultBattleFormation.asset";
         private const float BrowserWidth = 285f;
+        private const string CasterPreference = "LxyBattle.ExpressionPreview.CasterSlot";
+        private const string TargetPreference = "LxyBattle.ExpressionPreview.TargetSlot";
 
-        private TurnBasedBattleFormationAsset formation;
+        [SerializeField] private TurnBasedBattleFormationAsset formation;
         private SerializedObject serialized;
         private PreviewRenderUtility preview;
         private RenderTexture previewTexture;
@@ -38,6 +40,90 @@ namespace Game.Battle.Editor
         private int expressionFrame;
         private int expressionCasterSlot;
         private int expressionTargetSlot = 9;
+
+        private static int PreferredCasterSlot => SessionState.GetInt(CasterPreference, -1);
+        private static int PreferredTargetSlot => SessionState.GetInt(TargetPreference, -1);
+
+        internal static void DrawExpressionActorSettings()
+        {
+            var windows = Resources.FindObjectsOfTypeAll<TurnBasedFormationPreviewWindow>();
+            TurnBasedBattleFormationAsset current = windows.Length > 0
+                ? windows[0].formation
+                : AssetDatabase.LoadAssetAtPath<TurnBasedBattleFormationAsset>(DefaultAssetPath);
+            if (TurnBasedConfigEditorCatalog.Heroes.Count == 0 &&
+                TurnBasedConfigEditorCatalog.Monsters.Count == 0 &&
+                TurnBasedConfigEditorCatalog.LastError == null)
+                TurnBasedConfigEditorCatalog.Reload();
+
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("预览角色（仅影响演示）", EditorStyles.boldLabel);
+                if (current == null)
+                {
+                    EditorGUILayout.HelpBox("请打开“阵容模型预览”，选择阵容并配置武将。", MessageType.Info);
+                    return;
+                }
+                EditorGUILayout.LabelField("当前阵容", current.DisplayName);
+                var labels = new string[TurnBasedBattleFormationAsset.SlotCount + 1];
+                for (int i = 0; i < TurnBasedBattleFormationAsset.SlotCount; i++)
+                {
+                    TurnBasedFormationSlotAuthoring slot = current.GetSlot(i);
+                    TurnBasedConfigUnitOption option = TurnBasedConfigEditorCatalog.Find(slot.Source, slot.ConfigId);
+                    labels[i + 1] = $"{i + 1} 号位 · {(i < 9 ? "攻击方" : "防守方")} · " + (option?.Name ?? "空位或配置缺失");
+                }
+                int caster = Mathf.Clamp(PreferredCasterSlot, -1, 17);
+                int target = Mathf.Clamp(PreferredTargetSlot, -1, 17);
+                EditorGUI.BeginChangeCheck();
+                labels[0] = "自动：攻击方首个模型";
+                int nextCaster = EditorGUILayout.Popup("预览施法者", caster + 1, labels) - 1;
+                // Popup menus may retain the array until the next event.
+                var targetLabels = (string[])labels.Clone();
+                targetLabels[0] = "自动：操作演示站位 / 防守方首个模型";
+                int nextTarget = EditorGUILayout.Popup(new GUIContent("预览目标",
+                    "手动选择时覆盖各操作的演示目标站位；选择自动时使用操作内的配置。"), target + 1, targetLabels) - 1;
+                if (EditorGUI.EndChangeCheck()) SetPreviewActors(nextCaster, nextTarget);
+                EditorGUILayout.LabelField("更换站位中的武将：在阵容模型预览中点击站位，再选择“单位配置”。", EditorStyles.wordWrappedMiniLabel);
+                foreach (int slotIndex in new[] { nextCaster, nextTarget })
+                {
+                    if (slotIndex < 0) continue;
+                    TurnBasedFormationSlotAuthoring slot = current.GetSlot(slotIndex);
+                    TurnBasedConfigUnitOption option = TurnBasedConfigEditorCatalog.Find(slot.Source, slot.ConfigId);
+                    if (option == null || string.IsNullOrWhiteSpace(option.ModelPath))
+                        EditorGUILayout.HelpBox($"{slotIndex + 1} 号位尚未配置有效武将模型，请先配置或选择其他站位。", MessageType.Warning);
+                }
+            }
+        }
+
+        internal static void SetPreviewActors(int casterSlot, int targetSlot)
+        {
+            SessionState.SetInt(CasterPreference, Mathf.Clamp(casterSlot, -1, 17));
+            SessionState.SetInt(TargetPreference, Mathf.Clamp(targetSlot, -1, 17));
+            foreach (var window in Resources.FindObjectsOfTypeAll<TurnBasedFormationPreviewWindow>())
+            {
+                window.ResolveExpressionActors();
+                window.SetExpressionFrame(window.expressionFrame);
+                window.Repaint();
+            }
+            foreach (var window in Resources.FindObjectsOfTypeAll<TurnBasedExpressionEditorWindow>())
+                window.Repaint();
+        }
+
+        private void ResolveExpressionActors()
+        {
+            int previousCaster = expressionCasterSlot;
+            int previousTarget = expressionTargetSlot;
+            expressionCasterSlot = PreferredCasterSlot >= 0 ? PreferredCasterSlot : FindPopulatedSlot(0, 9, 0);
+            int fallback = FindPopulatedSlot(9, 18, 9);
+            expressionTargetSlot = PreferredTargetSlot >= 0 ? PreferredTargetSlot :
+                compiledExpression != null ? ResolveExpressionTargetSlot(compiledExpression, fallback) : fallback;
+            if (previousCaster != expressionCasterSlot)
+                PlayPreviewAnimationAtTime(GetPreviewModel(previousCaster), "idle_1", 0f, true);
+            if (previousTarget != expressionTargetSlot)
+                PlayPreviewAnimationAtTime(GetPreviewModel(previousTarget), "idle_1", 0f, true);
+        }
+
+        private static int ResolveClipTargetSlot(in CompiledBattleExpressionClip clip) =>
+            PreferredTargetSlot >= 0 ? PreferredTargetSlot : Mathf.Clamp(clip.PreviewTargetSlot - 1, 0, 17);
 
         [MenuItem("工具/战斗/18 位阵容与模型预览", false, 2)]
         public static void Open()
@@ -63,11 +149,7 @@ namespace Game.Battle.Editor
             TurnBasedFormationPreviewWindow window = OpenWindow();
             window.expressionAsset = asset;
             window.compiledExpression = expression;
-            window.expressionCasterSlot = window.FindPopulatedSlot(0, 9, 0);
-            int defaultTargetSlot = window.FindPopulatedSlot(9, 18, 9);
-            window.expressionTargetSlot = ResolveExpressionTargetSlot(
-                expression,
-                defaultTargetSlot);
+            window.ResolveExpressionActors();
             window.SetExpressionFrame(frame);
             window.Show();
         }
@@ -105,7 +187,7 @@ namespace Game.Battle.Editor
             var window = GetWindow<TurnBasedFormationPreviewWindow>();
             window.titleContent = new GUIContent("战斗阵容预览");
             window.minSize = new Vector2(1050f, 650f);
-            window.LoadOrCreateDefault();
+            if (window.formation == null) window.LoadOrCreateDefault();
             return window;
         }
 
@@ -120,6 +202,10 @@ namespace Game.Battle.Editor
             if (formation == null)
             {
                 LoadOrCreateDefault();
+            }
+            else
+            {
+                SelectFormation(formation);
             }
         }
 
@@ -256,16 +342,17 @@ namespace Game.Battle.Editor
                             $"施法位 {expressionCasterSlot + 1} → 目标位 {expressionTargetSlot + 1}",
                             EditorStyles.miniLabel);
                     }
-                    GUILayout.Label("EntityModel.ModelPath · 默认 Idle", EditorStyles.miniLabel);
+                    GUILayout.Label("模型预览 · 默认待机", EditorStyles.miniLabel);
                     if (GUILayout.Button("重建模型", EditorStyles.toolbarButton))
                     {
                         previewDirty = true;
                     }
                 }
 
+                DrawExpressionActorSettings();
                 Rect previewRect = GUILayoutUtility.GetRect(
                     400f,
-                    420f,
+                    Mathf.Clamp(position.height - 370f, 240f, 500f),
                     GUILayout.ExpandWidth(true));
                 DrawModelPreview(previewRect);
 
@@ -294,12 +381,18 @@ namespace Game.Battle.Editor
             EditorGUILayout.LabelField(
                 $"{(selectedSlot < 9 ? "攻击方" : "防守方")} · 位置 {selectedSlot + 1}",
                 EditorStyles.boldLabel);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("设为预览施法者")) SetPreviewActors(selectedSlot, PreferredTargetSlot);
+                if (GUILayout.Button("设为预览目标")) SetPreviewActors(PreferredCasterSlot, selectedSlot);
+            }
 
             SerializedProperty sourceProperty = slot.FindPropertyRelative("source");
             BattleFormationUnitSource source = (BattleFormationUnitSource)
                 sourceProperty.enumValueIndex;
             EditorGUI.BeginChangeCheck();
-            source = (BattleFormationUnitSource)EditorGUILayout.EnumPopup("单位来源", source);
+            source = (BattleFormationUnitSource)EditorGUILayout.Popup("单位来源", (int)source,
+                new[] { "空位", "武将", "怪物" });
             if (EditorGUI.EndChangeCheck())
             {
                 sourceProperty.enumValueIndex = (int)source;
@@ -317,12 +410,12 @@ namespace Game.Battle.Editor
             TurnBasedConfigUnitOption option = TurnBasedConfigEditorCatalog.Find(source, configId);
             if (option != null)
             {
-                EditorGUILayout.LabelField("EntityId", option.EntityId.ToString());
-                EditorGUILayout.LabelField("ModelPath", option.ModelPath ?? "<空>");
+                EditorGUILayout.LabelField("模型编号", option.EntityId.ToString());
+                EditorGUILayout.LabelField("模型路径", option.ModelPath ?? "<空>");
                 if (TurnBasedConfigEditorCatalog.LoadModelPrefab(option) == null)
                 {
                     EditorGUILayout.HelpBox(
-                        "ModelPath 对应的 Prefab 未找到：" + option.AssetPath,
+                        "模型预制体未找到：" + option.AssetPath,
                         MessageType.Warning);
                 }
             }
@@ -562,7 +655,8 @@ namespace Game.Battle.Editor
             {
                 TurnBasedFormationSlotAuthoring slot = formation.GetSlot(index);
                 if (slot != null && slot.Source != BattleFormationUnitSource.None &&
-                    TurnBasedConfigEditorCatalog.Find(slot.Source, slot.ConfigId) != null)
+                    TurnBasedConfigEditorCatalog.LoadModelPrefab(
+                        TurnBasedConfigEditorCatalog.Find(slot.Source, slot.ConfigId)) != null)
                 {
                     return index;
                 }
@@ -695,10 +789,7 @@ namespace Game.Battle.Editor
                         break;
                     case BattleExpressionClipType.MoveToTarget:
                     {
-                        int destinationSlot = Mathf.Clamp(
-                            clip.PreviewTargetSlot - 1,
-                            0,
-                            previewSlotModels.Length - 1);
+                        int destinationSlot = ResolveClipTargetSlot(clip);
                         GameObject destinationTarget = GetPreviewModel(destinationSlot);
                         if (destinationTarget == null)
                         {
@@ -739,10 +830,7 @@ namespace Game.Battle.Editor
                     }
                     case BattleExpressionClipType.SwapPosition:
                     {
-                        int destinationSlot = Mathf.Clamp(
-                            clip.PreviewTargetSlot - 1,
-                            0,
-                            previewSlotModels.Length - 1);
+                        int destinationSlot = ResolveClipTargetSlot(clip);
                         GameObject swapTarget = GetPreviewModel(destinationSlot);
                         if (swapTarget == null)
                         {
@@ -1114,10 +1202,7 @@ namespace Game.Battle.Editor
                     return caster.transform.position;
                 case BattleExpressionAnchor.PrimaryTarget:
                 {
-                    GameObject configuredTarget = GetPreviewModel(Mathf.Clamp(
-                        clip.PreviewTargetSlot - 1,
-                        0,
-                        previewSlotModels.Length - 1));
+                    GameObject configuredTarget = GetPreviewModel(ResolveClipTargetSlot(clip));
                     return configuredTarget == null
                         ? target.transform.position
                         : configuredTarget.transform.position;
@@ -1126,7 +1211,7 @@ namespace Game.Battle.Editor
                 case BattleExpressionAnchor.RowCenter:
                 case BattleExpressionAnchor.ColumnCenter:
                     return CalculatePreviewFormationCenter(
-                        clip.PreviewTargetSlot - 1,
+                        ResolveClipTargetSlot(clip),
                         clip.Anchor,
                         target.transform.position);
                 case BattleExpressionAnchor.ScreenCenter:
@@ -1508,6 +1593,7 @@ namespace Game.Battle.Editor
             serialized = formation == null ? null : new SerializedObject(formation);
             selectedSlot = Mathf.Clamp(selectedSlot, 0, 17);
             previewDirty = true;
+            ResolveExpressionActors();
             Repaint();
         }
 

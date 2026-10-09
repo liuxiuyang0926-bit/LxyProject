@@ -24,7 +24,6 @@ namespace Game.Battle.Editor
         public const string AchievementSkillPath = Root +
             "/Definitions/skill_ach_tiaozhan_level_jinnang_3.asset";
 
-        [MenuItem("工具/战斗/生成参考技能逻辑与表现资产", false, 3)]
         public static void GenerateReferenceAssetsFromMenu()
         {
             TurnBasedSkillAsset[] skills = EnsureReferenceAssets(false);
@@ -55,11 +54,11 @@ namespace Game.Battle.Editor
             TurnBasedSkillLogicAsset normalLogic = LoadOrCreate<TurnBasedSkillLogicAsset>(
                 NormalLogicPath,
                 resetExisting,
-                asset => asset.ResetToDamageSample("skill_logic_1001", 1, 10000, 0));
+                asset => asset.ResetToDamageSample("skill_logic_1001", 1, 100, 0));
             TurnBasedSkillLogicAsset heavyLogic = LoadOrCreate<TurnBasedSkillLogicAsset>(
                 HeavyLogicPath,
                 resetExisting,
-                asset => asset.ResetToDamageSample("skill_logic_1002", 2, 13500, 10));
+                asset => asset.ResetToDamageSample("skill_logic_1002", 2, 135, 10));
             TurnBasedSkillLogicAsset achievementLogic = LoadOrCreate<TurnBasedSkillLogicAsset>(
                 AchievementLogicPath,
                 resetExisting,

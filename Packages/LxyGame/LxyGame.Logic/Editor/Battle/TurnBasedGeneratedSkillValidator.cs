@@ -16,7 +16,6 @@ namespace Game.Battle.Editor
         private static readonly BattleVariableKey AchievementComplete =
             new BattleVariableKey(9030302);
 
-        [MenuItem("工具/战斗/运行技能资产闭环自检", false, 5)]
         public static void Validate()
         {
             TurnBasedBattleDefinition definition =

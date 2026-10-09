@@ -14,8 +14,10 @@ namespace Game.Battle.TurnBased.Generated
         public static class Data
         {
             public const int DamageRate_1001Key = 1001;
+            // 配置百分比：100%；以下值为编译后的定点比例 Raw，仅供运行时使用。
             public const long DamageRate_1001Default = 10000L;
             public const int TalentDamageBonus_1002Key = 1002;
+            // 配置百分比：0%；以下值为编译后的定点比例 Raw，仅供运行时使用。
             public const long TalentDamageBonus_1002Default = 0L;
             public const int DamageValue_3001Key = 3001;
             public const long DamageValue_3001Default = 0L;

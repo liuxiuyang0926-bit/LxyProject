@@ -37,6 +37,12 @@ namespace Game.Battle.Editor
         private int selectedConditionIndex;
         private int selectedActionIndex;
         private bool showTrackSettings;
+        private bool showRuleAdvanced;
+        private bool showActionAdvanced;
+        private int detailTab;
+        private string validationMessage;
+        private MessageType validationType;
+        private static readonly string[] DetailTabs = { "规则配置", "参数与变量", "提供给表现的数据" };
         private string[] trackOptions = Array.Empty<string>();
         private string[] ruleOptions = Array.Empty<string>();
         private string[] conditionOptions = Array.Empty<string>();
@@ -77,17 +83,17 @@ namespace Game.Battle.Editor
             "最大生命",
             "已损失生命",
             "生命百分比",
-            "Buff 层数",
+            "状态层数",
             "事件数值",
             "当前回合",
             "战斗计数器",
             "策划参数",
             "单次触发临时变量",
             "技能实例变量",
-            "确定性随机值（0~9999）",
+            "确定性随机百分比（0%~99.99%）",
         };
         private static readonly AttributeType[] AttributeTypeValues =
-            (AttributeType[])Enum.GetValues(typeof(AttributeType));
+            Array.FindAll((AttributeType[])Enum.GetValues(typeof(AttributeType)), value => value != AttributeType.Count);
         private static readonly string[] AttributeTypeLabels =
         {
             "生命",
@@ -102,7 +108,6 @@ namespace Game.Battle.Editor
             "怒气",
             "能量",
             "护盾",
-            "Count（内部保留）",
         };
         private static readonly ComparisonOperator[] ComparisonValues =
             (ComparisonOperator[])Enum.GetValues(typeof(ComparisonOperator));
@@ -143,11 +148,13 @@ namespace Game.Battle.Editor
 
         private void OnEnable()
         {
+            Undo.undoRedoPerformed += OnUndoRedo;
             ReloadAssets();
         }
 
         private void OnDisable()
         {
+            Undo.undoRedoPerformed -= OnUndoRedo;
             pendingSelection = null;
             DisposePropertyTree();
         }
@@ -180,7 +187,11 @@ namespace Game.Battle.Editor
                        GUILayout.ExpandHeight(true)))
             {
                 EditorGUILayout.LabelField("逻辑资产", EditorStyles.boldLabel);
-                search = EditorGUILayout.TextField(search, GUI.skin.FindStyle("ToolbarSearchTextField"));
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    GUILayout.Label(new GUIContent("搜索", "按技能标识、资产名或中文说明搜索"), GUILayout.Width(34));
+                    search = EditorGUILayout.TextField(search);
+                }
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button("新建", EditorStyles.miniButtonLeft))
@@ -194,26 +205,29 @@ namespace Game.Battle.Editor
                 }
 
                 assetScroll = EditorGUILayout.BeginScrollView(assetScroll);
+                int visibleCount = 0;
                 for (int index = 0; index < assets.Count; index++)
                 {
                     TurnBasedSkillLogicAsset asset = assets[index];
                     string label = string.IsNullOrWhiteSpace(asset.LogicId)
                         ? asset.name
                         : asset.LogicId;
-                    if (!string.IsNullOrWhiteSpace(search) &&
-                        label.IndexOf(search, StringComparison.OrdinalIgnoreCase) < 0)
+                    if (!TurnBasedSkillEditorUtility.MatchesSearch(search, label, asset.name, asset.Description))
                     {
                         continue;
                     }
                     if (GUILayout.Button(
-                            label,
+                            TurnBasedSkillEditorUtility.AssetLabel(label, asset.Description),
                             TurnBasedAssetEditorUtility.SelectedListStyle(asset == selected),
-                            GUILayout.Height(24f)))
+                            GUILayout.Height(44f)))
                     {
                         QueueSelection(asset);
                     }
+                    visibleCount++;
                 }
+                if (visibleCount == 0) EditorGUILayout.HelpBox("没有匹配的技能，可清空搜索或新建。", MessageType.Info);
                 EditorGUILayout.EndScrollView();
+                EditorGUILayout.LabelField($"显示 {visibleCount} / {assets.Count} 个技能", EditorStyles.miniLabel);
             }
         }
 
@@ -257,7 +271,7 @@ namespace Game.Battle.Editor
 
                 using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
                 {
-                    GUILayout.Label(selected.LogicId, EditorStyles.boldLabel);
+                    GUILayout.Label(selected.LogicId, EditorStyles.boldLabel, GUILayout.MinWidth(50), GUILayout.MaxWidth(200));
                     GUILayout.FlexibleSpace();
                     if (GUILayout.Button("定位", EditorStyles.toolbarButton))
                     {
@@ -287,12 +301,12 @@ namespace Game.Battle.Editor
                             () => Select(editingAsset));
                     }
                     if (GUILayout.Button(
-                            new GUIContent("生成 C#", "生成稳定的数据 Key 与规则 ID 常量"),
+                            new GUIContent("导出程序常量", "生成供程序使用的数据编号与规则编号；普通参数修改只需保存。"),
                             EditorStyles.toolbarButton))
                     {
                         GenerateCode();
                     }
-                    if (GUILayout.Button("校验编译", EditorStyles.toolbarButton))
+                    if (GUILayout.Button("检查配置", EditorStyles.toolbarButton))
                     {
                         ValidateAsset();
                     }
@@ -314,12 +328,10 @@ namespace Game.Battle.Editor
                     return;
                 }
 
+                if (!string.IsNullOrEmpty(validationMessage))
+                    EditorGUILayout.HelpBox(validationMessage, validationType);
+                detailTab = GUILayout.Toolbar(detailTab, DetailTabs);
                 detailScroll = EditorGUILayout.BeginScrollView(detailScroll);
-                SirenixEditorGUI.InfoMessageBox(
-                    "Odin 增强编辑已启用：无关参数会按条件与操作类型自动隐藏。" +
-                    "同一执行组的 Parallel 轨道表示并行语义，战斗核心仍按" +
-                    "阶段、优先级、单位和规则 ID 的固定顺序结算。",
-                    true);
 
                 ListEditCommand trackCommand = ListEditCommand.None;
                 ListEditCommand ruleCommand = ListEditCommand.None;
@@ -332,22 +344,33 @@ namespace Game.Battle.Editor
                     {
                         DrawRootProperty("#基础信息");
 
-                        trackCommand = DrawTrackNavigator();
-                        if (trackCommand == ListEditCommand.None &&
-                            GetSelectedTrack() != null)
+                        if (detailTab == 0)
                         {
-                            ruleCommand = DrawRuleNavigator();
-                            if (ruleCommand == ListEditCommand.None)
+                            EditorGUILayout.HelpBox("配置顺序：选择轨道 → 选择规则 → 设置触发事件与条件 → 设置操作目标和数值。", MessageType.None);
+                            trackCommand = DrawTrackNavigator();
+                            if (trackCommand == ListEditCommand.None &&
+                                GetSelectedTrack() != null)
                             {
-                                DrawSelectedRule(
-                                    out conditionCommand,
-                                    out actionCommand);
+                                ruleCommand = DrawRuleNavigator();
+                                if (ruleCommand == ListEditCommand.None)
+                                {
+                                    DrawSelectedRule(
+                                        out conditionCommand,
+                                        out actionCommand);
+                                }
+                                DrawSelectedTrackSettings();
                             }
-                            DrawSelectedTrackSettings();
                         }
-
-                        DrawRootProperty("#表现数据契约");
-                        DrawRootProperty("#临时数据与参数");
+                        else if (detailTab == 1)
+                        {
+                            EditorGUILayout.HelpBox("策划参数用于配置数值；单次触发变量在本次规则执行结束后清空；技能实例变量保留整场战斗。数值编号保持稳定，引用时可直接从下拉列表选择。", MessageType.Info);
+                            DrawRootProperty("#临时数据与参数");
+                        }
+                        else
+                        {
+                            EditorGUILayout.HelpBox("这里声明表现可以读取的逻辑结果，例如伤害、治疗或死亡。表现编辑器选择当前逻辑资产后，即可按中文事件选择绑定。数据标识发布后请保持稳定。", MessageType.Info);
+                            DrawRootProperty("#表现数据契约");
+                        }
                     }
                     finally
                     {
@@ -582,9 +605,12 @@ namespace Game.Battle.Editor
             SirenixEditorGUI.BeginBox("触发设置", false);
             try
             {
+                BattleRuleAuthoring rule = GetSelectedRule();
+                if (rule != null)
+                    EditorGUILayout.HelpBox($"当「{TurnBasedSkillEditorUtility.EventLabel(rule.trigger)}」的{TurnBasedSkillEditorUtility.PhaseLabel(rule.phase)}到来时，" +
+                        $"{((rule.conditions?.Count ?? 0) == 0 ? "无需附加条件" : "全部 " + rule.conditions.Count + " 个条件满足后")}，执行 {rule.actions?.Count ?? 0} 个操作。", MessageType.None);
+                DrawRuleChild(ruleProperty, "operationName");
                 DrawRuleChild(ruleProperty, "trigger");
-                DrawRuleChild(ruleProperty, "phase");
-                DrawRuleChild(ruleProperty, "priority");
                 DrawRuleChild(ruleProperty, "ownerMustBeAlive");
             }
             finally
@@ -592,13 +618,18 @@ namespace Game.Battle.Editor
                 SirenixEditorGUI.EndBox();
             }
 
-            SirenixEditorGUI.BeginBox("规则内容", false);
+            SirenixEditorGUI.BeginBox("规则高级设置", false);
             try
             {
-                DrawRuleChild(ruleProperty, "operationName");
-                DrawRuleChild(ruleProperty, "executionGroup");
-                DrawRuleChild(ruleProperty, "executionMode");
-                DrawRuleChild(ruleProperty, "id");
+                showRuleAdvanced = EditorGUILayout.Foldout(showRuleAdvanced, "阶段、优先级、分组与规则编号", true);
+                if (showRuleAdvanced)
+                {
+                    DrawRuleChild(ruleProperty, "phase");
+                    DrawRuleChild(ruleProperty, "priority");
+                    DrawRuleChild(ruleProperty, "executionGroup");
+                    DrawRuleChild(ruleProperty, "executionMode");
+                    DrawRuleChild(ruleProperty, "id");
+                }
             }
             finally
             {
@@ -805,7 +836,7 @@ namespace Game.Battle.Editor
             {
                 SetManualValue(
                     ref condition.value,
-                    EditorGUILayout.LongField("比较值", condition.value),
+                    EditorGUILayout.DoubleField(BattlePercentageAuthoring.IsPercentage(condition) ? "比较值（%）" : "比较值", condition.value),
                     "修改触发条件比较值");
             }
             if (displayType == CompiledConditionType.AttributeCompare)
@@ -825,10 +856,10 @@ namespace Game.Battle.Editor
                     ref condition.referenceId,
                     Mathf.Max(0, EditorGUILayout.IntField(
                         new GUIContent(
-                            "引用 ID",
-                            "拥有 Buff 填 Buff ID；计数器条件填变量 ID。"),
+                            "引用编号",
+                            "拥有增益或减益时填写状态编号；计数器条件填写变量编号。"),
                         condition.referenceId)),
-                    "修改触发条件引用 ID");
+                    "修改触发条件引用编号");
             }
             if (displayType == CompiledConditionType.LogicValueCompare)
             {
@@ -857,18 +888,22 @@ namespace Game.Battle.Editor
                 EditorGUILayout.TextField("操作名称", action.operationName),
                 "修改逻辑操作名称",
                 true);
-            SetManualValue(
-                ref action.executionGroup,
-                EditorGUILayout.TextField("执行组", action.executionGroup),
-                "修改逻辑操作执行组");
-            SetManualValue(
-                ref action.executionMode,
-                DrawLocalizedEnum(
-                    "执行方式",
-                    action.executionMode,
-                    ExecutionModeValues,
-                    ExecutionModeLabels),
-                "修改逻辑操作执行方式");
+            showActionAdvanced = EditorGUILayout.Foldout(showActionAdvanced, "操作分组设置", true);
+            if (showActionAdvanced)
+            {
+                SetManualValue(
+                    ref action.executionGroup,
+                    EditorGUILayout.TextField("执行组", action.executionGroup),
+                    "修改逻辑操作执行组");
+                SetManualValue(
+                    ref action.executionMode,
+                    DrawLocalizedEnum(
+                        "执行方式",
+                        action.executionMode,
+                        ExecutionModeValues,
+                        ExecutionModeLabels),
+                    "修改逻辑操作执行方式");
+            }
 
             CompiledActionType displayType = action.type;
             CompiledActionType nextType = DrawLocalizedEnum(
@@ -912,8 +947,8 @@ namespace Game.Battle.Editor
                     ref action.useDynamicReference,
                     EditorGUILayout.Toggle(
                         new GUIContent(
-                            "动态引用 ID",
-                            "开启后从策划参数或变量读取 Buff ID。"),
+                            "动态引用编号",
+                            "开启后从策划参数或变量读取 状态编号。"),
                         displayDynamicReference),
                     "修改逻辑操作引用模式");
             }
@@ -922,19 +957,25 @@ namespace Game.Battle.Editor
             {
                 DrawValueFields(
                     action.referenceValue,
-                    "引用 ID 数值",
-                    "修改逻辑操作动态引用 ID");
+                    "引用编号数值",
+                    "修改逻辑操作动态引用编号");
             }
             else if (ActionUsesReferenceId(displayType))
             {
+                ValueSourceType referenceSource = displayType == CompiledActionType.SetInvocationVariable || displayType == CompiledActionType.AddInvocationVariable
+                    ? ValueSourceType.InvocationVariable : displayType == CompiledActionType.SetSkillVariable || displayType == CompiledActionType.AddSkillVariable
+                        ? ValueSourceType.SkillVariable : ValueSourceType.BattleCounter;
+                if (TurnBasedSkillEditorUtility.IsLocalData(referenceSource))
+                    DrawDataReference(ref action.referenceId, referenceSource, "修改操作变量");
+                else
                 SetManualValue(
                     ref action.referenceId,
                     Mathf.Max(0, EditorGUILayout.IntField(
                         new GUIContent(
-                            "引用 ID",
-                            "添加/移除 Buff 填 Buff ID；计数器和变量操作填变量 ID。"),
+                            "引用编号",
+                            "添加或移除增益减益时填写状态编号；计数器和变量操作填写变量编号。"),
                         action.referenceId)),
-                    "修改逻辑操作引用 ID");
+                    "修改逻辑操作引用编号");
             }
 
             if (displayType == CompiledActionType.Damage)
@@ -987,8 +1028,8 @@ namespace Game.Battle.Editor
                     ref target.configIdFilter,
                     Mathf.Max(0, EditorGUILayout.IntField(
                         new GUIContent(
-                            "配置 ID 过滤",
-                            "大于 0 时，只保留指定配置 ID 的单位。"),
+                            "配置编号过滤",
+                            "大于 0 时，只保留指定配置编号的单位。"),
                         target.configIdFilter)),
                     undoName);
             }
@@ -1025,9 +1066,10 @@ namespace Game.Battle.Editor
                     undoName);
                 if (ValueUsesConstant(displaySource))
                 {
+                    SetManualValue(ref value.percentage, EditorGUILayout.Toggle("固定值使用百分比", value.percentage), undoName);
                     SetManualValue(
                         ref value.constant,
-                        EditorGUILayout.LongField("固定值", value.constant),
+                        EditorGUILayout.DoubleField("固定值", value.constant),
                         undoName);
                 }
                 if (ValueUsesAttribute(displaySource))
@@ -1043,24 +1085,23 @@ namespace Game.Battle.Editor
                 }
                 if (ValueUsesReferenceId(displaySource))
                 {
-                    SetManualValue(
-                        ref value.referenceId,
-                        Mathf.Max(0, EditorGUILayout.IntField(
-                            new GUIContent(
-                                "引用 ID",
-                                "Buff 层数填 Buff ID；计数器/参数/变量填写对应数据 Key。"),
-                            value.referenceId)),
-                        undoName);
+                    if (TurnBasedSkillEditorUtility.IsLocalData(displaySource))
+                        DrawDataReference(ref value.referenceId, displaySource, undoName);
+                    else
+                        SetManualValue(
+                            ref value.referenceId,
+                            Mathf.Max(0, EditorGUILayout.IntField(
+                                new GUIContent(
+                                    "引用编号",
+                                    "状态层数填写状态编号；计数器填写全局变量编号。"),
+                                value.referenceId)),
+                            undoName);
                 }
                 if (!displayDynamicScale)
                 {
                     SetManualValue(
-                        ref value.scaleBasisPoint,
-                        Mathf.Max(0, EditorGUILayout.IntField(
-                            new GUIContent(
-                                "倍率（万分比）",
-                                "10000 = 100%，13500 = 135%。"),
-                            value.scaleBasisPoint)),
+                        ref value.scalePercent,
+                        EditorGUILayout.DoubleField("倍率（%）", value.scalePercent),
                         undoName);
                 }
 
@@ -1079,7 +1120,7 @@ namespace Game.Battle.Editor
 
                 SetManualValue(
                     ref value.offset,
-                    EditorGUILayout.LongField("最终偏移", value.offset),
+                    EditorGUILayout.DoubleField("最终偏移", value.offset),
                     undoName);
                 SetManualValue(
                     ref value.hasMinimum,
@@ -1089,7 +1130,7 @@ namespace Game.Battle.Editor
                 {
                     SetManualValue(
                         ref value.minimum,
-                        EditorGUILayout.LongField("最小值", value.minimum),
+                        EditorGUILayout.DoubleField("最小值", value.minimum),
                         undoName);
                 }
                 SetManualValue(
@@ -1100,9 +1141,19 @@ namespace Game.Battle.Editor
                 {
                     SetManualValue(
                         ref value.maximum,
-                        EditorGUILayout.LongField("最大值", value.maximum),
+                        EditorGUILayout.DoubleField("最大值", value.maximum),
                         undoName);
                 }
+                string sourceLabel = value.source == ValueSourceType.Constant ? value.constant.ToString() :
+                    LocalizedValue(value.source, ValueSourceValues, ValueSourceLabels);
+                if (ValueUsesAttribute(value.source)) sourceLabel += " · " + LocalizedValue(value.attribute, AttributeTypeValues, AttributeTypeLabels);
+                if (ValueUsesReferenceId(value.source)) sourceLabel += "（编号 " + value.referenceId + "）";
+                EditorGUILayout.HelpBox("计算方式：" + sourceLabel + " × " +
+                    (value.useDynamicScale ? "动态倍率（100 表示 100%）" : value.scalePercent.ToString("0.##") + "%") +
+                    " + (" + value.offset + ")" + (value.hasMinimum ? "，下限 " + value.minimum : "") +
+                    (value.hasMaximum ? "，上限 " + value.maximum : ""), MessageType.None);
+                if (value.hasMinimum && value.hasMaximum && value.minimum > value.maximum)
+                    EditorGUILayout.HelpBox("最小值不能大于最大值，请调整上下限。", MessageType.Error);
             }
         }
 
@@ -1135,7 +1186,7 @@ namespace Game.Battle.Editor
                 {
                     SetManualValue(
                         ref operand.constant,
-                        EditorGUILayout.LongField("固定倍率", operand.constant),
+                        EditorGUILayout.DoubleField("固定倍率（%）", operand.constant),
                         undoName);
                 }
                 if (ValueUsesAttribute(displaySource))
@@ -1151,16 +1202,63 @@ namespace Game.Battle.Editor
                 }
                 if (ValueUsesReferenceId(displaySource))
                 {
-                    SetManualValue(
-                        ref operand.referenceId,
-                        Mathf.Max(0, EditorGUILayout.IntField(
-                            new GUIContent(
-                                "引用 ID",
-                                "逻辑参数/变量填写数据 Key；Buff 层数填写 Buff ID。"),
-                            operand.referenceId)),
-                        undoName);
+                    if (TurnBasedSkillEditorUtility.IsLocalData(displaySource))
+                        DrawDataReference(ref operand.referenceId, displaySource, undoName);
+                    else
+                        SetManualValue(
+                            ref operand.referenceId,
+                            Mathf.Max(0, EditorGUILayout.IntField(
+                                new GUIContent(
+                                    "引用编号",
+                                    "状态层数填写状态编号；计数器填写全局变量编号。"),
+                                operand.referenceId)),
+                            undoName);
                 }
             }
+        }
+
+        private void DrawDataReference(ref int referenceId, ValueSourceType source, string undoName)
+        {
+            var keys = new List<int>();
+            var labels = new List<string>();
+            foreach (BattleLogicDataAuthoring data in selected.DataDefinitions)
+            {
+                if (!TurnBasedSkillEditorUtility.MatchesDataSource(data, source)) continue;
+                keys.Add(data.key);
+                string label = TurnBasedSkillEditorUtility.FirstLine(data.description);
+                labels.Add((string.IsNullOrEmpty(label) ? data.name : label) + $"（{data.name} · {data.key}）");
+            }
+            int current = keys.IndexOf(referenceId);
+            bool found = current >= 0;
+            if (!found)
+            {
+                current = keys.Count;
+                keys.Add(referenceId);
+                labels.Add("未定义（保留原值）：" + referenceId);
+            }
+            int choice = EditorGUILayout.Popup(new GUIContent("选择参数或变量", "只显示符合当前种类和作用域的数据。"),
+                current, labels.ToArray());
+            if (choice != current && choice >= 0) SetManualValue(ref referenceId, keys[choice], undoName);
+            SetManualValue(ref referenceId, EditorGUILayout.DelayedIntField("数据编号", referenceId), undoName);
+            if (!found && choice == current)
+                EditorGUILayout.HelpBox("当前编号未在对应作用域中定义。请从列表选择，或先到“参数与变量”页添加定义；原编号会保留。", MessageType.Warning);
+        }
+
+        private static string LocalizedValue<T>(T value, T[] values, string[] labels)
+        {
+            int index = Array.IndexOf(values, value);
+            return index >= 0 && index < labels.Length ? labels[index] : "未知选项";
+        }
+
+        private void OnUndoRedo()
+        {
+            if (selected == null) return;
+            DisposePropertyTree();
+            serialized = new SerializedObject(selected);
+            CreatePropertyTree();
+            NormalizeSelection();
+            validationMessage = null;
+            Repaint();
         }
 
         private bool SetManualValue<T>(
@@ -1175,6 +1273,7 @@ namespace Game.Battle.Editor
             }
 
             Undo.RecordObject(selected, undoName);
+            validationMessage = null;
             field = next;
             EditorUtility.SetDirty(selected);
             if (invalidateActionOptions)
@@ -1192,11 +1291,19 @@ namespace Game.Battle.Editor
             where T : struct, Enum
         {
             int currentIndex = Array.IndexOf(values, current);
+            if (currentIndex < 0)
+            {
+                var extended = new string[labels.Length + 1];
+                Array.Copy(labels, extended, labels.Length);
+                extended[labels.Length] = "未知或不可用选项（保留原值）";
+                int next = EditorGUILayout.Popup(label, labels.Length, extended);
+                return next < values.Length ? values[next] : current;
+            }
             int nextIndex = EditorGUILayout.Popup(
                 label,
                 Mathf.Max(0, currentIndex),
                 labels);
-            return values[Mathf.Clamp(nextIndex, 0, values.Length - 1)];
+            return nextIndex == Mathf.Max(0, currentIndex) ? current : values[Mathf.Clamp(nextIndex, 0, values.Length - 1)];
         }
 
         private static bool ValueUsesConstant(ValueSourceType source) =>
@@ -1570,7 +1677,7 @@ namespace Game.Battle.Editor
                         {
                             source = ValueSourceType.OwnerAttribute,
                             attribute = AttributeType.Attack,
-                            scaleBasisPoint = BattleNumeric.BasisPointOne,
+                            scalePercent = 100,
                             hasMinimum = true,
                             minimum = 1,
                         },
@@ -1763,7 +1870,7 @@ namespace Game.Battle.Editor
 
             BattleRuleAuthoring rule = track.rules[index];
             return rule != null && !string.IsNullOrWhiteSpace(rule.operationName)
-                ? rule.operationName
+                ? $"{index + 1}. {rule.operationName} · {TurnBasedSkillEditorUtility.EventLabel(rule.trigger)}"
                 : $"规则 {rule?.id ?? index + 1}";
         }
 
@@ -1824,8 +1931,8 @@ namespace Game.Battle.Editor
                 case CompiledConditionType.IsDead: return "目标死亡";
                 case CompiledConditionType.IsEnemy: return "目标是敌人";
                 case CompiledConditionType.IsAlly: return "目标是友军";
-                case CompiledConditionType.ConfigIdCompare: return "配置 ID 比较";
-                case CompiledConditionType.HasBuff: return "拥有 Buff";
+                case CompiledConditionType.ConfigIdCompare: return "配置编号比较";
+                case CompiledConditionType.HasBuff: return "拥有增益或减益";
                 case CompiledConditionType.AttributeCompare: return "属性比较";
                 case CompiledConditionType.HpPercentCompare: return "生命百分比比较";
                 case CompiledConditionType.EventValueCompare: return "事件数值比较";
@@ -1846,8 +1953,8 @@ namespace Game.Battle.Editor
             {
                 case CompiledActionType.Damage: return "造成伤害";
                 case CompiledActionType.Heal: return "恢复生命";
-                case CompiledActionType.AddBuff: return "添加 Buff";
-                case CompiledActionType.RemoveBuff: return "移除 Buff";
+                case CompiledActionType.AddBuff: return "添加增益或减益";
+                case CompiledActionType.RemoveBuff: return "移除增益或减益";
                 case CompiledActionType.ModifyAttribute: return "修改属性";
                 case CompiledActionType.ModifyResource: return "修改资源";
                 case CompiledActionType.Kill: return "直接击杀";
@@ -1927,7 +2034,7 @@ namespace Game.Battle.Editor
             TurnBasedSkillLogicAsset asset = TurnBasedAssetEditorUtility.CreateAsset<TurnBasedSkillLogicAsset>(
                 TurnBasedSkillAssetGenerator.Root + "/Logic",
                 "skill_logic_new",
-                value => value.ResetToDamageSample("skill_logic_new", id, 10000, 0));
+                value => value.ResetToDamageSample("skill_logic_new", id, 100, 0));
             if (asset != null)
             {
                 ReloadAssets(asset);
@@ -1980,6 +2087,7 @@ namespace Game.Battle.Editor
             CreatePropertyTree();
             if (assetChanged)
             {
+                validationMessage = null;
                 selectedTrackIndex = 0;
                 selectedRuleIndex = 0;
                 selectedConditionIndex = 0;
@@ -2027,12 +2135,16 @@ namespace Game.Battle.Editor
                 serialized?.ApplyModifiedProperties();
                 selected.Compile();
                 Save();
+                validationMessage = "配置检查通过，已保存。";
+                validationType = MessageType.Info;
                 ShowNotification(new GUIContent("逻辑校验通过"));
             }
             catch (Exception exception)
             {
                 Debug.LogException(exception, selected);
-                ShowNotification(new GUIContent("校验失败，请查看 Console"));
+                validationMessage = "配置检查未通过：" + exception.Message;
+                validationType = MessageType.Error;
+                ShowNotification(new GUIContent("请按窗口内的提示修正配置"));
             }
         }
 
@@ -2051,7 +2163,9 @@ namespace Game.Battle.Editor
             catch (Exception exception)
             {
                 Debug.LogException(exception, selected);
-                ShowNotification(new GUIContent("生成失败，请查看 Console"));
+                validationMessage = "导出失败：" + exception.Message;
+                validationType = MessageType.Error;
+                ShowNotification(new GUIContent("请按窗口内的提示修正配置"));
             }
         }
     }

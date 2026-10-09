@@ -6,7 +6,6 @@ using Game.Battle.TurnBased.Core.Session;
 using Game.Battle.TurnBased.Core.Trace;
 using Game.Battle.TurnBased.Domain;
 using Game.Battle.TurnBased.RuntimeData;
-using UnityEditor;
 using UnityEngine;
 
 namespace Game.Battle.Editor
@@ -19,7 +18,6 @@ namespace Game.Battle.Editor
         private static readonly BuffId PoisonBuffId = new BuffId(2001);
         private static readonly BattleVariableKey KillCounter = new BattleVariableKey(3001);
 
-        [MenuItem("工具/战斗/运行回合制架构自检")]
         public static void Validate()
         {
             CompiledBattleDatabase database = CreateDatabase();

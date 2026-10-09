@@ -22,9 +22,20 @@ IBattleCommand
 5. 依次提交 `StartBattleCommand`、`UseSkillCommand`、`EndTurnCommand`。
 6. 消费 `BattleStepResult.Events` 驱动动画、特效、音频和 UI。
 
-编辑器菜单 `工具/战斗/运行回合制架构自检` 会执行普通攻击、死亡被动、Poison Buff 与双 Session 确定性校验。
+`Game.Battle.Editor.TurnBasedBattleValidator.Validate()` 会执行普通攻击、死亡被动、Poison Buff 与双 Session 确定性校验。
 
-编辑器菜单 `工具/战斗/运行技能资产闭环自检` 还会校验独立 ScriptableObject 编译、`skill_101011` 表现绑定，以及 `skill_logic_ach_tiaozhan_level_jinnang_3` 的“同一轮击杀全部 ConfigId=308”规则。
+`Game.Battle.Editor.TurnBasedGeneratedSkillValidator.Validate()` 还会校验独立 ScriptableObject 编译、`skill_101011` 表现绑定，以及 `skill_logic_ach_tiaozhan_level_jinnang_3` 的“同一轮击杀全部 ConfigId=308”规则；它依赖旧参考配置，仅适用于仍保留完整参考资产链的工程。
+
+开发自检保留代码入口，不再注册到 `工具/战斗`。需要时由程序在 Unity Editor 中调用，或使用 Unity 命令行 `-executeMethod Game.Battle.Editor.<类名>.Validate`：
+
+| 类名 | 检查内容 |
+| --- | --- |
+| `BattleDeterminismValidator` | 定点数学、碰撞和帧同步确定性 |
+| `TurnBasedBattleValidator` | 回合制架构与重放确定性 |
+| `TurnBasedGeneratedSkillValidator` | 旧参考技能资产编译闭环 |
+| `TurnBasedSkillEditorValidator` | 技能编辑器的数据选择和时间轴操作 |
+| `TurnBasedLogicDataValidator` | 逻辑参数、临时变量与状态哈希 |
+| `TurnBasedPercentageValidator` | 百分比输入、编译及旧数据转换 |
 
 ## 编辑器工作流
 
@@ -39,7 +50,9 @@ IBattleCommand
    - `回合制技能逻辑`：Trigger、Condition、Target、Value、Action；
    - `回合制技能表现`：30 FPS 整数帧时间轴，包括动画、位移、特效、声音、命中、闪色和死亡检查。
 4. 打开 `工具/战斗/18 位阵容与模型预览`，从二进制 Hero/Monster 表选择单位并保存阵容 ScriptableObject。该窗口用于资产编辑与模型预览，不负责生成或改写场景。
-5. 使用两个自检菜单验证架构确定性和技能资产编译闭环。
+5. 普通参数修改保存资产即可；程序需要数据编号与规则编号时，在技能逻辑编辑器中点击“导出程序常量”。新技能按策划手册完成实战验收。
+
+`工具/战斗` 只保留技能逻辑编辑器、技能表现编辑器和 18 位阵容与模型预览。参考资产生成、批量导出、自检及手动迁移不再提供菜单入口；旧百分比资产仍按版本标记自动转换。
 
 默认定义资产位于：
 

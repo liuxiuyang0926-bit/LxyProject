@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8f3754880c368747ab7ac87f60d57fd, type: 3}
   m_Name: skill_logic_hero_guanyu_pugong
   m_EditorClassIdentifier: 
+  percentageVersion: 1
   logicId: skill_logic_hero_guanyu_pugong
   description: "\u53C2\u8003 skill_logic_hero_guanyu_pugong.lua\uFF1A\u5173\u7FBD\u4E3B\u52A8\u666E\u653B\uFF0C\u9009\u4E2D\u5355\u4E2A\u654C\u4EBA\uFF0C\u6309\u6807\u51C6\u516C\u5F0F\u9020\u6210\u98CE\u5C5E\u6027\u5355\u4F53\u4F24\u5BB3\u3002damage_rate
-    \u586B\u5F53\u524D\u7B49\u7EA7\u6700\u7EC8\u500D\u7387\uFF1A5000 +\uFF08\u666E\u653B\u7B49\u7EA7-1\uFF09\xD71000\u3002\u5F53\u524D\u8FD0\u884C\u65F6\u6682\u4E0D\u7ED3\u7B97\u5143\u7D20\u6807\u7B7E\u3002"
+    \u586B\u5B9E\u9645\u767E\u5206\u6570\uFF1A50 +\uFF08\u666E\u653B\u7B49\u7EA7-1\uFF09\xD710\u3002\u5F53\u524D\u8FD0\u884C\u65F6\u6682\u4E0D\u7ED3\u7B97\u5143\u7D20\u6807\u7B7E\u3002"
   outputs:
   - key: damage_result
     eventType: 6
@@ -26,8 +27,8 @@ MonoBehaviour:
     kind: 0
     valueType: 1
     scope: 0
-    defaultValue: 5000
-    description: "\u5F53\u524D\u7B49\u7EA7\u6700\u7EC8\u4F24\u5BB3\u500D\u7387\uFF1A1\u7EA75000\uFF0C\u6BCF\u53471\u7EA7\u589E\u52A01000\u3002"
+    defaultValue: 50
+    description: "\u5F53\u524D\u7B49\u7EA7\u6700\u7EC8\u4F24\u5BB3\u500D\u7387\uFF08%\uFF09\uFF1A1\u7EA7\u586B50\uFF0C\u6BCF\u53471\u7EA7\u589E\u52A010\u3002"
   - name: damage_value
     key: 3001
     kind: 1
@@ -64,11 +65,12 @@ MonoBehaviour:
           constant: 0
           attribute: 2
           referenceId: 0
-          scaleBasisPoint: 10000
+          scalePercent: 100
+          percentage: 0
           useDynamicScale: 1
           dynamicScale:
             source: 12
-            constant: 10000
+            constant: 100
             attribute: 0
             referenceId: 1001
           offset: 0
@@ -83,11 +85,12 @@ MonoBehaviour:
           constant: 0
           attribute: 0
           referenceId: 0
-          scaleBasisPoint: 10000
+          scalePercent: 100
+          percentage: 0
           useDynamicScale: 0
           dynamicScale:
             source: 12
-            constant: 10000
+            constant: 100
             attribute: 0
             referenceId: 0
           offset: 0
@@ -111,11 +114,12 @@ MonoBehaviour:
           constant: 0
           attribute: 0
           referenceId: 3001
-          scaleBasisPoint: 10000
+          scalePercent: 100
+          percentage: 0
           useDynamicScale: 0
           dynamicScale:
             source: 12
-            constant: 10000
+            constant: 100
             attribute: 0
             referenceId: 0
           offset: 0
@@ -130,11 +134,12 @@ MonoBehaviour:
           constant: 0
           attribute: 0
           referenceId: 0
-          scaleBasisPoint: 10000
+          scalePercent: 100
+          percentage: 0
           useDynamicScale: 0
           dynamicScale:
             source: 12
-            constant: 10000
+            constant: 100
             attribute: 0
             referenceId: 0
           offset: 0

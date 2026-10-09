@@ -27,10 +27,10 @@ MonoBehaviour:
     attack: 190
     defense: 30
     speed: 110
-    critRate: 2200
-    critDamage: 16500
-    hitRate: 10000
-    dodgeRate: 500
+    critRate: 22
+    critDamage: 165
+    hitRate: 100
+    dodgeRate: 5
     energy: 100
     skillIds: 9d8a01003d110300
     viewPrefab: {fileID: 2961242989278074795, guid: e72ff562c27ca6141b6da5145dc3146a, type: 3}
@@ -51,9 +51,9 @@ MonoBehaviour:
     attack: 155
     defense: 25
     speed: 90
-    critRate: 1200
-    critDamage: 15000
-    hitRate: 10000
+    critRate: 12
+    critDamage: 150
+    hitRate: 100
     dodgeRate: 0
     energy: 100
     skillIds: 9d8a0100
@@ -114,11 +114,12 @@ MonoBehaviour:
         constant: 0
         attribute: 2
         referenceId: 0
-        scaleBasisPoint: 10000
+        scalePercent: 100
+        percentage: 0
         useDynamicScale: 0
         dynamicScale:
           source: 12
-          constant: 10000
+          constant: 100
           attribute: 0
           referenceId: 0
         offset: 0
@@ -133,11 +134,12 @@ MonoBehaviour:
         constant: 0
         attribute: 0
         referenceId: 0
-        scaleBasisPoint: 10000
+        scalePercent: 100
+        percentage: 0
         useDynamicScale: 0
         dynamicScale:
           source: 12
-          constant: 10000
+          constant: 100
           attribute: 0
           referenceId: 0
         offset: 0
@@ -171,11 +173,12 @@ MonoBehaviour:
         constant: 0
         attribute: 2
         referenceId: 0
-        scaleBasisPoint: 13500
+        scalePercent: 135
+        percentage: 0
         useDynamicScale: 0
         dynamicScale:
           source: 12
-          constant: 10000
+          constant: 100
           attribute: 0
           referenceId: 0
         offset: 10
@@ -190,11 +193,12 @@ MonoBehaviour:
         constant: 0
         attribute: 0
         referenceId: 0
-        scaleBasisPoint: 10000
+        scalePercent: 100
+        percentage: 0
         useDynamicScale: 0
         dynamicScale:
           source: 12
-          constant: 10000
+          constant: 100
           attribute: 0
           referenceId: 0
         offset: 0
@@ -214,3 +218,4 @@ MonoBehaviour:
     commandGapDuration: 0.2
     attackerAccent: {r: 0.15, g: 0.75, b: 1, a: 1}
     defenderAccent: {r: 1, g: 0.32, b: 0.25, a: 1}
+  percentageVersion: 1

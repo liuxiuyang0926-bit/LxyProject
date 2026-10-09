@@ -15,7 +15,6 @@ namespace Game.Battle.Editor
         private const string GeneratedRoot =
             "Packages/LxyGame/LxyGame.Logic/Runtime/Battle/TurnBased/Generated";
 
-        [MenuItem("工具/战斗/生成全部技能逻辑 C#", false, 7)]
         public static void GenerateAll()
         {
             List<TurnBasedSkillLogicAsset> assets =
@@ -118,8 +117,13 @@ namespace Game.Battle.Editor
                 string name = ToPascalIdentifier(item.name) + "_" + item.key;
                 builder.Append("            public const int ").Append(name)
                     .Append("Key = ").Append(item.key).AppendLine(";");
+                if (item.valueType == BattleLogicDataValueType.BasisPoint)
+                    builder.Append("            // 配置百分比：")
+                        .Append(item.defaultValue.ToString("R", CultureInfo.InvariantCulture))
+                        .AppendLine("%；以下值为编译后的定点比例 Raw，仅供运行时使用。");
                 builder.Append("            public const long ").Append(name)
-                    .Append("Default = ").Append(item.defaultValue)
+                    .Append("Default = ").Append(BattlePercentageAuthoring.Encode(
+                        item.defaultValue, item.valueType == BattleLogicDataValueType.BasisPoint))
                     .AppendLine("L;");
             }
             builder.AppendLine("        }");
@@ -143,7 +147,9 @@ namespace Game.Battle.Editor
             }
             builder.AppendLine("        }");
             AppendCompiledDataFactory(builder, data);
-            AppendCompiledRuleFactory(builder, orderedRules);
+            var compiledRules = new List<CompiledRule>(asset.Compile());
+            compiledRules.Sort((left, right) => left.Id.CompareTo(right.Id));
+            AppendCompiledRuleFactory(builder, compiledRules);
             builder.AppendLine("    }");
             builder.AppendLine("}");
             return builder.ToString();
@@ -175,7 +181,7 @@ namespace Game.Battle.Editor
                     .Append("\", BattleLogicDataKind.").Append(item.kind)
                     .Append(", BattleLogicDataValueType.").Append(item.valueType)
                     .Append(", BattleLogicVariableScope.").Append(scope)
-                    .Append(", ").Append(item.defaultValue).AppendLine("L),");
+                    .Append(", ").Append(BattlePercentageAuthoring.Encode(item.defaultValue, item.valueType == BattleLogicDataValueType.BasisPoint)).AppendLine("L),");
             }
             builder.AppendLine("            };");
             builder.AppendLine("        }");
@@ -183,7 +189,7 @@ namespace Game.Battle.Editor
 
         private static void AppendCompiledRuleFactory(
             StringBuilder builder,
-            IReadOnlyList<BattleRuleAuthoring> rules)
+            IReadOnlyList<CompiledRule> rules)
         {
             builder.AppendLine();
             builder.AppendLine("        public static CompiledRule[] CreateRules()");
@@ -192,17 +198,17 @@ namespace Game.Battle.Editor
             builder.AppendLine("            {");
             for (int ruleIndex = 0; ruleIndex < rules.Count; ruleIndex++)
             {
-                BattleRuleAuthoring rule = rules[ruleIndex];
+                CompiledRule rule = rules[ruleIndex];
                 builder.AppendLine("                new CompiledRule(");
-                builder.Append("                    new RuleId(").Append(rule.id).AppendLine("),");
-                builder.Append("                    BattleEventType.").Append(rule.trigger).AppendLine(",");
-                builder.Append("                    BattleEventPhase.").Append(rule.phase).AppendLine(",");
-                builder.Append("                    ").Append(rule.priority).AppendLine(",");
-                AppendConditions(builder, rule.conditions, 20);
+                builder.Append("                    new RuleId(").Append(rule.Id.Value).AppendLine("),");
+                builder.Append("                    BattleEventType.").Append(rule.Trigger).AppendLine(",");
+                builder.Append("                    BattleEventPhase.").Append(rule.Phase).AppendLine(",");
+                builder.Append("                    ").Append(rule.Priority).AppendLine(",");
+                AppendConditions(builder, rule.Conditions, 20);
                 builder.AppendLine(",");
-                AppendActions(builder, rule.actions, 20);
+                AppendActions(builder, rule.Actions, 20);
                 builder.AppendLine(",");
-                builder.Append("                    ").Append(Bool(rule.ownerMustBeAlive))
+                builder.Append("                    ").Append(Bool(rule.OwnerMustBeAlive))
                     .AppendLine("),");
             }
             builder.AppendLine("            };");
@@ -211,7 +217,7 @@ namespace Game.Battle.Editor
 
         private static void AppendConditions(
             StringBuilder builder,
-            IReadOnlyList<BattleConditionAuthoring> conditions,
+            IReadOnlyList<CompiledCondition> conditions,
             int indent)
         {
             string pad = new string(' ', indent);
@@ -224,18 +230,17 @@ namespace Game.Battle.Editor
             builder.Append(pad).AppendLine("{");
             for (int index = 0; index < (conditions?.Count ?? 0); index++)
             {
-                BattleConditionAuthoring condition = conditions[index] ??
-                    new BattleConditionAuthoring();
+                CompiledCondition condition = conditions[index];
                 builder.Append(pad).Append("    new CompiledCondition(")
-                    .Append("CompiledConditionType.").Append(condition.type).Append(", ");
-                AppendTarget(builder, condition.target);
-                builder.Append(", ComparisonOperator.").Append(condition.comparison)
-                    .Append(", ").Append(condition.value).Append("L, AttributeType.")
-                    .Append(condition.attribute).Append(", ").Append(condition.referenceId)
-                    .Append(", ").Append(Bool(condition.negate)).Append(", ");
-                AppendValue(builder, condition.leftValue);
+                    .Append("CompiledConditionType.").Append(condition.Type).Append(", ");
+                AppendTarget(builder, condition.Target);
+                builder.Append(", ComparisonOperator.").Append(condition.Comparison)
+                    .Append(", ").Append(condition.Value).Append("L, AttributeType.")
+                    .Append(condition.Attribute).Append(", ").Append(condition.ReferenceId)
+                    .Append(", ").Append(Bool(condition.Negate)).Append(", ");
+                AppendValue(builder, condition.LeftValue);
                 builder.Append(", ");
-                AppendValue(builder, condition.rightValue);
+                AppendValue(builder, condition.RightValue);
                 builder.AppendLine("),");
             }
             builder.Append(pad).Append("}");
@@ -243,7 +248,7 @@ namespace Game.Battle.Editor
 
         private static void AppendActions(
             StringBuilder builder,
-            IReadOnlyList<BattleActionAuthoring> actions,
+            IReadOnlyList<CompiledAction> actions,
             int indent)
         {
             string pad = new string(' ', indent);
@@ -251,17 +256,17 @@ namespace Game.Battle.Editor
             builder.Append(pad).AppendLine("{");
             for (int index = 0; index < (actions?.Count ?? 0); index++)
             {
-                BattleActionAuthoring action = actions[index] ?? new BattleActionAuthoring();
+                CompiledAction action = actions[index];
                 builder.Append(pad).Append("    new CompiledAction(CompiledActionType.")
-                    .Append(action.type).Append(", ");
-                AppendTarget(builder, action.target);
+                    .Append(action.Type).Append(", ");
+                AppendTarget(builder, action.Target);
                 builder.Append(", ");
-                AppendValue(builder, action.value);
-                builder.Append(", AttributeType.").Append(action.attribute)
-                    .Append(", ").Append(action.referenceId)
-                    .Append(", (CompiledActionFlags)").Append((int)action.flags)
-                    .Append(", ").Append(Bool(action.useDynamicReference)).Append(", ");
-                AppendValue(builder, action.referenceValue);
+                AppendValue(builder, action.Value);
+                builder.Append(", AttributeType.").Append(action.Attribute)
+                    .Append(", ").Append(action.ReferenceId)
+                    .Append(", (CompiledActionFlags)").Append((int)action.Flags)
+                    .Append(", ").Append(Bool(action.UseReferenceValue)).Append(", ");
+                AppendValue(builder, action.ReferenceValue);
                 builder.AppendLine("),");
             }
             builder.Append(pad).Append("}");
@@ -269,34 +274,32 @@ namespace Game.Battle.Editor
 
         private static void AppendTarget(
             StringBuilder builder,
-            BattleTargetAuthoring target)
+            CompiledTargetSelector target)
         {
-            BattleTargetAuthoring safe = target ?? new BattleTargetAuthoring();
+            CompiledTargetSelector safe = target;
             builder.Append("new CompiledTargetSelector(TargetSelectorType.")
-                .Append(safe.type).Append(", ").Append(safe.count)
-                .Append(", ").Append(Bool(safe.includeDead)).Append(", ")
-                .Append(safe.configIdFilter).Append(')');
+                .Append(safe.Type).Append(", ").Append(safe.Count)
+                .Append(", ").Append(Bool(safe.IncludeDead)).Append(", ")
+                .Append(safe.ConfigIdFilter).Append(')');
         }
 
         private static void AppendValue(
             StringBuilder builder,
-            BattleValueAuthoring value)
+            CompiledValue value)
         {
-            BattleValueAuthoring safe = value ?? new BattleValueAuthoring();
-            BattleValueOperandAuthoring scale = safe.dynamicScale ??
-                new BattleValueOperandAuthoring();
-            builder.Append("new CompiledValue(ValueSourceType.").Append(safe.source)
-                .Append(", ").Append(safe.constant).Append("L, AttributeType.")
-                .Append(safe.attribute).Append(", ").Append(safe.referenceId)
-                .Append(", ").Append(safe.scaleBasisPoint).Append(", ")
-                .Append(safe.offset).Append("L, ").Append(Bool(safe.hasMinimum))
-                .Append(", ").Append(safe.minimum).Append("L, ")
-                .Append(Bool(safe.hasMaximum)).Append(", ")
-                .Append(safe.maximum).Append("L, ")
-                .Append(Bool(safe.useDynamicScale)).Append(", ValueSourceType.")
-                .Append(scale.source).Append(", ").Append(scale.constant)
-                .Append("L, AttributeType.").Append(scale.attribute)
-                .Append(", ").Append(scale.referenceId).Append(')');
+            CompiledValue safe = value;
+            builder.Append("new CompiledValue(ValueSourceType.").Append(safe.Source)
+                .Append(", ").Append(safe.Constant).Append("L, AttributeType.")
+                .Append(safe.Attribute).Append(", ").Append(safe.ReferenceId)
+                .Append(", ").Append(safe.ScaleBasisPoint).Append(", ")
+                .Append(safe.Offset).Append("L, ").Append(Bool(safe.HasMinimum))
+                .Append(", ").Append(safe.Minimum).Append("L, ")
+                .Append(Bool(safe.HasMaximum)).Append(", ")
+                .Append(safe.Maximum).Append("L, ")
+                .Append(Bool(safe.UseDynamicScale)).Append(", ValueSourceType.")
+                .Append(safe.DynamicScaleSource).Append(", ").Append(safe.DynamicScaleConstant)
+                .Append("L, AttributeType.").Append(safe.DynamicScaleAttribute)
+                .Append(", ").Append(safe.DynamicScaleReferenceId).Append(')');
         }
 
         private static string Bool(bool value) => value ? "true" : "false";
@@ -435,7 +438,7 @@ namespace Game.Battle.Editor
                 BattleLogicDataKind kind,
                 BattleLogicDataValueType valueType,
                 BattleLogicVariableScope scope,
-                long defaultValue,
+                double defaultValue,
                 string description)
             {
                 Key = key;
@@ -452,7 +455,7 @@ namespace Game.Battle.Editor
             public BattleLogicDataKind Kind { get; }
             public BattleLogicDataValueType ValueType { get; }
             public BattleLogicVariableScope Scope { get; }
-            public long DefaultValue { get; }
+            public double DefaultValue { get; }
             public string Description { get; }
         }
 
@@ -460,10 +463,10 @@ namespace Game.Battle.Editor
         {
             new TemplateItem(1001, "damage_rate", BattleLogicDataKind.Parameter,
                 BattleLogicDataValueType.BasisPoint, BattleLogicVariableScope.Invocation,
-                10000, "基础伤害倍率，10000 表示 100%。"),
+                100, "基础伤害倍率，100 表示 100%。"),
             new TemplateItem(1002, "trigger_chance", BattleLogicDataKind.Parameter,
                 BattleLogicDataValueType.BasisPoint, BattleLogicVariableScope.Invocation,
-                10000, "触发概率，10000 表示必定触发。"),
+                100, "触发概率，100 表示必定触发。"),
             new TemplateItem(2001, "cast_count", BattleLogicDataKind.RuntimeVariable,
                 BattleLogicDataValueType.Integer, BattleLogicVariableScope.Skill,
                 0, "该单位的此技能在本场战斗累计释放次数。"),
@@ -476,7 +479,7 @@ namespace Game.Battle.Editor
         {
             new TemplateItem(1002, "trigger_chance", BattleLogicDataKind.Parameter,
                 BattleLogicDataValueType.BasisPoint, BattleLogicVariableScope.Invocation,
-                10000, "被动触发概率，10000 表示必定触发。"),
+                100, "被动触发概率，100 表示必定触发。"),
             new TemplateItem(2001, "trigger_count", BattleLogicDataKind.RuntimeVariable,
                 BattleLogicDataValueType.Integer, BattleLogicVariableScope.Skill,
                 0, "本场战斗累计触发次数。"),

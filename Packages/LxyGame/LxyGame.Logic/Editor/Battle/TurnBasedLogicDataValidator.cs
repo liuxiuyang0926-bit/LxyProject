@@ -4,7 +4,6 @@ using Game.Battle.TurnBased.Core.Commands;
 using Game.Battle.TurnBased.Core.Session;
 using Game.Battle.TurnBased.Domain;
 using Game.Battle.TurnBased.RuntimeData;
-using UnityEditor;
 using UnityEngine;
 
 namespace Game.Battle.Editor
@@ -24,7 +23,6 @@ namespace Game.Battle.Editor
             new BattleVariableKey(9810001);
         private static readonly BuffId TestBuff = new BuffId(820001);
 
-        [MenuItem("工具/战斗/运行逻辑临时数据自检", false, 6)]
         public static void Validate()
         {
             CompiledBattleDatabase database = CreateDatabase();

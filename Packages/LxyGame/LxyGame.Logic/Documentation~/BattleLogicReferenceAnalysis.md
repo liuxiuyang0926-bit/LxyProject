@@ -19,7 +19,7 @@
 | 技能等级数组、策划系数 | `BattleLogicDataKind.Parameter` |
 | 函数内局部中间值 | `InvocationVariable`，每条规则触发后清空 |
 | `getSkillCache/setSkillCache` | `SkillVariable`，按技能运行时实例隔离 |
-| `checkRateSuccess` | `RandomBasisPoint < trigger_chance` 动态条件 |
+| `checkRateSuccess` | `确定性随机百分比 < trigger_chance` 动态条件 |
 | 数值系数参与伤害/治疗 | 数值表达式的动态倍率 |
 | 两个运行时值比较 | `LogicValueCompare` |
 | 固定或参数化 Buff ID | Action 固定引用 ID / 动态引用 ID |
@@ -59,7 +59,7 @@
 1. 从一个旧技能提取触发事件、目标、参数、临时值、整场缓存和输出事件。
 2. 在逻辑编辑器先建立数据定义，再按规则拆分条件和 Action。
 3. 复杂公式用临时变量分步计算；跨触发状态只放技能实例变量。
-4. 为随机条件显式配置万分比参数，不使用 Unity 随机数。
+4. 为随机条件显式配置百分比参数（30 表示 30%），不使用 Unity 随机数。
 5. 保存并运行“校验编译”和“逻辑临时数据自检”。
 6. 生成 C# 进行代码评审，再把技能定义加入 `TurnBasedBattleDefinition`。
 7. 使用固定 Seed 与 Command 录制黄金事件轨迹，和旧工程结果对照。

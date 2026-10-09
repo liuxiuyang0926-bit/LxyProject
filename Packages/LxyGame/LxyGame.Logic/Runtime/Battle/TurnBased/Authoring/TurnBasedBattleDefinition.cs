@@ -4,6 +4,7 @@ using Game.Battle.TurnBased.Domain;
 using Game.Battle.TurnBased.RuntimeData;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game.Battle.TurnBased.Authoring
 {
@@ -36,7 +37,7 @@ namespace Game.Battle.TurnBased.Authoring
         public int count;
         [LabelText("包含死亡单位")]
         public bool includeDead;
-        [LabelText("配置 ID 过滤"), Tooltip("大于 0 时，只保留指定配置 ID 的单位。")]
+        [LabelText("配置编号过滤"), Tooltip("大于 0 时，只保留指定配置编号的单位。")]
         [Min(0)] public int configIdFilter;
 
         internal CompiledTargetSelector Compile() =>
@@ -48,12 +49,12 @@ namespace Game.Battle.TurnBased.Authoring
     {
         [LabelText("倍率来源")]
         public ValueSourceType source = ValueSourceType.LogicParameter;
-        [LabelText("固定倍率"), ShowIf(nameof(UsesConstant))]
-        public long constant = BattleNumeric.BasisPointOne;
+        [LabelText("固定倍率（%）"), ShowIf(nameof(UsesConstant))]
+        public double constant = 100;
         [LabelText("倍率属性"), ShowIf(nameof(UsesAttribute))]
         public AttributeType attribute = AttributeType.Hp;
-        [LabelText("引用 ID"), ShowIf(nameof(UsesReferenceId)),
-         Tooltip("逻辑参数/变量填写数据 Key；Buff 层数填写 Buff ID。")]
+        [LabelText("引用编号"), ShowIf(nameof(UsesReferenceId)),
+         Tooltip("逻辑参数或变量填写数据编号；状态层数填写状态编号。")]
         public int referenceId;
 
         private bool UsesConstant => source == ValueSourceType.Constant;
@@ -73,15 +74,18 @@ namespace Game.Battle.TurnBased.Authoring
         [LabelText("数值来源")]
         public ValueSourceType source = ValueSourceType.Constant;
         [LabelText("固定值"), ShowIf(nameof(UsesConstant))]
-        public long constant;
+        public double constant;
         [LabelText("属性"), ShowIf(nameof(UsesAttribute))]
         public AttributeType attribute = AttributeType.Hp;
-        [LabelText("引用 ID"), ShowIf(nameof(UsesReferenceId)),
-         Tooltip("BuffStack 填 Buff ID；BattleCounter 填全局变量 ID；逻辑参数/变量填逻辑数据 Key。")]
+        [LabelText("引用编号"), ShowIf(nameof(UsesReferenceId)),
+         Tooltip("状态层数填写状态编号；战斗计数器填写全局变量编号；逻辑参数或变量填写数据编号。")]
         public int referenceId;
-        [LabelText("倍率（万分比）"), Min(0), ShowIf(nameof(UsesStaticScale)),
-         Tooltip("10000 = 100%，13500 = 135%。")]
-        public int scaleBasisPoint = BattleNumeric.BasisPointOne;
+        [LabelText("倍率（%）"), Min(0), ShowIf(nameof(UsesStaticScale)),
+         Tooltip("填写实际百分数：100 = 100%，135 = 135%，支持两位小数。"), FormerlySerializedAs("scaleBasisPoint")]
+        public double scalePercent = 100;
+        [LabelText("固定值使用百分比"), ShowIf(nameof(UsesConstant)),
+         Tooltip("百分比比较和百分比变量会自动识别单位；独立固定百分比可手动开启。")]
+        public bool percentage;
         [LabelText("使用动态倍率"),
          Tooltip("开启后倍率可读取策划参数或运行时变量，适合按技能等级配置伤害系数。")]
         public bool useDynamicScale;
@@ -89,15 +93,15 @@ namespace Game.Battle.TurnBased.Authoring
         public BattleValueOperandAuthoring dynamicScale =
             new BattleValueOperandAuthoring();
         [LabelText("最终偏移")]
-        public long offset;
+        public double offset;
         [LabelText("启用下限")]
         public bool hasMinimum;
         [LabelText("最小值"), ShowIf(nameof(hasMinimum))]
-        public long minimum;
+        public double minimum;
         [LabelText("启用上限")]
         public bool hasMaximum;
         [LabelText("最大值"), ShowIf(nameof(hasMaximum))]
-        public long maximum;
+        public double maximum;
 
         private bool UsesConstant => source == ValueSourceType.Constant;
         private bool UsesStaticScale => !useDynamicScale;
@@ -110,23 +114,26 @@ namespace Game.Battle.TurnBased.Authoring
             source == ValueSourceType.InvocationVariable ||
             source == ValueSourceType.SkillVariable;
 
-        internal CompiledValue Compile() =>
-            new CompiledValue(
-                source,
-                constant,
-                attribute,
-                referenceId,
-                scaleBasisPoint,
-                offset,
-                hasMinimum,
-                minimum,
-                hasMaximum,
-                maximum,
-                useDynamicScale,
+        internal CompiledValue Compile(IReadOnlyList<BattleLogicDataAuthoring> data = null, bool percentageContext = false)
+        {
+            bool percent = percentageContext || BattlePercentageAuthoring.IsPercentage(this, data);
+            if (percent && source != ValueSourceType.Constant &&
+                !BattlePercentageAuthoring.IsPercentage(source, attribute, referenceId, data))
+                throw new ArgumentException("百分比表达式不能读取整数参数或整数属性，请使用百分比类型的数据。");
+            if (useDynamicScale && dynamicScale != null && dynamicScale.source != ValueSourceType.Constant &&
+                !BattlePercentageAuthoring.IsPercentage(dynamicScale.source, dynamicScale.attribute, dynamicScale.referenceId, data))
+                throw new ArgumentException("动态倍率必须引用百分比类型的参数、变量、属性、血量比例或随机百分比。");
+            return new CompiledValue(source,
+                BattlePercentageAuthoring.Encode(constant, percent), attribute, referenceId,
+                BattlePercentageAuthoring.Scale(scalePercent),
+                BattlePercentageAuthoring.Encode(offset, percent), hasMinimum,
+                BattlePercentageAuthoring.Encode(minimum, percent), hasMaximum,
+                BattlePercentageAuthoring.Encode(maximum, percent), useDynamicScale,
                 dynamicScale?.source ?? ValueSourceType.Constant,
-                dynamicScale?.constant ?? BattleNumeric.BasisPointOne,
-                dynamicScale?.attribute ?? AttributeType.Hp,
-                dynamicScale?.referenceId ?? 0);
+                BattlePercentageAuthoring.Encode(dynamicScale?.constant ?? 100, true),
+                dynamicScale?.attribute ?? AttributeType.Hp, dynamicScale?.referenceId ?? 0);
+        }
+
     }
 
     [Serializable]
@@ -139,15 +146,15 @@ namespace Game.Battle.TurnBased.Authoring
         [LabelText("比较方式"), ShowIf(nameof(UsesComparison))]
         public ComparisonOperator comparison = ComparisonOperator.Equal;
         [LabelText("比较值"), ShowIf(nameof(UsesValue))]
-        public long value;
+        public double value;
         [LabelText("左侧数值"), ShowIf(nameof(UsesLogicValues)), InlineProperty]
         public BattleValueAuthoring leftValue = new BattleValueAuthoring();
         [LabelText("右侧数值"), ShowIf(nameof(UsesLogicValues)), InlineProperty]
         public BattleValueAuthoring rightValue = new BattleValueAuthoring();
         [LabelText("比较属性"), ShowIf(nameof(UsesAttribute))]
         public AttributeType attribute = AttributeType.Hp;
-        [LabelText("引用 ID"), ShowIf(nameof(UsesReferenceId)),
-         Tooltip("HasBuff 填 Buff ID；计数器条件填变量 ID。")]
+        [LabelText("引用编号"), ShowIf(nameof(UsesReferenceId)),
+         Tooltip("拥有状态填写状态编号；计数器条件填写变量编号。")]
         public int referenceId;
         [LabelText("条件取反"), HideIf(nameof(IsAlways))]
         public bool negate;
@@ -178,17 +185,17 @@ namespace Game.Battle.TurnBased.Authoring
             type == CompiledConditionType.CounterCompare ||
             type == CompiledConditionType.CounterCompareCurrentRound;
 
-        internal CompiledCondition Compile() =>
+        internal CompiledCondition Compile(IReadOnlyList<BattleLogicDataAuthoring> data = null) =>
             new CompiledCondition(
                 type,
                 (target ?? new BattleTargetAuthoring()).Compile(),
                 comparison,
-                value,
+                BattlePercentageAuthoring.Encode(value, BattlePercentageAuthoring.IsPercentage(this)),
                 attribute,
                 referenceId,
                 negate,
-                (leftValue ?? new BattleValueAuthoring()).Compile(),
-                (rightValue ?? new BattleValueAuthoring()).Compile());
+                (leftValue ?? new BattleValueAuthoring()).Compile(data, BattlePercentageAuthoring.IsPercentage(rightValue, data)),
+                (rightValue ?? new BattleValueAuthoring()).Compile(data, BattlePercentageAuthoring.IsPercentage(leftValue, data)));
     }
 
     [Serializable]
@@ -209,13 +216,13 @@ namespace Game.Battle.TurnBased.Authoring
         public BattleValueAuthoring value = new BattleValueAuthoring();
         [LabelText("修改属性"), ShowIf(nameof(UsesAttribute))]
         public AttributeType attribute = AttributeType.Hp;
-        [LabelText("动态引用 ID"), ShowIf(nameof(SupportsDynamicReference)),
-         Tooltip("启用后可从策划参数或变量读取 Buff ID；关闭时使用固定引用 ID。")]
+        [LabelText("动态引用编号"), ShowIf(nameof(SupportsDynamicReference)),
+         Tooltip("启用后可从策划参数或变量读取状态编号；关闭时使用固定引用编号。")]
         public bool useDynamicReference;
-        [LabelText("引用 ID 数值"), ShowIf(nameof(UsesDynamicReference)), InlineProperty]
+        [LabelText("引用编号数值"), ShowIf(nameof(UsesDynamicReference)), InlineProperty]
         public BattleValueAuthoring referenceValue = new BattleValueAuthoring();
-        [LabelText("引用 ID"), ShowIf(nameof(UsesFixedReferenceId)),
-         Tooltip("添加/移除 Buff 填 Buff ID；计数器和变量操作填变量 ID。")]
+        [LabelText("引用编号"), ShowIf(nameof(UsesFixedReferenceId)),
+         Tooltip("添加或移除增益减益时填写状态编号；计数器和变量操作填写变量编号。")]
         public int referenceId;
         [LabelText("伤害选项"), ShowIf(nameof(IsDamage))]
         public CompiledActionFlags flags;
@@ -255,16 +262,23 @@ namespace Game.Battle.TurnBased.Authoring
             type == CompiledActionType.AddSkillVariable;
         private bool UsesFixedReferenceId => UsesReferenceId && !UsesDynamicReference;
 
-        internal CompiledAction Compile() =>
-            new CompiledAction(
+        internal CompiledAction Compile(IReadOnlyList<BattleLogicDataAuthoring> data = null)
+        {
+            bool percentageTarget = BattlePercentageAuthoring.IsPercentage(this, data);
+            if (BattlePercentageAuthoring.IsPercentage(value, data) && !percentageTarget)
+                throw new ArgumentException("百分比不能直接写入伤害、数量或整数变量；请用攻击/生命等数值乘以动态倍率，或选择百分比变量。");
+            if (useDynamicReference && BattlePercentageAuthoring.IsPercentage(referenceValue, data))
+                throw new ArgumentException("配置引用编号必须使用整数，不能使用百分比。");
+            return new CompiledAction(
                 type,
                 (target ?? new BattleTargetAuthoring()).Compile(),
-                (value ?? new BattleValueAuthoring()).Compile(),
+                (value ?? new BattleValueAuthoring()).Compile(data, percentageTarget),
                 attribute,
                 referenceId,
                 flags,
                 useDynamicReference,
-                (referenceValue ?? new BattleValueAuthoring()).Compile());
+                (referenceValue ?? new BattleValueAuthoring()).Compile(data));
+        }
     }
 
     [Serializable]
@@ -272,12 +286,12 @@ namespace Game.Battle.TurnBased.Authoring
     {
         [LabelText("规则名称"), Tooltip("编辑器中显示的规则名称。")]
         public string operationName = "规则";
-        [LabelText("执行组"), Tooltip("同名组可表达 Lua Parallel/并行分支。")]
+        [LabelText("执行组"), Tooltip("同名组可表达并行逻辑分支。")]
         public string executionGroup = "主流程";
         [LabelText("执行方式")]
         public BattleAuthoringExecutionMode executionMode =
             BattleAuthoringExecutionMode.Sequence;
-        [LabelText("规则 ID"), Min(1)] public int id = 1;
+        [LabelText("规则编号"), Min(1)] public int id = 1;
         [LabelText("触发事件")]
         public BattleEventType trigger = BattleEventType.SkillCast;
         [LabelText("执行阶段")]
@@ -301,19 +315,19 @@ namespace Game.Battle.TurnBased.Authoring
         public List<BattleActionAuthoring> actions =
             new List<BattleActionAuthoring>();
 
-        internal CompiledRule Compile()
+        internal CompiledRule Compile(IReadOnlyList<BattleLogicDataAuthoring> data = null)
         {
             var compiledConditions =
                 new CompiledCondition[conditions?.Count ?? 0];
             for (int index = 0; index < compiledConditions.Length; index++)
             {
-                compiledConditions[index] = conditions[index].Compile();
+                compiledConditions[index] = conditions[index].Compile(data);
             }
 
             var compiledActions = new CompiledAction[actions?.Count ?? 0];
             for (int index = 0; index < compiledActions.Length; index++)
             {
-                compiledActions[index] = actions[index].Compile();
+                compiledActions[index] = actions[index].Compile(data);
             }
 
             return new CompiledRule(
@@ -330,7 +344,7 @@ namespace Game.Battle.TurnBased.Authoring
     [Serializable]
     public sealed class BattleSkillAuthoring
     {
-        [LabelText("技能 ID"), Min(1)] public int id = 1001;
+        [LabelText("技能编号"), Min(1)] public int id = 1001;
         [LabelText("显示名称")]
         public string displayName = "普通攻击";
         [LabelText("消耗属性")]
@@ -339,10 +353,10 @@ namespace Game.Battle.TurnBased.Authoring
         [LabelText("目标模式")]
         public BattleSkillTargetMode targetMode =
             BattleSkillTargetMode.SingleEnemy;
-        [LabelText("主动技能"), Tooltip("关闭后作为被动技能注册规则，但不会出现在行动按钮与 AI 选技中。")]
+        [LabelText("主动技能"), Tooltip("关闭后作为被动技能注册规则，不参与手动或自动选技。")]
         public bool activeCommand = true;
-        [LabelText("旧版规则 ID（独立技能无需配置）"),
-         Tooltip("独立技能资产会直接使用 Logic 中的规则 ID。")]
+        [LabelText("旧版规则编号（独立技能无需配置）"),
+         Tooltip("独立技能资产会直接使用逻辑资产中的规则编号。")]
         public List<int> ruleIds = new List<int>();
 
         [Header("表现")]
@@ -424,11 +438,10 @@ namespace Game.Battle.TurnBased.Authoring
         [Min(0)] public long attack = 100;
         [Min(0)] public long defense = 10;
         [Min(1)] public long speed = 100;
-        [Range(0, BattleNumeric.BasisPointOne)] public int critRate = 1500;
-        [Min(0)] public int critDamage = BattleNumeric.DefaultCritDamage;
-        [Range(0, BattleNumeric.BasisPointOne)] public int hitRate =
-            BattleNumeric.BasisPointOne;
-        [Range(0, BattleNumeric.BasisPointOne)] public int dodgeRate;
+        [LabelText("暴击率（%）"), Range(0, 100)] public double critRate = 15;
+        [LabelText("暴击伤害（%）"), Min(0)] public double critDamage = 150;
+        [LabelText("命中率（%）"), Range(0, 100)] public double hitRate = 100;
+        [LabelText("闪避率（%）"), Range(0, 100)] public double dodgeRate;
         [Min(0)] public long energy = 100;
         public List<int> skillIds = new List<int>();
 
@@ -453,10 +466,10 @@ namespace Game.Battle.TurnBased.Authoring
             unit.InitializeAttribute(AttributeType.Attack, attack);
             unit.InitializeAttribute(AttributeType.Defense, defense);
             unit.InitializeAttribute(AttributeType.Speed, speed);
-            unit.InitializeAttribute(AttributeType.CritRate, critRate);
-            unit.InitializeAttribute(AttributeType.CritDamage, critDamage);
-            unit.InitializeAttribute(AttributeType.HitRate, hitRate);
-            unit.InitializeAttribute(AttributeType.DodgeRate, dodgeRate);
+            unit.InitializeAttribute(AttributeType.CritRate, BattlePercentageAuthoring.Encode(critRate, true));
+            unit.InitializeAttribute(AttributeType.CritDamage, BattlePercentageAuthoring.Encode(critDamage, true));
+            unit.InitializeAttribute(AttributeType.HitRate, BattlePercentageAuthoring.Encode(hitRate, true));
+            unit.InitializeAttribute(AttributeType.DodgeRate, BattlePercentageAuthoring.Encode(dodgeRate, true));
             unit.InitializeAttribute(AttributeType.Energy, energy);
 
             for (int index = 0; index < skillIds.Count; index++)
@@ -500,7 +513,7 @@ namespace Game.Battle.TurnBased.Authoring
     [CreateAssetMenu(
         fileName = "TurnBasedBattleDefinition",
         menuName = "LxyDemo/战斗/回合制战斗定义")]
-    public sealed class TurnBasedBattleDefinition : ScriptableObject
+    public sealed partial class TurnBasedBattleDefinition : ScriptableObject
     {
         [SerializeField] private string displayName = "回合制战斗";
         [SerializeField] private string logicVersion = "1.0.0";
@@ -668,10 +681,10 @@ namespace Game.Battle.TurnBased.Authoring
                     attack = 190,
                     defense = 30,
                     speed = 110,
-                    critRate = 2200,
-                    critDamage = 16500,
-                    hitRate = 10000,
-                    dodgeRate = 500,
+                    critRate = 22,
+                    critDamage = 165,
+                    hitRate = 100,
+                    dodgeRate = 5,
                     energy = 100,
                     skillIds = new List<int> { 1001, 1002 },
                     viewPrefab = attackerPrefab,
@@ -694,10 +707,10 @@ namespace Game.Battle.TurnBased.Authoring
                     attack = 155,
                     defense = 25,
                     speed = 90,
-                    critRate = 1200,
-                    critDamage = 15000,
-                    hitRate = 10000,
-                    dodgeRate = 300,
+                    critRate = 12,
+                    critDamage = 150,
+                    hitRate = 100,
+                    dodgeRate = 3,
                     energy = 100,
                     skillIds = new List<int> { 1001 },
                     viewPrefab = defenderPrefab,
@@ -739,10 +752,10 @@ namespace Game.Battle.TurnBased.Authoring
 
             rules = new List<BattleRuleAuthoring>
             {
-                CreateDamageRule(1, BattleNumeric.BasisPointOne, 0),
+                CreateDamageRule(1, 100, 0),
                 CreateDamageRule(
                     2,
-                    13500,
+                    135,
                     10,
                     CompiledActionFlags.CanCritical |
                     CompiledActionFlags.CanMiss),
@@ -858,7 +871,7 @@ namespace Game.Battle.TurnBased.Authoring
                     if (!ruleIds.Add(assetRules[ruleIndex].Id.Value))
                     {
                         throw new InvalidOperationException(
-                            $"独立技能规则 ID 重复：{assetRules[ruleIndex].Id}");
+                            $"独立技能规则编号重复：{assetRules[ruleIndex].Id}");
                     }
                     ruleList.Add(assetRules[ruleIndex]);
                 }
@@ -877,7 +890,7 @@ namespace Game.Battle.TurnBased.Authoring
 
         private static BattleRuleAuthoring CreateDamageRule(
             int id,
-            int scaleBasisPoint,
+            double scalePercent,
             long offset,
             CompiledActionFlags flags =
                 CompiledActionFlags.CanCritical |
@@ -902,7 +915,7 @@ namespace Game.Battle.TurnBased.Authoring
                         {
                             source = ValueSourceType.OwnerAttribute,
                             attribute = AttributeType.Attack,
-                            scaleBasisPoint = scaleBasisPoint,
+                            scalePercent = scalePercent,
                             offset = offset,
                             hasMinimum = true,
                             minimum = 1,
@@ -930,6 +943,18 @@ namespace Game.Battle.TurnBased.Authoring
             ValidateRules();
             ValidateSkills();
             ValidateBuffs();
+            foreach (var unit in units)
+            {
+                BattlePercentageAuthoring.Encode(unit.critRate, true);
+                BattlePercentageAuthoring.Encode(unit.critDamage, true);
+                BattlePercentageAuthoring.Encode(unit.hitRate, true);
+                BattlePercentageAuthoring.Encode(unit.dodgeRate, true);
+                if (unit.critRate < 0 || unit.critRate > 100 || unit.critDamage < 0 ||
+                    unit.hitRate < 0 || unit.hitRate > 100 || unit.dodgeRate < 0 || unit.dodgeRate > 100)
+                    throw new InvalidOperationException($"单位 {unit.unitId} 的概率必须在 0%～100%，暴击伤害不能为负。");
+            }
+            if (!UsesGeneratedSkillAssets)
+                foreach (var rule in rules) rule.Compile();
         }
 
         private void ValidateUnits()
@@ -1007,7 +1032,7 @@ namespace Game.Battle.TurnBased.Authoring
                         if (!externalRuleIds.Add(assetRules[ruleIndex].id))
                         {
                             throw new InvalidOperationException(
-                                $"独立技能规则 ID 重复：{assetRules[ruleIndex].id}");
+                                $"独立技能规则编号重复：{assetRules[ruleIndex].id}");
                         }
                     }
                 }
@@ -1027,7 +1052,7 @@ namespace Game.Battle.TurnBased.Authoring
                 if (rule.id <= 0 || !ids.Add(rule.id) ||
                     rule.trigger == BattleEventType.None)
                 {
-                    throw new InvalidOperationException($"规则 ID 或触发器无效：{rule.id}");
+                    throw new InvalidOperationException($"规则编号或触发事件无效：{rule.id}");
                 }
 
                 if (rule.actions == null || rule.actions.Count == 0)
@@ -1242,7 +1267,7 @@ namespace Game.Battle.TurnBased.Authoring
             BattleValueAuthoring value,
             string owner)
         {
-            if (value == null || value.scaleBasisPoint < 0 ||
+            if (value == null || value.scalePercent < 0 ||
                 value.useDynamicScale && value.dynamicScale == null ||
                 value.useDynamicScale &&
                 value.dynamicScale.source == ValueSourceType.Constant &&
@@ -1273,10 +1298,10 @@ namespace Game.Battle.TurnBased.Authoring
                 hash.Add(unit.attack);
                 hash.Add(unit.defense);
                 hash.Add(unit.speed);
-                hash.Add(unit.critRate);
-                hash.Add(unit.critDamage);
-                hash.Add(unit.hitRate);
-                hash.Add(unit.dodgeRate);
+                hash.Add(BattlePercentageAuthoring.Encode(unit.critRate, true));
+                hash.Add(BattlePercentageAuthoring.Encode(unit.critDamage, true));
+                hash.Add(BattlePercentageAuthoring.Encode(unit.hitRate, true));
+                hash.Add(BattlePercentageAuthoring.Encode(unit.dodgeRate, true));
                 hash.Add(unit.energy);
                 hash.Add(unit.skillIds.Count);
                 for (int skillIndex = 0; skillIndex < unit.skillIds.Count; skillIndex++)
@@ -1331,14 +1356,14 @@ namespace Game.Battle.TurnBased.Authoring
                         hash.Add((int)(data.kind == BattleLogicDataKind.Parameter
                             ? BattleLogicVariableScope.Invocation
                             : data.scope));
-                        hash.Add(data.defaultValue);
+                        hash.Add(data.Compile().DefaultValue);
                     }
                     hash.Add(asset.Logic.Rules.Count);
                     for (int ruleIndex = 0;
                          ruleIndex < asset.Logic.Rules.Count;
                          ruleIndex++)
                     {
-                        AddRuleHash(ref hash, asset.Logic.Rules[ruleIndex]);
+                        AddRuleHash(ref hash, asset.Logic.Rules[ruleIndex], asset.Logic.DataDefinitions);
                     }
                 }
             }
@@ -1370,7 +1395,7 @@ namespace Game.Battle.TurnBased.Authoring
 
         private static void AddRuleHash(
             ref StableAuthoringHash hash,
-            BattleRuleAuthoring rule)
+            BattleRuleAuthoring rule, IReadOnlyList<BattleLogicDataAuthoring> data = null)
         {
             hash.Add(rule.id);
             hash.Add((int)rule.trigger);
@@ -1385,14 +1410,14 @@ namespace Game.Battle.TurnBased.Authoring
                 hash.Add((int)condition.type);
                 AddTargetHash(ref hash, condition.target);
                 hash.Add((int)condition.comparison);
-                hash.Add(condition.value);
+                hash.Add(condition.Compile(data).Value);
                 hash.Add((int)condition.attribute);
                 hash.Add(condition.referenceId);
                 hash.Add(condition.negate);
                 if (condition.type == CompiledConditionType.LogicValueCompare)
                 {
-                    AddValueHash(ref hash, condition.leftValue);
-                    AddValueHash(ref hash, condition.rightValue);
+                    AddValueHash(ref hash, condition.leftValue.Compile(data, BattlePercentageAuthoring.IsPercentage(condition.rightValue, data)));
+                    AddValueHash(ref hash, condition.rightValue.Compile(data, BattlePercentageAuthoring.IsPercentage(condition.leftValue, data)));
                 }
             }
 
@@ -1403,14 +1428,14 @@ namespace Game.Battle.TurnBased.Authoring
                 BattleActionAuthoring action = rule.actions[index];
                 hash.Add((int)action.type);
                 AddTargetHash(ref hash, action.target);
-                AddValueHash(ref hash, action.value);
+                AddValueHash(ref hash, action.value.Compile(data, BattlePercentageAuthoring.IsPercentage(action, data)));
                 hash.Add((int)action.attribute);
                 hash.Add(action.referenceId);
                 hash.Add((int)action.flags);
                 hash.Add(action.useDynamicReference);
                 if (action.useDynamicReference)
                 {
-                    AddValueHash(ref hash, action.referenceValue);
+                    AddValueHash(ref hash, action.referenceValue.Compile(data));
                 }
             }
         }
@@ -1427,25 +1452,25 @@ namespace Game.Battle.TurnBased.Authoring
 
         private static void AddValueHash(
             ref StableAuthoringHash hash,
-            BattleValueAuthoring value)
+            CompiledValue value)
         {
-            hash.Add((int)value.source);
-            hash.Add(value.constant);
-            hash.Add((int)value.attribute);
-            hash.Add(value.referenceId);
-            hash.Add(value.scaleBasisPoint);
-            hash.Add(value.offset);
-            hash.Add(value.hasMinimum);
-            hash.Add(value.minimum);
-            hash.Add(value.hasMaximum);
-            hash.Add(value.maximum);
-            hash.Add(value.useDynamicScale);
-            if (value.useDynamicScale && value.dynamicScale != null)
+            hash.Add((int)value.Source);
+            hash.Add(value.Constant);
+            hash.Add((int)value.Attribute);
+            hash.Add(value.ReferenceId);
+            hash.Add(value.ScaleBasisPoint);
+            hash.Add(value.Offset);
+            hash.Add(value.HasMinimum);
+            hash.Add(value.Minimum);
+            hash.Add(value.HasMaximum);
+            hash.Add(value.Maximum);
+            hash.Add(value.UseDynamicScale);
+            if (value.UseDynamicScale)
             {
-                hash.Add((int)value.dynamicScale.source);
-                hash.Add(value.dynamicScale.constant);
-                hash.Add((int)value.dynamicScale.attribute);
-                hash.Add(value.dynamicScale.referenceId);
+                hash.Add((int)value.DynamicScaleSource);
+                hash.Add(value.DynamicScaleConstant);
+                hash.Add((int)value.DynamicScaleAttribute);
+                hash.Add(value.DynamicScaleReferenceId);
             }
         }
 

@@ -20,6 +20,15 @@ namespace Game.Battle.Editor
             T[] values = Values;
             string[] labels = Labels;
             int current = IndexOf(values, ValueEntry.SmartValue);
+            if (current < 0)
+            {
+                var extended = new string[labels.Length + 1];
+                Array.Copy(labels, extended, labels.Length);
+                extended[labels.Length] = "未知或不可用选项（保留原值）";
+                int choice = EditorGUILayout.Popup(label ?? GUIContent.none, labels.Length, extended);
+                if (choice < values.Length) ValueEntry.SmartValue = values[choice];
+                return;
+            }
             int shown = current < 0 ? 0 : current;
             EditorGUI.BeginChangeCheck();
             int next = EditorGUILayout.Popup(label ?? GUIContent.none, shown, labels);
@@ -92,7 +101,7 @@ namespace Game.Battle.Editor
             BattleUnitControl.Player,
             BattleUnitControl.Ai,
         };
-        private static readonly string[] DisplayLabels = { "玩家", "AI" };
+        private static readonly string[] DisplayLabels = { "玩家", "自动控制" };
         protected override BattleUnitControl[] Values => EnumValues;
         protected override string[] Labels => DisplayLabels;
     }
@@ -114,8 +123,8 @@ namespace Game.Battle.Editor
             "伤害结算完成",
             "生命变化",
             "治疗完成",
-            "获得 Buff",
-            "移除 Buff",
+            "获得增益或减益",
+            "移除增益或减益",
             "单位召唤",
             "单位死亡",
             "单位复活",
@@ -176,14 +185,14 @@ namespace Game.Battle.Editor
             "最大生命",
             "已损失生命",
             "生命百分比",
-            "Buff 层数",
+            "状态层数",
             "事件数值",
             "当前回合",
             "战斗计数器",
             "策划参数",
             "单次触发临时变量",
             "技能实例变量",
-            "确定性随机值（0~9999）",
+            "确定性随机百分比（0%~99.99%）",
         };
         protected override ValueSourceType[] Values => EnumValues;
         protected override string[] Labels => DisplayLabels;
@@ -222,8 +231,8 @@ namespace Game.Battle.Editor
             "目标死亡",
             "目标是敌人",
             "目标是友军",
-            "配置 ID 比较",
-            "拥有 Buff",
+            "配置编号 比较",
+            "拥有增益或减益",
             "属性比较",
             "生命百分比比较",
             "事件数值比较",
@@ -247,8 +256,8 @@ namespace Game.Battle.Editor
         {
             "造成伤害",
             "恢复生命",
-            "添加 Buff",
-            "移除 Buff",
+            "添加增益或减益",
+            "移除增益或减益",
             "修改属性",
             "修改资源",
             "直接击杀",
@@ -290,7 +299,7 @@ namespace Game.Battle.Editor
         private static readonly string[] DisplayLabels =
         {
             "整数",
-            "万分比",
+            "百分比（%）",
             "布尔值（0/1）",
             "配置标识符",
         };
@@ -318,7 +327,7 @@ namespace Game.Battle.Editor
         LocalizedEnumOdinDrawer<AttributeType>
     {
         private static readonly AttributeType[] EnumValues =
-            (AttributeType[])Enum.GetValues(typeof(AttributeType));
+            Array.FindAll((AttributeType[])Enum.GetValues(typeof(AttributeType)), value => value != AttributeType.Count);
         private static readonly string[] DisplayLabels =
         {
             "生命",
@@ -333,7 +342,6 @@ namespace Game.Battle.Editor
             "怒气",
             "能量",
             "护盾",
-            "Count（内部保留）",
         };
         protected override AttributeType[] Values => EnumValues;
         protected override string[] Labels => DisplayLabels;
@@ -347,6 +355,39 @@ namespace Game.Battle.Editor
             (BattleCamp[])Enum.GetValues(typeof(BattleCamp));
         private static readonly string[] DisplayLabels = { "中立", "攻击方", "防守方" };
         protected override BattleCamp[] Values => EnumValues;
+        protected override string[] Labels => DisplayLabels;
+    }
+
+    [OdinDrawer]
+    internal sealed class BattleExpressionSubjectOdinDrawer : LocalizedEnumOdinDrawer<BattleExpressionSubject>
+    {
+        private static readonly BattleExpressionSubject[] EnumValues = (BattleExpressionSubject[])Enum.GetValues(typeof(BattleExpressionSubject));
+        private static readonly string[] DisplayLabels = { "施法者", "逻辑主目标" };
+        protected override BattleExpressionSubject[] Values => EnumValues;
+        protected override string[] Labels => DisplayLabels;
+    }
+
+    [OdinDrawer]
+    internal sealed class BattleExpressionAnchorOdinDrawer : LocalizedEnumOdinDrawer<BattleExpressionAnchor>
+    {
+        private static readonly BattleExpressionAnchor[] EnumValues = (BattleExpressionAnchor[])Enum.GetValues(typeof(BattleExpressionAnchor));
+        private static readonly string[] DisplayLabels = { "执行对象", "施法者", "逻辑主目标", "目标阵营中心", "目标所在排中心", "目标所在列中心", "屏幕中心" };
+        protected override BattleExpressionAnchor[] Values => EnumValues;
+        protected override string[] Labels => DisplayLabels;
+    }
+
+    [OdinDrawer]
+    internal sealed class BattleExpressionTypeOdinDrawer : LocalizedEnumOdinDrawer<BattleExpressionClipType>
+    {
+        private static readonly BattleExpressionClipType[] EnumValues = (BattleExpressionClipType[])Enum.GetValues(typeof(BattleExpressionClipType));
+        private static readonly string[] DisplayLabels = BuildLabels();
+        private static string[] BuildLabels()
+        {
+            var labels = new string[EnumValues.Length];
+            for (int i = 0; i < labels.Length; i++) labels[i] = TurnBasedExpressionOperationCatalog.Get(EnumValues[i]).MenuPath;
+            return labels;
+        }
+        protected override BattleExpressionClipType[] Values => EnumValues;
         protected override string[] Labels => DisplayLabels;
     }
 

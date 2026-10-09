@@ -12,7 +12,7 @@ namespace Game.Battle.TurnBased.Authoring
         menuName = "LxyDemo/战斗/回合制技能逻辑")]
     public sealed partial class TurnBasedSkillLogicAsset
     {
-        [SerializeField, TitleGroup("基础信息"), LabelText("逻辑名称"), Required]
+        [SerializeField, TitleGroup("基础信息"), LabelText("逻辑标识"), Required]
         private string logicId = "skill_logic_new";
         [SerializeField, TitleGroup("基础信息"), LabelText("说明"), TextArea(2, 5)]
         private string description;
@@ -88,7 +88,7 @@ namespace Game.Battle.TurnBased.Authoring
             var result = new CompiledRule[sourceRules.Count];
             for (int index = 0; index < sourceRules.Count; index++)
             {
-                result[index] = sourceRules[index].Compile();
+                result[index] = sourceRules[index].Compile(dataDefinitions);
             }
             return result;
         }
@@ -123,7 +123,7 @@ namespace Game.Battle.TurnBased.Authoring
         public void ResetToDamageSample(
             string id,
             int ruleId,
-            int scaleBasisPoint,
+            double scalePercent,
             long offset)
         {
             logicId = id;
@@ -140,8 +140,8 @@ namespace Game.Battle.TurnBased.Authoring
                     key = 1001,
                     kind = BattleLogicDataKind.Parameter,
                     valueType = BattleLogicDataValueType.BasisPoint,
-                    defaultValue = scaleBasisPoint,
-                    description = "基础伤害倍率，10000 表示 100%。",
+                    defaultValue = scalePercent,
+                    description = "基础伤害倍率，100 表示 100%。",
                 },
                 new BattleLogicDataAuthoring
                 {
@@ -209,7 +209,7 @@ namespace Game.Battle.TurnBased.Authoring
                                     {
                                         source = ValueSourceType.InvocationVariable,
                                         referenceId = 3001,
-                                        scaleBasisPoint = BattleNumeric.BasisPointOne,
+                                        scalePercent = 100,
                                         offset = offset,
                                         hasMinimum = true,
                                         minimum = 1,
@@ -446,10 +446,11 @@ namespace Game.Battle.TurnBased.Authoring
                     !logicDataNames.Add(dataName))
                 {
                     throw new InvalidOperationException(
-                        $"技能逻辑 {logicId} 的数据 Key/名称为空或重复：{data.key}/{dataName}");
+                        $"技能逻辑 {logicId} 的数据编号/名称为空或重复：{data.key}/{dataName}");
                 }
 
                 logicDataByKey.Add(data.key, data);
+                data.Compile();
 
                 if (data.valueType == BattleLogicDataValueType.Boolean &&
                     data.defaultValue != 0 && data.defaultValue != 1)
@@ -473,7 +474,7 @@ namespace Game.Battle.TurnBased.Authoring
                 if (rule.id <= 0 || !ids.Add(rule.id) ||
                     rule.trigger == BattleEventType.None)
                 {
-                    throw new InvalidOperationException($"技能逻辑 {logicId} 的规则 ID 无效或重复：{rule.id}");
+                    throw new InvalidOperationException($"技能逻辑 {logicId} 的规则编号无效或重复：{rule.id}");
                 }
 
                 if (rule.actions == null || rule.actions.Count == 0)
@@ -495,7 +496,7 @@ namespace Game.Battle.TurnBased.Authoring
                             $"规则 {rule.id} 的 Action {actionIndex} 目标选择器无效。");
                     }
                     if (action.value != null &&
-                        (action.value.scaleBasisPoint < 0 ||
+                        (action.value.scalePercent < 0 ||
                          action.value.useDynamicScale && action.value.dynamicScale == null ||
                          action.value.useDynamicScale &&
                          action.value.dynamicScale.source == ValueSourceType.Constant &&
@@ -518,6 +519,7 @@ namespace Game.Battle.TurnBased.Authoring
                         action,
                         logicDataByKey,
                         $"规则 {rule.id} 的 Action {actionIndex}");
+                    action.Compile(dataDefinitions);
                 }
 
                 for (int conditionIndex = 0;
@@ -552,6 +554,7 @@ namespace Game.Battle.TurnBased.Authoring
                             logicDataByKey,
                             $"规则 {rule.id} 的 Condition {conditionIndex} 右值");
                     }
+                    condition.Compile(dataDefinitions);
                 }
             }
 
@@ -571,7 +574,7 @@ namespace Game.Battle.TurnBased.Authoring
 
         private static void ValidateValueShape(BattleValueAuthoring value, string owner)
         {
-            if (value == null || value.scaleBasisPoint < 0 ||
+            if (value == null || value.scalePercent < 0 ||
                 value.useDynamicScale && value.dynamicScale == null ||
                 value.useDynamicScale &&
                 value.dynamicScale.source == ValueSourceType.Constant &&
@@ -703,7 +706,7 @@ namespace Game.Battle.TurnBased.Authoring
                 action.type == CompiledActionType.SetVariable;
             if (requiresReference && action.referenceId <= 0)
             {
-                throw new InvalidOperationException($"{owner} 的引用 ID 必须大于 0。");
+                throw new InvalidOperationException($"{owner} 的引用编号必须大于 0。");
             }
         }
 
@@ -716,7 +719,7 @@ namespace Game.Battle.TurnBased.Authoring
         {
             if (!definitions.TryGetValue(key, out BattleLogicDataAuthoring definition))
             {
-                throw new InvalidOperationException($"{owner} 引用了未声明的逻辑数据 Key：{key}。");
+                throw new InvalidOperationException($"{owner} 引用了未声明的逻辑数据编号：{key}。");
             }
 
             if (definition.kind != kind ||
@@ -754,7 +757,7 @@ namespace Game.Battle.TurnBased.Authoring
         menuName = "LxyDemo/战斗/回合制技能表现")]
     public sealed partial class TurnBasedSkillExpressionAsset
     {
-        [SerializeField, TitleGroup("基础信息"), LabelText("表现名称"), Required]
+        [SerializeField, TitleGroup("基础信息"), LabelText("表现标识"), Required]
         private string expressionId = "skill_expression_new";
         [SerializeField, TitleGroup("基础信息"), LabelText("逻辑数据源"),
          Tooltip("表现只读取该逻辑资产声明的数据契约。")]
@@ -1006,7 +1009,7 @@ namespace Game.Battle.TurnBased.Authoring
                     {
                         throw new InvalidOperationException(
                             $"顺序轨道 {track.trackName} 的操作帧区间发生重叠；" +
-                            "需要重叠时请将轨道执行方式改为 Parallel。");
+                            "需要重叠时请将轨道执行方式改为“并行”。");
                     }
                 }
             }
@@ -1040,7 +1043,7 @@ namespace Game.Battle.TurnBased.Authoring
                 string.IsNullOrWhiteSpace(clip.resourceKey))
             {
                 throw new InvalidOperationException(
-                    $"技能表现 {expressionId} 的 {marker} 缺少资源或动作 Key。");
+                    $"技能表现 {expressionId} 的 {marker} 缺少资源或动作标识。");
             }
             if (RequiresPositiveDuration(clip.type) && clip.durationFrames <= 0)
             {

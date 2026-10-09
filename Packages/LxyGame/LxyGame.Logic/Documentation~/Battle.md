@@ -10,7 +10,7 @@
 
 ## 快速开始
 
-1. 修改战斗核心或帧输入后执行 `工具/战斗/运行确定性自检`。
+1. 修改战斗核心或帧输入后，由程序在 Unity Editor 中调用 `Game.Battle.Editor.BattleDeterminismValidator.Validate()`；自动化验证可使用 Unity 命令行的 `-executeMethod Game.Battle.Editor.BattleDeterminismValidator.Validate`。该自检不再注册为日常菜单。
 2. 使用 `BattleApplication`、`BattleSession` 和已有 Battle 场景接入战斗。
 3. 表现层只消费 `BattleEvent`，不得修改权威状态。
 

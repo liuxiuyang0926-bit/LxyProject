@@ -25,8 +25,8 @@ namespace Game.Battle.Editor
         };
         private static readonly GUIContent[] SubjectOptions =
         {
-            new GUIContent("攻击方", "当前释放技能的角色"),
-            new GUIContent("受击方", "技能逻辑选中的主目标"),
+            new GUIContent("施法者", "当前释放技能的角色，与攻击/防守阵营无关"),
+            new GUIContent("逻辑主目标", "技能逻辑选中的主目标，也可以是治疗或增益的目标"),
         };
         private static readonly string[] ExecutionModeOptions =
         {
@@ -49,6 +49,12 @@ namespace Game.Battle.Editor
         private bool previewPlaying;
         private double lastEditorTime;
         private CompiledBattleExpression compiledPreview;
+        private TurnBasedSkillExpressionAsset pendingSelection;
+        private int pendingTrack = -1;
+        private int pendingOperation = -1;
+        private string validationMessage;
+        private MessageType validationType;
+        private bool showGuide;
 
         [MenuItem("工具/战斗/技能表现编辑器", false, 1)]
         public static void Open()
@@ -68,17 +74,35 @@ namespace Game.Battle.Editor
         private void OnEnable()
         {
             EditorApplication.update += OnEditorUpdate;
+            Undo.undoRedoPerformed += OnUndoRedo;
             ReloadAssets();
         }
 
         private void OnDisable()
         {
             EditorApplication.update -= OnEditorUpdate;
+            Undo.undoRedoPerformed -= OnUndoRedo;
             TurnBasedFormationPreviewWindow.EndExpressionPreview(selected);
         }
 
         private void OnGUI()
         {
+            if (Event.current.type == EventType.Layout)
+            {
+                if (pendingSelection != null)
+                {
+                    Select(pendingSelection);
+                    pendingSelection = null;
+                }
+                if (pendingTrack >= 0)
+                {
+                    selectedTrack = pendingTrack;
+                    selectedOperation = Math.Max(0, pendingOperation);
+                    pendingTrack = pendingOperation = -1;
+                    if (trackList != null) trackList.index = selectedTrack;
+                    BuildOperationList();
+                }
+            }
             using (new EditorGUILayout.HorizontalScope())
             {
                 DrawBrowser();
@@ -95,7 +119,11 @@ namespace Game.Battle.Editor
                        GUILayout.ExpandHeight(true)))
             {
                 EditorGUILayout.LabelField("表现资产", EditorStyles.boldLabel);
-                search = EditorGUILayout.TextField(search, GUI.skin.FindStyle("ToolbarSearchTextField"));
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    GUILayout.Label(new GUIContent("搜索", "按技能标识、资产名或中文说明搜索"), GUILayout.Width(34));
+                    search = EditorGUILayout.TextField(search);
+                }
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     if (GUILayout.Button("新建", EditorStyles.miniButtonLeft))
@@ -109,26 +137,30 @@ namespace Game.Battle.Editor
                 }
 
                 assetScroll = EditorGUILayout.BeginScrollView(assetScroll);
+                int visibleCount = 0;
                 for (int index = 0; index < assets.Count; index++)
                 {
                     TurnBasedSkillExpressionAsset asset = assets[index];
                     string label = string.IsNullOrWhiteSpace(asset.ExpressionId)
                         ? asset.name
                         : asset.ExpressionId;
-                    if (!string.IsNullOrWhiteSpace(search) &&
-                        label.IndexOf(search, StringComparison.OrdinalIgnoreCase) < 0)
+                    if (!TurnBasedSkillEditorUtility.MatchesSearch(search, label, asset.name, asset.Description))
                     {
                         continue;
                     }
                     if (GUILayout.Button(
-                            label,
+                            TurnBasedSkillEditorUtility.AssetLabel(label, asset.Description),
                             TurnBasedAssetEditorUtility.SelectedListStyle(asset == selected),
-                            GUILayout.Height(24f)))
+                            GUILayout.Height(44f)))
                     {
-                        Select(asset);
+                        pendingSelection = asset;
+                        Repaint();
                     }
+                    visibleCount++;
                 }
+                if (visibleCount == 0) EditorGUILayout.HelpBox("没有匹配的技能，可清空搜索或新建。", MessageType.Info);
                 EditorGUILayout.EndScrollView();
+                EditorGUILayout.LabelField($"显示 {visibleCount} / {assets.Count} 个技能", EditorStyles.miniLabel);
             }
         }
 
@@ -149,6 +181,8 @@ namespace Game.Battle.Editor
                 {
                     return;
                 }
+                if (!string.IsNullOrEmpty(validationMessage))
+                    EditorGUILayout.HelpBox(validationMessage, validationType);
                 if (selected.UsesLegacyLayout)
                 {
                     EditorGUILayout.HelpBox(
@@ -165,28 +199,26 @@ namespace Game.Battle.Editor
                 }
 
                 detailScroll = EditorGUILayout.BeginScrollView(detailScroll);
-                EditorGUILayout.PropertyField(serialized.FindProperty("expressionId"), new GUIContent("表现名称"));
+                EditorGUILayout.PropertyField(serialized.FindProperty("expressionId"), new GUIContent("表现标识"));
                 EditorGUILayout.PropertyField(serialized.FindProperty("logicSource"), new GUIContent("逻辑数据源"));
                 EditorGUILayout.PropertyField(serialized.FindProperty("framesPerSecond"), new GUIContent("每秒帧数"));
                 EditorGUILayout.PropertyField(serialized.FindProperty("autoDuration"), new GUIContent("自动计算总帧数"));
                 using (new EditorGUI.DisabledScope(serialized.FindProperty("autoDuration").boolValue))
                 {
-                    EditorGUILayout.PropertyField(serialized.FindProperty("durationFrames"), new GUIContent("总帧数"));
+                    if (serialized.FindProperty("autoDuration").boolValue)
+                        EditorGUILayout.IntField("总帧数", GetTimelineDuration());
+                    else
+                        EditorGUILayout.PropertyField(serialized.FindProperty("durationFrames"), new GUIContent("总帧数"));
                 }
                 EditorGUILayout.PropertyField(serialized.FindProperty("description"), new GUIContent("说明"));
 
                 EditorGUILayout.Space(8f);
-                EditorGUILayout.HelpBox(
-                    "点击播放会打开并驱动阵容模型预览，默认使用攻击方第一个有模型的单位" +
-                    "作为施法者、防守方第一个有模型的单位作为目标。\n" +
-                    "同名 Parallel Group 下的多条轨道会并行播放。帧操作保存绝对起止帧，" +
-                    "不需要手工添加 Delay；组时长由最后一个操作自动计算。\n" +
-                    "Lua 参考中的 AddParallelTask 由并行轨表达，beginMark/endMark 由播放器" +
-                    "生命周期自动处理，伤害与死亡只消费逻辑事件结果。",
-                    MessageType.Info);
+                showGuide = EditorGUILayout.Foldout(showGuide, "配置与预览说明", true);
+                if (showGuide)
+                    EditorGUILayout.HelpBox("先添加轨道，再选择动作、特效或镜头等操作，填写开始帧和持续帧数。所有开始帧都从技能开始计算；顺序轨不允许操作重叠，并行轨允许重叠。\n点击时间轴色块可定位操作，点击刻度可定位预览帧。在上方选择预览施法者和目标；选择“自动”时沿用阵容和操作的演示站位。伤害与死亡结果由技能逻辑提供。", MessageType.Info);
+                DrawTimeline();
                 trackList?.DoLayoutList();
                 DrawSelectedTrackAndOperations();
-                DrawTimeline();
                 EditorGUILayout.EndScrollView();
 
                 if (serialized.ApplyModifiedProperties())
@@ -195,6 +227,7 @@ namespace Game.Battle.Editor
                     previewFrame = Mathf.Min(previewFrame, selected.DurationFrames);
                     previewPlaying = false;
                     compiledPreview = null;
+                    validationMessage = null;
                     TurnBasedFormationPreviewWindow.EndExpressionPreview(selected);
                     Repaint();
                 }
@@ -205,7 +238,7 @@ namespace Game.Battle.Editor
         {
             using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
-                GUILayout.Label(selected.ExpressionId, EditorStyles.boldLabel);
+                GUILayout.Label(selected.ExpressionId, EditorStyles.boldLabel, GUILayout.MinWidth(50), GUILayout.MaxWidth(200));
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(previewPlaying ? "暂停" : "播放", EditorStyles.toolbarButton))
                 {
@@ -243,13 +276,14 @@ namespace Game.Battle.Editor
                 {
                     Save();
                 }
-                if (GUILayout.Button("校验编译", EditorStyles.toolbarButton))
+                if (GUILayout.Button("检查配置", EditorStyles.toolbarButton))
                 {
                     ValidateAsset();
                 }
             }
 
-            int duration = Mathf.Max(1, selected.DurationFrames);
+            TurnBasedFormationPreviewWindow.DrawExpressionActorSettings();
+            int duration = GetTimelineDuration();
             int nextFrame = EditorGUILayout.IntSlider(
                 "预览帧",
                 previewFrame,
@@ -265,6 +299,7 @@ namespace Game.Battle.Editor
                         previewFrame);
                 }
             }
+            EditorGUILayout.LabelField($"当前 {previewFrame} 帧 / {previewFrame / (float)Math.Max(1, selected.FramesPerSecond):0.00} 秒　　总长 {duration} 帧 / {duration / (float)Math.Max(1, selected.FramesPerSecond):0.00} 秒", EditorStyles.miniLabel);
             return false;
         }
 
@@ -274,6 +309,7 @@ namespace Game.Battle.Editor
             if (tracks == null || tracks.arraySize == 0)
             {
                 operationList = null;
+                EditorGUILayout.HelpBox("尚无表现轨道。点击上方轨道列表的“＋”，再选择要添加的表现操作。", MessageType.Info);
                 return;
             }
 
@@ -307,6 +343,7 @@ namespace Game.Battle.Editor
         {
             if (operations == null || operations.arraySize == 0)
             {
+                EditorGUILayout.HelpBox("这条轨道尚无操作。点击列表下方“＋”，可按角色、特效、音频或镜头分类添加。", MessageType.Info);
                 return;
             }
             selectedOperation = Mathf.Clamp(selectedOperation, 0, operations.arraySize - 1);
@@ -318,7 +355,7 @@ namespace Game.Battle.Editor
                 (BattleExpressionClipType)typeProperty.intValue;
             int currentMarker = TurnBasedExpressionOperationCatalog.IndexOf(operationType);
             int nextMarker = EditorGUILayout.Popup(
-                new GUIContent("操作标记", "选择标准表现操作，不需要手工输入名称。"),
+                new GUIContent("操作类型", "选择标准表现操作，不需要手工输入名称。"),
                 currentMarker,
                 TurnBasedExpressionOperationCatalog.Options);
             if (nextMarker != currentMarker)
@@ -334,10 +371,7 @@ namespace Game.Battle.Editor
                 TurnBasedExpressionOperationCatalog.Get(operationType);
             SerializedProperty operationName =
                 operation.FindPropertyRelative("operationName");
-            if (string.IsNullOrWhiteSpace(operationName.stringValue))
-            {
-                operationName.stringValue = descriptor.DisplayName;
-            }
+            EditorGUILayout.PropertyField(operationName, new GUIContent("操作备注", "给同类操作起不同的名字，方便在列表和时间轴中区分。"));
             EditorGUILayout.HelpBox(descriptor.Description, MessageType.None);
             DrawLogicOutputPopup(operation.FindPropertyRelative("logicOutputKey"));
             if (UsesSubject(operationType))
@@ -351,12 +385,19 @@ namespace Game.Battle.Editor
 
             SerializedProperty start = operation.FindPropertyRelative("startFrame");
             SerializedProperty duration = operation.FindPropertyRelative("durationFrames");
+            EditorGUI.BeginChangeCheck();
             int startFrame = Mathf.Max(0, EditorGUILayout.IntField("开始帧", start.intValue));
-            int endFrame = Mathf.Max(startFrame, EditorGUILayout.IntField(
-                "结束帧",
-                start.intValue + duration.intValue));
-            start.intValue = startFrame;
-            duration.intValue = endFrame - startFrame;
+            int durationFrames = Mathf.Max(0, EditorGUILayout.IntField(new GUIContent("持续帧数", "修改开始帧只移动操作，不改变持续时长。0 表示瞬间执行。"), duration.intValue));
+            if (EditorGUI.EndChangeCheck())
+                TurnBasedSkillEditorUtility.SetTiming(operation, startFrame, durationFrames);
+            int fps = Math.Max(1, serialized.FindProperty("framesPerSecond").intValue);
+            EditorGUILayout.LabelField($"结束于第 {TurnBasedSkillEditorUtility.EndFrame(operation)} 帧 · 开始 {startFrame / (float)fps:0.00} 秒 · 持续 {durationFrames / (float)fps:0.00} 秒", EditorStyles.miniLabel);
+            if (GUILayout.Button("从该操作开始预览", EditorStyles.miniButton))
+            {
+                previewPlaying = false;
+                previewFrame = startFrame;
+                ShowPreviewAtCurrentFrame();
+            }
 
             DrawOperationParameters(operation, operationType);
         }
@@ -392,7 +433,7 @@ namespace Game.Battle.Editor
                     break;
                 case BattleExpressionClipType.HitReaction:
                     DrawText(operation, "resourceKey", "受击动作");
-                    DrawText(operation, "secondaryResourceKey", "受击特效 Key（可选）");
+                    DrawText(operation, "secondaryResourceKey", "受击特效标识（可选）");
                     DrawText(operation, "anchorKey", "特效挂点（可选）");
                     DrawVector(operation, "offset", "特效偏移");
                     break;
@@ -415,7 +456,7 @@ namespace Game.Battle.Editor
                     DrawText(operation, "resourceKey", "切换后动作（可选）");
                     break;
                 case BattleExpressionClipType.ChangeModel:
-                    DrawText(operation, "resourceKey", "模型资源 Key");
+                    DrawText(operation, "resourceKey", "模型资源标识");
                     break;
                 case BattleExpressionClipType.UnitShake:
                     DrawVector(operation, "offset", "震动轴向");
@@ -431,7 +472,7 @@ namespace Game.Battle.Editor
                     DrawBool(operation, "loop", "循环特效");
                     break;
                 case BattleExpressionClipType.ProjectileEffect:
-                    DrawText(operation, "resourceKey", "弹道特效 Key");
+                    DrawText(operation, "resourceKey", "弹道特效标识");
                     DrawText(operation, "anchorKey", "起点挂点（可选）");
                     DrawText(operation, "secondaryResourceKey", "终点挂点（可选）");
                     DrawVector(operation, "offset", "起点偏移");
@@ -439,14 +480,14 @@ namespace Game.Battle.Editor
                     DrawDynamicTarget(operation, "演示终点位置");
                     break;
                 case BattleExpressionClipType.EffectAnimation:
-                    DrawText(operation, "resourceKey", "已有特效 Key");
-                    DrawText(operation, "secondaryResourceKey", "动画或 Trigger 名称");
+                    DrawText(operation, "resourceKey", "已有特效标识");
+                    DrawText(operation, "secondaryResourceKey", "动画或触发器名称");
                     break;
                 case BattleExpressionClipType.RemoveEffect:
-                    DrawText(operation, "resourceKey", "待移除特效 Key");
+                    DrawText(operation, "resourceKey", "待移除特效标识");
                     break;
                 case BattleExpressionClipType.ToggleLoopEffect:
-                    DrawText(operation, "resourceKey", "常驻特效 Key");
+                    DrawText(operation, "resourceKey", "常驻特效标识");
                     DrawText(operation, "anchorKey", "挂点（可选）");
                     DrawVector(operation, "offset", "挂点偏移");
                     DrawBool(operation, "state", "开启");
@@ -454,7 +495,7 @@ namespace Game.Battle.Editor
                 case BattleExpressionClipType.Audio:
                 case BattleExpressionClipType.BackgroundAudio:
                     DrawText(operation, "resourceKey", operationType ==
-                        BattleExpressionClipType.Audio ? "音效资源 Key" : "背景音乐资源 Key");
+                        BattleExpressionClipType.Audio ? "音效资源标识" : "背景音乐资源标识");
                     DrawBool(operation, "loop", "循环播放");
                     DrawFloat(operation, "intensity", "音量", 0f, 1f);
                     break;
@@ -480,9 +521,9 @@ namespace Game.Battle.Editor
                 case BattleExpressionClipType.FloatingTip:
                 case BattleExpressionClipType.BubbleTip:
                     DrawText(operation, "resourceKey", operationType ==
-                        BattleExpressionClipType.BuffText ? "Buff 文本或样式 Key" :
+                        BattleExpressionClipType.BuffText ? "状态文本或样式标识" :
                         operationType == BattleExpressionClipType.FloatingTip ?
-                            "提示文本或配置 Key" : "气泡文本或配置 Key");
+                            "提示文本或配置标识" : "气泡文本或配置标识");
                     DrawColor(operation, "color", "文字颜色");
                     break;
                 case BattleExpressionClipType.PresentationTimeScale:
@@ -495,7 +536,7 @@ namespace Game.Battle.Editor
             SerializedProperty operation,
             bool includeColor)
         {
-            DrawText(operation, "resourceKey", "特效资源 Key");
+            DrawText(operation, "resourceKey", "特效资源标识");
             DrawText(operation, "anchorKey", "模型挂点（可选）");
             DrawVector(operation, "offset", "挂点偏移");
             if (includeColor)
@@ -667,27 +708,17 @@ namespace Game.Battle.Editor
 
         private void DrawLogicOutputPopup(SerializedProperty keyProperty)
         {
-            var labels = new List<string> { "<不绑定逻辑数据>" };
-            var keys = new List<string> { string.Empty };
             TurnBasedSkillLogicAsset source = (TurnBasedSkillLogicAsset)
                 serialized.FindProperty("logicSource").objectReferenceValue;
-            if (source != null)
-            {
-                for (int index = 0; index < source.Outputs.Count; index++)
-                {
-                    BattleLogicOutputAuthoring output = source.Outputs[index];
-                    if (output == null || string.IsNullOrWhiteSpace(output.key))
-                    {
-                        continue;
-                    }
-                    keys.Add(output.key);
-                    labels.Add($"{output.key}  ({output.eventType})");
-                }
-            }
-
-            int selectedIndex = Mathf.Max(0, keys.IndexOf(keyProperty.stringValue));
-            int next = EditorGUILayout.Popup("逻辑数据", selectedIndex, labels.ToArray());
-            keyProperty.stringValue = keys[Mathf.Clamp(next, 0, keys.Count - 1)];
+            TurnBasedSkillEditorUtility.BuildOutputOptions(source, keyProperty.stringValue, out string[] keys, out string[] labels);
+            int selectedIndex = Math.Max(0, Array.IndexOf(keys, keyProperty.stringValue));
+            EditorGUI.BeginChangeCheck();
+            int next = EditorGUILayout.Popup("读取逻辑结果", selectedIndex, labels);
+            if (EditorGUI.EndChangeCheck()) keyProperty.stringValue = keys[Mathf.Clamp(next, 0, keys.Length - 1)];
+            if (labels[selectedIndex].StartsWith("未找到绑定", StringComparison.Ordinal))
+                EditorGUILayout.HelpBox("当前逻辑数据源没有这个标识。请重新选择数据源或绑定；原绑定不会自动清空。", MessageType.Warning);
+            else if (source == null)
+                EditorGUILayout.HelpBox("需要显示伤害、治疗等结果时，先在上方指定“逻辑数据源”。", MessageType.None);
         }
 
         private void BuildLists()
@@ -712,9 +743,14 @@ namespace Game.Battle.Editor
             };
             trackList.onSelectCallback = list =>
             {
-                selectedTrack = list.index;
-                selectedOperation = 0;
-                BuildOperationList();
+                pendingTrack = list.index;
+                pendingOperation = 0;
+                Repaint();
+            };
+            trackList.onReorderCallback = list =>
+            {
+                pendingTrack = list.index;
+                pendingOperation = selectedOperation;
             };
             trackList.onAddCallback = list =>
             {
@@ -737,6 +773,7 @@ namespace Game.Battle.Editor
                 selectedOperation = 0;
                 BuildOperationList();
             };
+            trackList.index = selectedTrack;
             BuildOperationList();
         }
 
@@ -751,6 +788,7 @@ namespace Game.Battle.Editor
             selectedTrack = Mathf.Clamp(selectedTrack, 0, tracks.arraySize - 1);
             SerializedProperty operations = tracks.GetArrayElementAtIndex(selectedTrack)
                 .FindPropertyRelative("operations");
+            selectedOperation = Mathf.Clamp(selectedOperation, 0, Math.Max(0, operations.arraySize - 1));
             operationList = new ReorderableList(serialized, operations, true, true, true, true);
             operationList.drawHeaderCallback = rect => EditorGUI.LabelField(rect, "帧操作列表（绝对帧）");
             operationList.drawElementCallback = (rect, index, active, focused) =>
@@ -758,33 +796,70 @@ namespace Game.Battle.Editor
                 SerializedProperty operation = operations.GetArrayElementAtIndex(index);
                 int type = operation.FindPropertyRelative("type").intValue;
                 int start = operation.FindPropertyRelative("startFrame").intValue;
-                int duration = operation.FindPropertyRelative("durationFrames").intValue;
+                int end = TurnBasedSkillEditorUtility.EndFrame(operation);
                 string marker = TurnBasedExpressionOperationCatalog.GetDisplayName(
                     (BattleExpressionClipType)type);
-                EditorGUI.LabelField(rect, $"[{start}-{start + duration}] {marker}");
+                string note = operation.FindPropertyRelative("operationName").stringValue;
+                string subject = operation.FindPropertyRelative("subject").intValue == 0 ? "施法者" : "主目标";
+                EditorGUI.LabelField(rect, new GUIContent($"{index + 1}. [{start}–{end} 帧] {marker} · {subject}" +
+                    (string.IsNullOrWhiteSpace(note) || note == marker ? "" : " · " + note), note));
             };
             operationList.onSelectCallback = list => selectedOperation = list.index;
-            operationList.onAddCallback = list =>
+            operationList.onReorderCallback = list => selectedOperation = list.index;
+            operationList.onRemoveCallback = list =>
             {
-                int index = operations.arraySize;
-                operations.InsertArrayElementAtIndex(index);
-                SerializedProperty operation = operations.GetArrayElementAtIndex(index);
-                operation.FindPropertyRelative("logicOutputKey").stringValue = string.Empty;
-                operation.FindPropertyRelative("subject").enumValueIndex = 0;
-                operation.FindPropertyRelative("startFrame").intValue = index == 0
-                    ? 0
-                    : operations.GetArrayElementAtIndex(index - 1)
-                        .FindPropertyRelative("startFrame").intValue +
-                      operations.GetArrayElementAtIndex(index - 1)
-                        .FindPropertyRelative("durationFrames").intValue;
-                ApplyOperationDescriptor(
-                    operation,
-                    TurnBasedExpressionOperationCatalog.Get(
-                        BattleExpressionClipType.Animation),
-                    true);
-                selectedOperation = index;
-                list.index = index;
+                ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                selectedOperation = Math.Max(0, list.index);
             };
+            operationList.onAddDropdownCallback = (rect, list) =>
+            {
+                var menu = new GenericMenu();
+                TurnBasedSkillExpressionAsset owner = selected;
+                int trackIndex = selectedTrack;
+                foreach (TurnBasedExpressionOperationDescriptor item in TurnBasedExpressionOperationCatalog.All)
+                {
+                    TurnBasedExpressionOperationDescriptor descriptor = item;
+                    menu.AddItem(new GUIContent(item.MenuPath, item.Description), false, () =>
+                    {
+                        if (selected != owner || selectedTrack != trackIndex) return;
+                        AddOperation(descriptor);
+                    });
+                }
+                menu.DropDown(rect);
+            };
+            operationList.index = selectedOperation;
+        }
+
+        private void AddOperation(TurnBasedExpressionOperationDescriptor descriptor)
+        {
+            serialized.Update();
+            SerializedProperty operations = serialized.FindProperty("tracks").GetArrayElementAtIndex(selectedTrack).FindPropertyRelative("operations");
+            int start = TurnBasedSkillEditorUtility.NextStartFrame(operations);
+            int index = operations.arraySize;
+            operations.InsertArrayElementAtIndex(index);
+            SerializedProperty operation = operations.GetArrayElementAtIndex(index);
+            operation.FindPropertyRelative("logicOutputKey").stringValue = string.Empty;
+            operation.FindPropertyRelative("subject").intValue = (int)BattleExpressionSubject.Caster;
+            ApplyOperationDescriptor(operation, descriptor, true);
+            TurnBasedSkillEditorUtility.SetTiming(operation, start, descriptor.DefaultDurationFrames);
+            serialized.ApplyModifiedProperties();
+            selectedOperation = index;
+            BuildOperationList();
+            StopPreview(false);
+            validationMessage = null;
+            Repaint();
+        }
+
+        private int GetTimelineDuration()
+        {
+            if (serialized == null) return 1;
+            if (!serialized.FindProperty("autoDuration").boolValue)
+                return Math.Max(1, serialized.FindProperty("durationFrames").intValue);
+            SerializedProperty tracks = serialized.FindProperty("tracks");
+            int result = 1;
+            for (int i = 0; i < tracks.arraySize; i++)
+                result = Math.Max(result, TurnBasedSkillEditorUtility.NextStartFrame(tracks.GetArrayElementAtIndex(i).FindPropertyRelative("operations")));
+            return result;
         }
 
         private void DrawTimeline()
@@ -795,13 +870,15 @@ namespace Game.Battle.Editor
                 return;
             }
 
-            int duration = Mathf.Max(1, selected.DurationFrames);
+            int duration = GetTimelineDuration();
+            EditorGUILayout.LabelField("时间轴 · 点击色块编辑，点击刻度定位预览", EditorStyles.boldLabel);
             float height = 26f + tracks.arraySize * 28f;
             Rect full = GUILayoutUtility.GetRect(200f, height, GUILayout.ExpandWidth(true));
             EditorGUI.DrawRect(full, new Color(0.08f, 0.09f, 0.11f, 1f));
             Rect timeArea = new Rect(full.x + TrackLabelWidth, full.y, full.width - TrackLabelWidth, full.height);
-            for (int frame = 0; frame <= duration; frame += Mathf.Max(1, duration / 10))
+            for (int tick = 0; tick <= 10; tick++)
             {
+                int frame = (int)((long)duration * tick / 10);
                 float x = timeArea.x + timeArea.width * frame / duration;
                 EditorGUI.DrawRect(new Rect(x, full.y, 1f, full.height), new Color(0.22f, 0.24f, 0.28f));
                 GUI.Label(new Rect(x + 2f, full.y, 45f, 20f), frame.ToString(), EditorStyles.miniLabel);
@@ -825,8 +902,34 @@ namespace Game.Battle.Editor
                     Color color = trackIndex == selectedTrack && operationIndex == selectedOperation
                         ? new Color(0.16f, 0.65f, 1f)
                         : new Color(0.24f, 0.42f, 0.62f);
-                    EditorGUI.DrawRect(new Rect(x, y + 2f, width, 18f), color);
+                    Rect block = new Rect(Mathf.Clamp(x, timeArea.x, timeArea.xMax - 3f), y + 2f,
+                        Mathf.Min(width, Math.Max(3f, timeArea.xMax - x)), 20f);
+                    EditorGUI.DrawRect(block, color);
+                    string marker = TurnBasedExpressionOperationCatalog.GetDisplayName((BattleExpressionClipType)operation.FindPropertyRelative("type").intValue);
+                    string tip = marker + $" · {start}–{TurnBasedSkillEditorUtility.EndFrame(operation)} 帧";
+                    GUI.Label(block, new GUIContent(block.width > 50 ? marker : string.Empty, tip), EditorStyles.whiteMiniLabel);
+                    if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && block.Contains(Event.current.mousePosition))
+                    {
+                        pendingTrack = trackIndex;
+                        pendingOperation = operationIndex;
+                        previewFrame = Mathf.Clamp(start, 0, duration);
+                        previewPlaying = false;
+                        if (compiledPreview != null) TurnBasedFormationPreviewWindow.SetExpressionPreviewFrame(selected, previewFrame);
+                        GUI.FocusControl(null);
+                        Event.current.Use();
+                        Repaint();
+                    }
                 }
+            }
+
+            Rect ruler = new Rect(timeArea.x, full.y, timeArea.width, 24f);
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && ruler.Contains(Event.current.mousePosition))
+            {
+                previewFrame = Mathf.Clamp(Mathf.RoundToInt((Event.current.mousePosition.x - timeArea.x) / timeArea.width * duration), 0, duration);
+                previewPlaying = false;
+                if (compiledPreview != null) TurnBasedFormationPreviewWindow.SetExpressionPreviewFrame(selected, previewFrame);
+                Event.current.Use();
+                Repaint();
             }
 
             float playX = timeArea.x + timeArea.width * previewFrame / duration;
@@ -897,6 +1000,8 @@ namespace Game.Battle.Editor
                 TurnBasedFormationPreviewWindow.EndExpressionPreview(selected);
             }
             selected = asset;
+            validationMessage = null;
+            pendingTrack = pendingOperation = -1;
             serialized = selected == null ? null : new SerializedObject(selected);
             selectedTrack = 0;
             selectedOperation = 0;
@@ -933,7 +1038,9 @@ namespace Game.Battle.Editor
                 previewPlaying = false;
                 compiledPreview = null;
                 Debug.LogException(exception, selected);
-                ShowNotification(new GUIContent("无法播放，请查看 Console"));
+                validationMessage = "无法预览：" + exception.Message;
+                validationType = MessageType.Error;
+                ShowNotification(new GUIContent("请按窗口内的提示修正配置"));
                 return false;
             }
         }
@@ -965,13 +1072,27 @@ namespace Game.Battle.Editor
                 serialized.ApplyModifiedProperties();
                 selected.Compile();
                 Save();
+                validationMessage = "配置检查通过，已保存。";
+                validationType = MessageType.Info;
                 ShowNotification(new GUIContent("表现校验通过"));
             }
             catch (Exception exception)
             {
                 Debug.LogException(exception, selected);
-                ShowNotification(new GUIContent("校验失败，请查看 Console"));
+                validationMessage = "配置检查未通过：" + exception.Message;
+                validationType = MessageType.Error;
+                ShowNotification(new GUIContent("请按窗口内的提示修正配置"));
             }
+        }
+
+        private void OnUndoRedo()
+        {
+            if (selected == null) return;
+            StopPreview(false);
+            serialized = new SerializedObject(selected);
+            BuildLists();
+            validationMessage = null;
+            Repaint();
         }
 
         private void OnEditorUpdate()
